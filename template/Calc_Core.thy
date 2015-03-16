@@ -1,0 +1,530 @@
+theory (*calc_name_core*)
+imports Main "~~/src/HOL/Library/Code_Char" "~~/src/HOL/Code_Numeral" (*always keep Code_char import last! its added for code generator to output Haskell strings instead of the isabelle nibble stuff *)
+begin
+
+
+(*calc_structure*)
+
+class Varmatch =
+  (* match takes a string occurring in a pattern and a term and returns the string 
+     with a matching subterm. Never returns a list longer than 1. *)  
+  fixes "match" :: "'a \<Rightarrow> 'a \<Rightarrow> ('a * 'a) list"
+  fixes "freevars" :: "'a \<Rightarrow> 'a set"
+  (* first argument matches return-type of match *)
+  fixes "replace" :: "('a * 'a) \<Rightarrow> 'a \<Rightarrow> 'a"
+
+
+definition m_clash :: "'a \<times> 'b \<Rightarrow> ('a \<times> 'b) list \<Rightarrow> bool" (infix "\<inter>m" 400) where 
+"x \<inter>m y \<equiv> \<exists>a \<in> set y. fst a = fst x \<and> snd a \<noteq> snd x"
+
+lemma m_clash_simp[simp] : "set (map fst m1) \<inter> set (map fst m2) = {} \<longrightarrow> (\<forall>x \<in> set m1. \<not>(x \<inter>m m2))"
+unfolding m_clash_def by auto
+
+fun merge :: "('a * 'b) list \<Rightarrow> ('a * 'b) list  \<Rightarrow> ('a * 'b) list " (infix "@m" 400) where
+"[] @m y = y" |
+"(x#xs) @m y = ( if x \<inter>m y
+                 then [a \<leftarrow> xs. fst a \<noteq> fst x] @m [a \<leftarrow> y . fst a \<noteq> fst x] 
+                 else x#(xs @m y) )"
+
+lemma merge_simp[simp] :
+  fixes m1 m2
+  assumes "(\<forall>a\<in>set m1. case a of (x, y) \<Rightarrow> x = y)"
+  and "\<forall>a\<in>set m2. case a of (x, y) \<Rightarrow> x = y"
+  shows "set (m1 @m m2) = set m1 \<union> set m2"
+using assms(1)
+proof (induct m1)
+  case Nil
+    show ?case by simp
+next
+  case (Cons x xs)
+    have "\<forall>a\<in>set xs. case a of (a, b) \<Rightarrow> a = b"
+      by (metis Cons.prems(1) contra_subsetD set_subset_Cons)
+    with Cons(1) have 1: "set (xs @m m2) = set xs \<union> set m2" by simp
+    { assume "\<not>(x \<inter>m m2)"
+      then have "set ((x # xs) @m m2) = set (x#xs @m m2)" by simp
+      with 1 have ?case by simp }
+    { assume "(x \<inter>m m2)"
+      then have "\<exists>a \<in> set m2. fst a = fst x \<and> snd a \<noteq> snd x" unfolding m_clash_def by simp
+      then obtain a where 2: "a \<in> set m2" and 3: "fst a = fst x" and 4: "snd a \<noteq> snd x" by auto
+      then have False by (metis (full_types) Cons.prems(1) assms(2) fst_conv insertI1 old.prod.exhaust set_simps(2) snd_eqD split_beta)
+      then have ?case .. }
+    thus ?case
+      by (metis `\<not> x \<inter>m m2 \<Longrightarrow> set ((x # xs) @m m2) = set (x # xs) \<union> set m2`)
+qed 
+
+
+lemma merge_simp2[simp] :
+  fixes m1 m2
+  assumes "set (map fst m1) \<inter> set (map fst m2) = {}"
+  shows "set (m1 @m m2) = set m1 \<union> set m2"
+using assms
+proof (induct m1)
+case Nil
+  show ?case by simp
+next
+case (Cons x xs)
+  then have "set (map fst xs) \<inter> set (map fst m2) = {}" by simp
+  with Cons(1) have 1: "set (xs @m m2) = set xs \<union> set m2" by simp
+  with Cons(2) have "\<not>(x \<inter>m m2)" by (metis insertCI m_clash_simp set_simps(2))
+  then have "set ((x # xs) @m m2) = set( x#(xs @m m2) )" by simp
+  then have "set ((x # xs) @m m2) = set(xs @m m2) \<union> {x}" by simp
+  with 1 have "set ((x # xs) @m m2) = set xs \<union> set m2 \<union> {x}" by simp
+  thus ?case by simp
+qed
+
+fun(in Varmatch) replaceAll :: "('a * 'a) list \<Rightarrow> 'a \<Rightarrow> 'a"
+where
+  "replaceAll Nil mtch = mtch"
+| "replaceAll (x # xs) mtch = replaceAll xs (replace x mtch)"
+
+lemma replaceAll_simp: "(replaceAll [(x, r)] m) \<equiv> (replace (x, r) m)" by auto
+
+
+definition(in Varmatch) ruleMatch :: "'a \<Rightarrow> 'a \<Rightarrow> bool" where
+"ruleMatch r m = (if freevars m = {} then (replaceAll (match r m) r) = m else False)"
+
+(*lemma(in Varmatch) ruleMatch_simp[simp]: "freevars m = {} \<longrightarrow> ruleMatch r m \<equiv> (replaceAll (match r m) r) = m"*)
+
+
+
+class Varmatch_preserving = Varmatch +
+  assumes inv: "a = (replaceAll (match a a) a)"
+
+instantiation Atprop :: Varmatch
+begin   
+  fun match_Atprop :: "Atprop \<Rightarrow> Atprop \<Rightarrow> (Atprop * Atprop) list"
+  where
+    "match_Atprop (Atprop_Freevar free) mtch = [((Atprop_Freevar free), mtch)]" |
+    "match_Atprop _ _ = []"
+
+  fun freevars_Atprop :: "Atprop \<Rightarrow> Atprop set"
+  where
+    "freevars_Atprop (Atprop_Freevar var) = {(Atprop_Freevar var)}" |
+    "freevars_Atprop _ = {}" 
+  
+  fun replace_Atprop :: "(Atprop * Atprop) \<Rightarrow> Atprop \<Rightarrow> Atprop"
+  where
+    "replace_Atprop ((Atprop_Freevar x), mtch) (Atprop_Freevar free) = (if x = free then mtch else (Atprop_Freevar free))" |
+    "replace_Atprop _ pttrn = pttrn"
+
+  
+instance ..
+end
+
+lemma inv_Atprop[simp]:
+  fixes a::Atprop
+  assumes "free \<in> set (match a a)"
+  shows "a = replace free a"
+by (cases a, metis replace_Atprop.simps(3))
+(metis assms in_set_insert insert_Nil match_Atprop.simps(1) not_Cons_self2 replace_Atprop.simps(1) set_ConsD)
+
+
+lemma inv_Atprop_2[simp]:
+  fixes a::Atprop
+  shows "a = replaceAll (match a a) a"
+by (cases a, metis match_Atprop.simps(2) replaceAll.simps(1), simp)
+
+
+
+instantiation Action :: Varmatch
+begin   
+  fun match_Action :: "Action \<Rightarrow> Action \<Rightarrow> (Action * Action) list"
+  where
+    "match_Action (Action_Freevar free) mtch = [((Action_Freevar free), mtch)]" |
+    "match_Action _ _ = []"
+
+  fun freevars_Action :: "Action \<Rightarrow> Action set"
+  where
+    "freevars_Action (Action_Freevar var) = {(Action_Freevar var)}" |
+    "freevars_Action _ = {}" 
+  
+  fun replace_Action :: "(Action * Action) \<Rightarrow> Action \<Rightarrow> Action"
+  where
+    "replace_Action ((Action_Freevar x), mtch) (Action_Freevar free) = (if x = free then mtch else (Action_Freevar free))" |
+    "replace_Action _ pttrn = pttrn"
+
+  
+instance ..
+end
+
+lemma inv_Action[simp]:
+  fixes a::Action
+  assumes "free \<in> set (match a a)"
+  shows "a = replace free a"
+by (cases a, metis replace_Action.simps(3))
+(metis assms in_set_insert insert_Nil match_Action.simps(1) not_Cons_self2 replace_Action.simps(1) set_ConsD)
+
+
+lemma inv_Action_2[simp]:
+  fixes a::Action
+  shows "a = replaceAll (match a a) a"
+by (cases a, metis match_Action.simps(2) replaceAll.simps(1), simp)
+
+
+instantiation Agent :: Varmatch
+begin   
+  fun match_Agent :: "Agent \<Rightarrow> Agent \<Rightarrow> (Agent * Agent) list"
+  where
+    "match_Agent (Agent_Freevar free) mtch = [((Agent_Freevar free), mtch)]" |
+    "match_Agent _ _ = []"
+
+  fun freevars_Agent :: "Agent \<Rightarrow> Agent set"
+  where
+    "freevars_Agent (Agent_Freevar var) = {(Agent_Freevar var)}" |
+    "freevars_Agent _ = {}" 
+  
+  fun replace_Agent :: "(Agent * Agent) \<Rightarrow> Agent \<Rightarrow> Agent"
+  where
+    "replace_Agent ((Agent_Freevar x), mtch) (Agent_Freevar free) = (if x = free then mtch else (Agent_Freevar free))" |
+    "replace_Agent _ pttrn = pttrn"
+
+  
+instance ..
+end
+
+
+lemma inv_Agent[simp]:
+  fixes a::Agent
+  assumes "free \<in> set (match a a)"
+  shows "a = replace free a"
+by (cases a, metis replace_Agent.simps(3))
+(metis assms in_set_insert insert_Nil match_Agent.simps(1) not_Cons_self2 replace_Agent.simps(1) set_ConsD)
+
+
+lemma inv_Agent_2[simp]:
+  fixes a::Agent
+  shows "a = replaceAll (match a a) a"
+by (cases a, metis match_Agent.simps(2) replaceAll.simps(1), simp)
+
+
+instantiation Formula :: Varmatch
+begin   
+  fun match_Formula :: "Formula \<Rightarrow> Formula \<Rightarrow> (Formula * Formula) list"
+  where
+    "match_Formula (Formula_Atprop rule) (Formula_Atprop atprop) = map (\<lambda>(x,y). (Formula_Atprop x, Formula_Atprop y)) (match rule atprop)"
+  | "match_Formula (Formula_Bin var11 op1 var12) (Formula_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])"
+(*perhaps introduce formula_action and formula_agent ?? *)
+  | "match_Formula (Formula_Action_Formula op1 var11 var12) (Formula_Action_Formula op2 var21 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])"
+  | "match_Formula (Formula_Freevar free) mtch = [((Formula_Freevar free), mtch)]"
+  | "match_Formula _ _ = []"
+  
+  fun freevars_Formula :: "Formula \<Rightarrow> Formula set"
+  where
+    "freevars_Formula (Formula_Atprop var) = image (\<lambda>x. Formula_Atprop x) (freevars var)"
+  | "freevars_Formula (Formula_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)"
+  | "freevars_Formula (Formula_Freevar var) = {(Formula_Freevar var)}"
+  | "freevars_Formula _ = {}"
+
+  fun replace_Formula :: "(Formula * Formula) \<Rightarrow> Formula \<Rightarrow> Formula"
+  where
+    "replace_Formula ((Formula_Atprop x), (Formula_Atprop rep)) (Formula_Atprop atprop) = Formula_Atprop (replace (x, rep) atprop)"
+  | "replace_Formula (x, rep) (Formula_Bin var1 op1 var2) = Formula_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)"
+  | "replace_Formula (x, mtch) (Formula_Freevar free) = (if x = (Formula_Freevar free) then mtch else (Formula_Freevar free))"
+  | "replace_Formula (_, _) y = y" 
+instance ..
+end
+
+value "freevars (Atprop ''a'')"
+value "match (Atprop ''a'') (Atprop ''a'')"
+
+lemma freevars_replace_Atprop_simp[simp]: "free \<notin> freevars (a::Atprop) \<longrightarrow> replace (free,free) a = a" 
+by (induct a) (cases free, auto, metis Atprop.exhaust replace_Atprop.simps(1) replace_Atprop.simps(2))
+
+
+lemma freevars_replace_Atprop_simp2 : "free \<in> freevars (a::Atprop) \<longrightarrow> replace (free,free) a = a"
+by (induct a) (cases free, auto)
+
+lemma match_Atprop_simp : "\<forall>(x, y) \<in> set (match (a::Atprop) a). x = y"
+by (cases a) auto
+
+lemma freevars_replace_Formula_simp[simp]: "free \<notin> freevars (a::Formula) \<longrightarrow> replace (free,free) a = a"
+sorry
+
+
+lemma freevars_replace_Formula_simp2 : "free \<in> freevars (a::Formula) \<longrightarrow> replace (free,free) a = a"
+proof (rule, induct a)
+  case (Formula_Atprop x)
+    have 0: "freevars (Formula_Atprop x) = image (\<lambda>x. Formula_Atprop x) (freevars x)" by simp
+    then obtain afree where "afree \<in> freevars x" "Formula_Atprop afree = free"
+      by (metis Formula_Atprop.prems freevars_Formula.simps(1) imageE)
+    then have "replace (free, free) (Formula_Atprop x) = Formula_Atprop (replace (afree, afree) x)" by (metis replace_Formula.simps(1))
+    thus ?case
+      by (metis freevars_replace_Atprop_simp freevars_replace_Atprop_simp2)
+next
+  case (Formula_Freevar x)
+    show ?case by simp
+next
+  case (Formula_Bin x c y)
+    have 1: "free \<in> freevars (Formula_Bin x c y) \<longrightarrow> replace (free, free) x = x"
+    proof rule
+      assume "free \<in> freevars (Formula_Bin x c y)"
+    { assume "free \<notin> freevars x" then have "replace (free, free) x = x" using freevars_replace_Formula_simp by simp }
+      thus "replace (free, free) x = x" by (metis Formula_Bin.hyps(1))
+    qed
+    have 2: "free \<in> freevars (Formula_Bin x c y) \<longrightarrow> replace (free, free) y = y"
+    proof 
+      assume "free \<in> freevars (Formula_Bin x c y)"
+    { assume "free \<notin> freevars y" then have "replace (free, free) y = y" using freevars_replace_Formula_simp by simp }
+      thus "replace (free, free) y = y" by (metis Formula_Bin.hyps(2))
+    qed
+    have "free \<in> freevars (Formula_Bin x c y) \<longrightarrow> replace (free, free) (Formula_Bin x c y) = Formula_Bin (replace (free, free) x) c (replace (free, free) y)" by (metis replace_Formula.simps)
+    with 1 2 show ?case by (metis Formula_Bin.prems)
+oops
+
+lemma match_Formula_simp : "\<forall>(x, y) \<in> set (match (a::Formula) a). x = y"
+proof (induct a)
+  case (Formula_Atprop x)
+    have 0: "match (Formula_Atprop x) (Formula_Atprop x) = map (\<lambda>(x,y). (Formula_Atprop x, Formula_Atprop y)) (match x x)" by simp
+    have "\<forall>a\<in>set (match x x). case a of (x, y) \<Rightarrow> x = y" by (metis match_Atprop_simp)
+    then have "\<forall>a\<in>set( map (\<lambda>(x,y). (Formula_Atprop x, Formula_Atprop y)) (match x x)). case a of (x, y) \<Rightarrow> x = y" by auto
+    with 0 show ?case using match_Atprop_simp by simp
+next
+  case (Formula_Freevar x)
+    show ?case by auto
+next
+  case (Formula_Bin x c y)
+    have assms: "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" 
+      by (metis Formula_Bin.hyps(1)) (metis Formula_Bin.hyps(2))
+    have 0: "set (match (Formula_Bin x c y) (Formula_Bin x c y)) = set ((match x x) @m (match y y))" by simp
+    from Formula_Bin have "set ((match x x) @m (match y y)) = set (match x x) \<union> set (match y y)" by simp
+    with assms 0 show ?case by auto
+oops
+
+lemma inv_Formula[simp]:
+  fixes a::Formula
+  shows "\<forall>free \<in> set (match a a). a = replace free a"
+proof (induct a)
+  case (Formula_Atprop x)
+    show ?case by auto
+next
+  
+  case (Formula_Bin x c y)
+    obtain z where 0: "z = (Formula_Bin x c y)" by simp
+    have 1: "\<forall>free \<in> set (match z z). replace free z = Formula_Bin (replace free x) c (replace free y)"
+      by (metis "0" old.prod.exhaust replace_Formula.simps)
+    have "\<forall>free \<in> set (match z z). replace free x = x" "\<forall>free \<in> set (match z z). replace free y = y"
+    proof auto
+      fix a b
+      assume "(a, b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Formula_simp by (metis (full_types) splitD)
+      have x: "a \<notin> freevars x \<longrightarrow> replace (a,b) x = x" and "a \<in> freevars x \<longrightarrow> replace (a,b) x = x"
+        by (metis eq freevars_replace_Formula_simp) (metis freevars_replace_Formula_simp2 eq)
+      thus "replace (a, b) x = x" by auto
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Formula_simp) (metis freevars_replace_Formula_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    thus ?case by (metis "0" "1")
+next
+  case (Formula_Freevar x)
+    show ?case by simp
+qed
+
+
+lemma inv_Formula2_aux[simp]: 
+fixes a::Formula and list
+assumes "set list \<subseteq> set (match a a)"
+shows "replaceAll list a = a"
+using assms
+by (induct list a rule:replaceAll.induct, simp) (metis insert_subset inv_Formula replaceAll.simps(2) set_simps(2))
+
+lemma inv_Formula2: "replaceAll (match a a) a = (a::Formula)" by simp
+
+
+
+instantiation Structure :: Varmatch
+begin   
+  fun match_Structure :: "Structure \<Rightarrow> Structure \<Rightarrow> (Structure * Structure) list"
+  where
+(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "match_Structure (Structure_Formula rule) (Structure_Formula form) = map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match rule form)" |(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
+(*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*)  "match_Structure (Structure_Bin var11 op1 var12) (Structure_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])" |(*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
+(*(*uncommentL?Structure_Freevar-BEGIN*)*)(*uncommentL?Structure_Freevar-END*)  "match_Structure (Structure_Freevar free) mtch = [((Structure_Freevar free), mtch)]" |(*uncommentR?Structure_Freevar-BEGIN*)(*(*uncommentR?Structure_Freevar-END*)*)
+  "match_Structure _ _ = []"
+  
+  fun freevars_Structure :: "Structure \<Rightarrow> Structure set"
+  where
+(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "freevars_Structure (Structure_Formula var) = image (\<lambda>x. Structure_Formula x) (freevars var)" |(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
+(*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*)  "freevars_Structure (Structure_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)" |(*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
+(*(*uncommentL?Structure_Freevar-BEGIN*)*)(*uncommentL?Structure_Freevar-END*)  "freevars_Structure (Structure_Freevar var) = {(Structure_Freevar var)}" |(*uncommentR?Structure_Freevar-BEGIN*)(*(*uncommentR?Structure_Freevar-END*)*)
+  "freevars_Structure _ = {}"
+
+  fun replace_Structure :: "(Structure * Structure) \<Rightarrow> Structure \<Rightarrow> Structure"
+  where
+(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "replace_Structure ((Structure_Formula x), (Structure_Formula rep)) (Structure_Formula form) = Structure_Formula (replace (x, rep) form)" |(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
+(*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*)  "replace_Structure (x, rep) (Structure_Bin var1 op1 var2) = Structure_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)" |(*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
+(*(*uncommentL?Structure_Freevar-BEGIN*)*)(*uncommentL?Structure_Freevar-END*)  "replace_Structure (x, mtch) (Structure_Freevar free) = (if x = (Structure_Freevar free) then mtch else (Structure_Freevar free))" |(*uncommentR?Structure_Freevar-BEGIN*)(*(*uncommentR?Structure_Freevar-END*)*)
+  "replace_Structure (_, _) y = y" 
+instance ..
+end
+
+
+lemma freevars_replace_Structure_simp : "free \<notin> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
+apply (induct a, cases free, auto)
+by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formula_simp2 replace_Structure.simps(1) replace_Structure.simps(10) replace_Structure.simps(6) replace_Structure.simps(8))
+
+lemma freevars_replace_Structure_simp2 : "free \<in> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
+proof (rule, induct a)
+(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)
+  case (Structure_Formula x)
+    have 0: "freevars (Structure_Formula x) = image (\<lambda>x. Structure_Formula x) (freevars x)" by simp
+    then obtain ffree where "ffree \<in> freevars x"
+      by (metis Structure_Formula.prems freevars_Structure.simps(1) imageE)
+    with 0 have "replace (free, free) (Structure_Formula x) = Structure_Formula (replace (ffree, ffree) x)"
+      by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formula_simp2 replace_Structure.simps(1) replace_Structure.simps(12) replace_Structure.simps(14) replace_Structure.simps(4))
+    thus ?case
+      by (metis freevars_replace_Formula_simp freevars_replace_Formula_simp2)
+(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
+(*(*uncommentL?Structure_Zer-BEGIN*)*)(*uncommentL?Structure_Zer-END*)
+next
+  case (Structure_Zer c)
+    thus ?case by simp
+(*uncommentR?Structure_Zer-BEGIN*)(*(*uncommentR?Structure_Zer-END*)*)
+next
+  case (Structure_Freevar x)
+    thus ?case by simp
+next
+  case (Structure_Bin x c y)
+    have 1: "free \<in> freevars (Structure_Bin x c y) \<longrightarrow> (replace (free, free) x) = x"
+    proof rule
+      assume "free \<in> freevars (Structure_Bin x c y)"
+    { assume "free \<notin> freevars x" then have "replace (free, free) x = x" using freevars_replace_Structure_simp by simp }
+      thus "replace (free, free) x = x" by (metis Structure_Bin.hyps(1))
+    qed
+    have 2: "free \<in> freevars (Structure_Bin x c y) \<longrightarrow> replace (free, free) y = y"
+    proof 
+      assume "free \<in> freevars (Structure_Bin x c y)"
+    { assume "free \<notin> freevars y" then have "replace (free, free) y = y" using freevars_replace_Structure_simp by simp }
+      thus "replace (free, free) y = y" by (metis Structure_Bin.hyps(2))
+    qed
+    have "free \<in> freevars (Structure_Bin x c y) \<longrightarrow> replace (free, free) (Structure_Bin x c y) = Structure_Bin (replace (free, free) x) c (replace (free, free) y)" by (metis replace_Structure.simps(2))
+    thus ?case by (metis "1" "2" Structure_Bin.prems)
+qed
+
+
+lemma match_Structure_simp : "\<forall>(x, y) \<in> set (match (a::Structure) a). x = y"
+proof (induct a)
+  case (Structure_Formula x)
+    have 0: "match (Structure_Formula x) (Structure_Formula x) = map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match x x)" by simp
+    have "\<forall>a\<in>set (match x x). case a of (x, y) \<Rightarrow> x = y" by (metis match_Formula_simp)
+    then have "\<forall>a\<in>set( map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match x x)). case a of (x, y) \<Rightarrow> x = y" by auto
+    with 0 show ?case using match_Formula_simp by simp
+next
+  case (Structure_Zer x)
+    show ?case by auto
+next
+  case (Structure_Freevar x)
+    show ?case by auto
+next
+  case (Structure_Bin x c y)
+    have assms: "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" 
+      by (metis Structure_Bin.hyps(1)) (metis Structure_Bin.hyps(2))
+    have 0: "set (match (Structure_Bin x c y) (Structure_Bin x c y)) = set ((match x x) @m (match y y))" by simp
+    from Structure_Bin have "set ((match x x) @m (match y y)) = set (match x x) \<union> set (match y y)" by simp
+    with assms 0 show ?case by auto
+qed
+
+
+lemma inv_Structure[simp]:
+  fixes a::Structure
+  shows "\<forall>free \<in> set (match a a). a = replace free a"
+proof (induct a)
+  case (Structure_Formula x)
+    thus ?case by auto
+next
+  case (Structure_Zer x)
+    show ?case by simp
+next
+  case (Structure_Bin x c y)
+    obtain z where 0: "z = (Structure_Bin x c y)" by simp
+    have 1: "\<forall>free \<in> set (match z z). replace free z = Structure_Bin (replace free x) c (replace free y)"
+      by (metis "0" old.prod.exhaust replace_Structure.simps(2))
+    have "\<forall>free \<in> set (match z z). replace free x = x" "\<forall>free \<in> set (match z z). replace free y = y"
+    proof auto
+      fix a b
+      assume "(a, b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Structure_simp by (metis (full_types) splitD)
+      have x: "a \<notin> freevars x \<longrightarrow> replace (a,b) x = x" and "a \<in> freevars x \<longrightarrow> replace (a,b) x = x"
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+      thus "replace (a, b) x = x" by auto
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    thus ?case by (metis "0" "1")
+next
+  case (Structure_Freevar x)
+    show ?case by simp
+qed
+
+
+lemma inv_Structure2_aux[simp]: 
+fixes a::Structure and list
+assumes "set list \<subseteq> set (match a a)"
+shows "replaceAll list a = a"
+using assms
+by (induct list a rule:replaceAll.induct, simp) (metis insert_subset inv_Structure replaceAll.simps(2) set_simps(2))
+
+lemma inv_Structure2: "replaceAll (match a a) a = (a::Structure)" by simp
+
+
+
+
+instantiation Sequent :: Varmatch
+begin   
+  fun match_Sequent :: "Sequent \<Rightarrow> Sequent \<Rightarrow> (Sequent * Sequent) list"
+  where
+    "match_Sequent (Sequent var11 var12) (Sequent var21 var22) = (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) ((match var11 var21) @m (match var12 var22)))"
+  | "match_Sequent _ _ = []"
+  
+  fun freevars_Sequent :: "Sequent \<Rightarrow> Sequent set"
+  where
+    "freevars_Sequent (Sequent var1 var2) = image (\<lambda>x. Sequent_Structure x) (freevars var1 \<union> freevars var2)"
+  | "freevars_Sequent _ = {}"
+
+  fun replace_Sequent :: "(Sequent * Sequent) \<Rightarrow> Sequent \<Rightarrow> Sequent"
+  where
+    "replace_Sequent ((Sequent_Structure x), (Sequent_Structure rep))  (Sequent var1 var2) = Sequent (replace (x, rep) var1) (replace (x, rep) var2)"
+  | "replace_Sequent (_, _) y = y" 
+instance ..
+end
+
+
+lemma inv_Sequent[simp]:
+  fixes a::Sequent
+  shows "\<forall>free \<in> set (match a a). a = replace free a"
+proof (induct a)
+  case (Sequent_Structure x)
+    thus ?case by auto
+next
+  case (Sequent x y)
+    have "\<forall>(a, b) \<in> set (match x x @m match y y). replace (a, b) x = x"  "\<forall>(a, b) \<in> set (match x x @m match y y). replace (a, b) y = y"
+    proof auto
+      fix a b
+      assume 0: "(a, b) \<in> set (match x x @m match y y)"
+      have "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" by (metis match_Structure_simp)+
+      with 0 have eq: "a = b" by auto
+      have "a \<notin> freevars x \<longrightarrow> replace (a, b) x = x" and "a \<in> freevars x \<longrightarrow> replace (a, b) x = x"
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+      thus "replace (a, b) x = x" by auto
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    thus ?case by auto
+qed
+
+
+lemma inv_Sequent2_aux[simp]: 
+fixes a::Sequent and list
+assumes "set list \<subseteq> set (match a a)"
+shows "replaceAll list a = a"
+using assms
+by (induct list a rule:replaceAll.induct, simp) (metis insert_subset inv_Sequent replaceAll.simps(2) set_simps(2))
+
+lemma inv_Sequent2: "replaceAll (match a a) a = (a::Sequent)" by simp
+
+definition "export = (Atprop ''A'')\<^sub>F\<^sub>S \<turnstile>\<^sub>S (Atprop ''A'')\<^sub>F\<^sub>S"
+
+export_code open export in Scala
+module_name (*calc_name*) file (*export_path*)
+end
