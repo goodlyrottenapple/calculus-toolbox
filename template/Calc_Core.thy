@@ -125,6 +125,15 @@ lemma inv_Atprop_2[simp]:
 by (cases a, metis match_Atprop.simps(2) replaceAll.simps(1), simp)
 
 
+lemma freevars_replace_Atprop_simp[simp]: "free \<notin> freevars (a::Atprop) \<longrightarrow> replace (free,free) a = a" 
+by (induct a) (cases free, auto, metis Atprop.exhaust replace_Atprop.simps(1) replace_Atprop.simps(2))
+
+
+lemma freevars_replace_Atprop_simp2 : "free \<in> freevars (a::Atprop) \<longrightarrow> replace (free,free) a = a"
+by (induct a) (cases free, auto)
+
+lemma match_Atprop_simp : "\<forall>(x, y) \<in> set (match (a::Atprop) a). x = y"
+by (cases a) auto
 
 instantiation Action :: Varmatch
 begin   
@@ -159,6 +168,16 @@ lemma inv_Action_2[simp]:
   fixes a::Action
   shows "a = replaceAll (match a a) a"
 by (cases a, metis match_Action.simps(2) replaceAll.simps(1), simp)
+
+
+lemma freevars_replace_Action_simp[simp]: "free \<notin> freevars (a::Action) \<longrightarrow> replace (free,free) a = a" 
+by (induct a) (cases free, auto, metis Action.exhaust replace_Action.simps(1) replace_Action.simps(2))
+
+lemma freevars_replace_Action_simp2 : "free \<in> freevars (a::Action) \<longrightarrow> replace (free,free) a = a"
+by (induct a) (cases free, auto)
+
+lemma match_Action_simp : "\<forall>(x, y) \<in> set (match (a::Action) a). x = y"
+by (cases a) auto
 
 
 instantiation Agent :: Varmatch
@@ -197,15 +216,27 @@ lemma inv_Agent_2[simp]:
 by (cases a, metis match_Agent.simps(2) replaceAll.simps(1), simp)
 
 
+lemma freevars_replace_Agent_simp[simp]: "free \<notin> freevars (a::Agent) \<longrightarrow> replace (free,free) a = a" 
+by (induct a) (cases free, auto, metis Agent.exhaust replace_Agent.simps(1) replace_Agent.simps(2))
+
+lemma freevars_replace_Agent_simp2 : "free \<in> freevars (a::Agent) \<longrightarrow> replace (free,free) a = a"
+by (induct a) (cases free, auto)
+
+lemma match_Agent_simp : "\<forall>(x, y) \<in> set (match (a::Agent) a). x = y"
+by (cases a) auto
+
+
 instantiation Formula :: Varmatch
 begin   
   fun match_Formula :: "Formula \<Rightarrow> Formula \<Rightarrow> (Formula * Formula) list"
   where
     "match_Formula (Formula_Atprop rule) (Formula_Atprop atprop) = map (\<lambda>(x,y). (Formula_Atprop x, Formula_Atprop y)) (match rule atprop)"
   | "match_Formula (Formula_Bin var11 op1 var12) (Formula_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])"
-(*perhaps introduce formula_action and formula_agent ?? *)
-  | "match_Formula (Formula_Action_Formula op1 var11 var12) (Formula_Action_Formula op2 var21 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])"
   | "match_Formula (Formula_Freevar free) mtch = [((Formula_Freevar free), mtch)]"
+
+  | "match_Formula (Formula_Action_Formula op1 act1 form1) (Formula_Action_Formula op2 act2 form2) = (if op1 = op2 then map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match act1 act2) @m (match form1 form2) else [])"
+  | "match_Formula (Formula_Agent_Formula op1 ag1 form1) (Formula_Agent_Formula op2 ag2 form2) = (if op1 = op2 then map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match ag1 ag2) @m (match form1 form2) else [])"
+  | "match_Formula (Formula_Precondition act1) (Formula_Precondition act2) = map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match act1 act2)"
   | "match_Formula _ _ = []"
   
   fun freevars_Formula :: "Formula \<Rightarrow> Formula set"
@@ -213,6 +244,10 @@ begin
     "freevars_Formula (Formula_Atprop var) = image (\<lambda>x. Formula_Atprop x) (freevars var)"
   | "freevars_Formula (Formula_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)"
   | "freevars_Formula (Formula_Freevar var) = {(Formula_Freevar var)}"
+
+  | "freevars_Formula (Formula_Action_Formula _ act1 form1) = image (\<lambda>x. Formula_Action x) (freevars act1) \<union> (freevars form1)"
+  | "freevars_Formula (Formula_Agent_Formula _ ag1 form1) = image (\<lambda>x. Formula_Agent x) (freevars ag1) \<union> (freevars form1)"
+  | "freevars_Formula (Formula_Precondition act1) = image (\<lambda>x. Formula_Action x) (freevars act1)"
   | "freevars_Formula _ = {}"
 
   fun replace_Formula :: "(Formula * Formula) \<Rightarrow> Formula \<Rightarrow> Formula"
@@ -220,6 +255,15 @@ begin
     "replace_Formula ((Formula_Atprop x), (Formula_Atprop rep)) (Formula_Atprop atprop) = Formula_Atprop (replace (x, rep) atprop)"
   | "replace_Formula (x, rep) (Formula_Bin var1 op1 var2) = Formula_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)"
   | "replace_Formula (x, mtch) (Formula_Freevar free) = (if x = (Formula_Freevar free) then mtch else (Formula_Freevar free))"
+
+  | "replace_Formula ((Formula_Action x), (Formula_Action rep)) (Formula_Action_Formula op1 act1 form1) = Formula_Action_Formula op1 (replace (x, rep) act1) (replace ((Formula_Action x), (Formula_Action rep)) form1)"
+  | "replace_Formula ((Formula_Agent x), (Formula_Agent rep)) (Formula_Agent_Formula op1 ag1 form1) = Formula_Agent_Formula op1 (replace (x, rep) ag1) (replace ((Formula_Agent x), (Formula_Agent rep)) form1)"
+
+  | "replace_Formula (x, rep) (Formula_Action_Formula op1 act1 form1) = Formula_Action_Formula op1 act1 (replace (x, rep) form1)"
+  | "replace_Formula (x, rep) (Formula_Agent_Formula op1 ag1 form1) = Formula_Agent_Formula op1 ag1 (replace (x, rep) form1)"
+
+  | "replace_Formula ((Formula_Action x), (Formula_Action rep)) (Formula_Precondition act1) = Formula_Precondition (replace (x, rep) act1)"
+
   | "replace_Formula (_, _) y = y" 
 instance ..
 end
@@ -227,19 +271,24 @@ end
 value "freevars (Atprop ''a'')"
 value "match (Atprop ''a'') (Atprop ''a'')"
 
-lemma freevars_replace_Atprop_simp[simp]: "free \<notin> freevars (a::Atprop) \<longrightarrow> replace (free,free) a = a" 
-by (induct a) (cases free, auto, metis Atprop.exhaust replace_Atprop.simps(1) replace_Atprop.simps(2))
 
-
-lemma freevars_replace_Atprop_simp2 : "free \<in> freevars (a::Atprop) \<longrightarrow> replace (free,free) a = a"
-by (induct a) (cases free, auto)
-
-lemma match_Atprop_simp : "\<forall>(x, y) \<in> set (match (a::Atprop) a). x = y"
-by (cases a) auto
-
-lemma freevars_replace_Formula_simp[simp]: "free \<notin> freevars (a::Formula) \<longrightarrow> replace (free,free) a = a"
-sorry
-
+lemma freevars_replace_Formula_simp[simp]: "free \<notin> freevars (a::Formula) \<longrightarrow> replace (free,free) a = a" 
+apply (induct a)
+apply (cases a)
+apply (simp_all)
+apply (cases free)
+apply auto
+apply (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+apply (cases free)
+apply auto
+apply (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+apply (cases free)
+apply auto
+apply (metis freevars_replace_Atprop_simp freevars_replace_Atprop_simp2)
+apply (cases free)
+apply auto
+apply (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+done
 
 lemma freevars_replace_Formula_simp2 : "free \<in> freevars (a::Formula) \<longrightarrow> replace (free,free) a = a"
 proof (rule, induct a)
@@ -269,7 +318,46 @@ next
     qed
     have "free \<in> freevars (Formula_Bin x c y) \<longrightarrow> replace (free, free) (Formula_Bin x c y) = Formula_Bin (replace (free, free) x) c (replace (free, free) y)" by (metis replace_Formula.simps)
     with 1 2 show ?case by (metis Formula_Bin.prems)
-oops
+next
+    case (Formula_Action x)
+    show ?case by simp
+next
+  case (Formula_Agent x)
+    show ?case by simp
+next
+  case (Formula_Precondition x)
+    have 0: "freevars (Formula_Precondition x) = image (\<lambda>x. Formula_Action x) (freevars x)" by simp
+    then obtain afree where "afree \<in> freevars x" "Formula_Action afree = free" 
+      by (metis Formula_Precondition.prems freevars_Formula.simps(6) imageE)
+    then have "replace (free, free) (Formula_Precondition x) = Formula_Precondition (replace (afree, afree) x)" by (metis replace_Formula.simps(34))
+    thus ?case by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+next
+  case (Formula_Action_Formula c x y)
+    have 1: "free \<in> freevars (Formula_Action_Formula c x y) \<longrightarrow> replace (free, free) (Formula_Action x) = (Formula_Action x)" by simp
+    have 2: "free \<in> freevars (Formula_Action_Formula c x y) \<longrightarrow> replace (free, free) y = y"
+    proof 
+      assume "free \<in> freevars (Formula_Action_Formula c x y)"
+    { assume "free \<notin> freevars y" then have "replace (free, free) y = y" using freevars_replace_Formula_simp by simp }
+      thus "replace (free, free) y = y" by (metis Formula_Action_Formula.hyps)
+    qed
+    with 1 have "free \<in> freevars (Formula_Action_Formula c x y) \<longrightarrow> replace (free, free) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (free, free) y)"
+      by (cases free, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+    with 2 show ?case by (metis Formula_Action_Formula.prems)
+next
+  case (Formula_Agent_Formula c x y)
+    have 1: "free \<in> freevars (Formula_Agent_Formula c x y) \<longrightarrow> replace (free, free) (Formula_Agent x) = (Formula_Agent x)" by simp
+    have 2: "free \<in> freevars (Formula_Agent_Formula c x y) \<longrightarrow> replace (free, free) y = y"
+    proof 
+      assume "free \<in> freevars (Formula_Agent_Formula c x y)"
+    { assume "free \<notin> freevars y" then have "replace (free, free) y = y" using freevars_replace_Formula_simp by simp }
+      thus "replace (free, free) y = y" by (metis Formula_Agent_Formula.hyps)
+    qed
+    with 1 have "free \<in> freevars (Formula_Agent_Formula c x y) \<longrightarrow> replace (free, free) (Formula_Agent_Formula c x y) = Formula_Agent_Formula c x (replace (free, free) y)"
+      by (cases free, simp_all) (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+    with 2 show ?case by (metis Formula_Agent_Formula.prems)
+qed
+
+
 
 lemma match_Formula_simp : "\<forall>(x, y) \<in> set (match (a::Formula) a). x = y"
 proof (induct a)
@@ -288,16 +376,43 @@ next
     have 0: "set (match (Formula_Bin x c y) (Formula_Bin x c y)) = set ((match x x) @m (match y y))" by simp
     from Formula_Bin have "set ((match x x) @m (match y y)) = set (match x x) \<union> set (match y y)" by simp
     with assms 0 show ?case by auto
-oops
+next
+  case (Formula_Action x)
+    show ?case by simp
+next
+  case (Formula_Agent x)
+    show ?case by simp
+next
+  case (Formula_Precondition x)
+    have 0: "match (Formula_Precondition x) (Formula_Precondition x) = map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x)" by simp
+    have "\<forall>a\<in>set (match x x). case a of (x, y) \<Rightarrow> x = y" by (metis match_Action_simp)
+    then have "\<forall>a\<in>set( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x)). case a of (x, y) \<Rightarrow> x = y" by auto
+    with 0 show ?case using match_Atprop_simp by simp
+next
+  case (Formula_Action_Formula c x y)
+    have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Action_simp by simp
+    then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+    have 0: "set (match (Formula_Action_Formula c x y) (Formula_Action_Formula c x y)) = set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) @m (match y y) )" by simp
+    with a Formula_Action_Formula have "set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) ) \<union> set (match y y)" by simp
+    with assms 0 show ?case by (metis Formula_Action_Formula.hyps Un_iff a)
+next
+  case (Formula_Agent_Formula c x y)
+    have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Agent_simp by simp
+    then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+    have 0: "set (match (Formula_Agent_Formula c x y) (Formula_Agent_Formula c x y)) = set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) @m (match y y) )" by simp
+    with a Formula_Agent_Formula have "set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) ) \<union> set (match y y)" by simp
+    with assms 0 show ?case by (metis Formula_Agent_Formula.hyps Un_iff a)
+qed
 
 lemma inv_Formula[simp]:
   fixes a::Formula
-  shows "\<forall>free \<in> set (match a a). a = replace free a"
+  shows "free \<in> set (match a a) \<longrightarrow> a = replace free a"
 proof (induct a)
   case (Formula_Atprop x)
     show ?case by auto
 next
-  
   case (Formula_Bin x c y)
     obtain z where 0: "z = (Formula_Bin x c y)" by simp
     have 1: "\<forall>free \<in> set (match z z). replace free z = Formula_Bin (replace free x) c (replace free y)"
@@ -318,7 +433,40 @@ next
 next
   case (Formula_Freevar x)
     show ?case by simp
-qed
+next
+  case (Formula_Action x)
+    show ?case by simp
+next
+  case (Formula_Agent x)
+    show ?case by simp
+next
+  case (Formula_Precondition x)
+    show ?case by auto
+next
+  case (Formula_Action_Formula c x y)
+    obtain z where 0: "z = (Formula_Action_Formula c x y)" by simp
+    have 1: "\<forall>free \<in> set (match z z). replace free (Formula_Action x) = (Formula_Action x)" by auto
+    have 2: "\<forall>free \<in> set (match z z). replace free y = y"
+    proof auto
+      fix a b
+      assume "(a, b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Formula_simp by (metis (full_types) splitD)
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Formula_simp) (metis freevars_replace_Formula_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    have "\<forall>free \<in> set (match z z). replace free (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace free y)"
+    proof auto
+      fix a b
+      assume "(a,b) \<in> set (match z z)"
+      {assume "(a,b) \<in> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x))"
+      have "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" sorry}
+      {assume "(a,b) \<notin> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x))"
+      have "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" sorry}
+      thus "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" try
+    qed
+    with 0 1 2 show ?case by simp
+oops
 
 
 lemma inv_Formula2_aux[simp]: 
