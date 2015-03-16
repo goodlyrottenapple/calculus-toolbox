@@ -408,7 +408,7 @@ qed
 
 lemma inv_Formula[simp]:
   fixes a::Formula
-  shows "free \<in> set (match a a) \<longrightarrow> a = replace free a"
+  shows "\<forall>free \<in> set (match a a). a = replace free a"
 proof (induct a)
   case (Formula_Atprop x)
     show ?case by auto
@@ -445,6 +445,7 @@ next
 next
   case (Formula_Action_Formula c x y)
     obtain z where 0: "z = (Formula_Action_Formula c x y)" by simp
+
     have 1: "\<forall>free \<in> set (match z z). replace free (Formula_Action x) = (Formula_Action x)" by auto
     have 2: "\<forall>free \<in> set (match z z). replace free y = y"
     proof auto
@@ -455,18 +456,81 @@ next
         by (metis eq freevars_replace_Formula_simp) (metis freevars_replace_Formula_simp2 eq)
       thus "replace (a, b) y = y" by auto
     qed
+    
     have "\<forall>free \<in> set (match z z). replace free (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace free y)"
     proof auto
       fix a b
-      assume "(a,b) \<in> set (match z z)"
-      {assume "(a,b) \<in> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x))"
-      have "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" sorry}
-      {assume "(a,b) \<notin> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x))"
-      have "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" sorry}
-      thus "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" try
+      assume assm: "(a,b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Formula_simp by (metis (full_types) splitD)
+
+      from 0 have "match z z = map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) @m match y y" by simp 
+      then have 3: "set (match z z) = set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) @m (match y y))" by simp 
+
+      have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Action_simp by simp
+      then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+      have 0: "set (match (Formula_Action_Formula c x y) (Formula_Action_Formula c x y)) = set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) @m (match y y) )" by simp
+      with a match_Formula_simp have "set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x) ) \<union> set (match y y)" by simp
+      with 3 eq 0 assm have ab_in_z: "(a,b) \<in> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x)) \<union> set (match y y)" by simp
+
+      { assume "(a,b) \<in> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x))"
+        then obtain a' b' where "Formula_Action a' = a" "Formula_Action b' = b" by auto
+        then have 1: "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c (replace (a',b') x) (replace (a,b) y)" by auto
+        have "(replace (a',b') x) = x" by (metis Formula.inject(1) `Formula_Action a' = a` `Formula_Action b' = b` eq freevars_replace_Action_simp freevars_replace_Action_simp2)
+        with 1 have "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" by simp }
+      { assume "(a,b) \<notin> set (map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match x x))"
+        with ab_in_z have "(a,b) \<in> set (match y y)" by simp
+        then have 1: "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)"
+          by (cases a, cases b, auto) (metis Formula.inject(1) eq freevars_replace_Action_simp freevars_replace_Action_simp2) }
+      thus "replace (a,b) (Formula_Action_Formula c x y) = Formula_Action_Formula c x (replace (a,b) y)" 
+        by (metis `(a, b) \<in> set (map (\<lambda>(x, y). (Formula_Action x, Formula_Action y)) (match x x)) \<Longrightarrow> replace (a, b) (ActF\<^sub>F c x y) = ActF\<^sub>F c x replace (a, b) y`)
     qed
     with 0 1 2 show ?case by simp
-oops
+next
+  case (Formula_Agent_Formula c x y)
+    obtain z where 0: "z = (Formula_Agent_Formula c x y)" by simp
+
+    have 1: "\<forall>free \<in> set (match z z). replace free (Formula_Agent x) = (Formula_Agent x)" by auto
+    have 2: "\<forall>free \<in> set (match z z). replace free y = y"
+    proof auto
+      fix a b
+      assume "(a, b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Formula_simp by (metis (full_types) splitD)
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Formula_simp) (metis freevars_replace_Formula_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    
+    have "\<forall>free \<in> set (match z z). replace free (Formula_Agent_Formula c x y) = Formula_Agent_Formula c x (replace free y)"
+    proof auto
+      fix a b
+      assume assm: "(a,b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Formula_simp by (metis (full_types) splitD)
+
+      from 0 have "match z z = map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) @m match y y" by simp 
+      then have 3: "set (match z z) = set (map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) @m (match y y))" by simp 
+
+      have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Agent_simp by simp
+      then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+      have 0: "set (match (Formula_Agent_Formula c x y) (Formula_Agent_Formula c x y)) = set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) @m (match y y) )" by simp
+      with a match_Formula_simp have "set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x) ) \<union> set (match y y)" by simp
+      with 3 eq 0 assm have ab_in_z: "(a,b) \<in> set (map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x)) \<union> set (match y y)" by simp
+
+      { assume "(a,b) \<in> set (map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x))"
+        then obtain a' b' where "Formula_Agent a' = a" "Formula_Agent b' = b" by auto
+        then have 1: "replace (a,b) (Formula_Agent_Formula c x y) = Formula_Agent_Formula c (replace (a',b') x) (replace (a,b) y)" by auto
+        have "(replace (a',b') x) = x" by (metis Formula.inject(3) `Formula_Agent a' = a` `Formula_Agent b' = b` eq freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+        with 1 have "replace (a,b) (Formula_Agent_Formula c x y) = Formula_Agent_Formula c x (replace (a,b) y)" by simp }
+      { assume "(a,b) \<notin> set (map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match x x))"
+        with ab_in_z have "(a,b) \<in> set (match y y)" by simp
+        then have 1: "replace (a,b) (Formula_Agent_Formula c x y) = Formula_Agent_Formula c x (replace (a,b) y)"
+          by (cases a, auto, cases b, auto) (metis Formula.inject(3) eq freevars_replace_Agent_simp freevars_replace_Agent_simp2) }
+      thus "replace (a,b) (Formula_Agent_Formula c x y) = Formula_Agent_Formula c x (replace (a,b) y)"
+        by (metis `(a, b) \<in> set (map (\<lambda>(x, y). (Formula_Agent x, Formula_Agent y)) (match x x)) \<Longrightarrow> replace (a, b) (AgF\<^sub>F c x y) = AgF\<^sub>F c x replace (a, b) y` eq)
+    qed
+    with 0 1 2 show ?case by simp
+qed
 
 
 lemma inv_Formula2_aux[simp]: 
