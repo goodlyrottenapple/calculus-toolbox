@@ -18,13 +18,13 @@ fun fst :: "ruleder \<Rightarrow> Sequent" and snd :: "ruleder \<Rightarrow> Seq
 
 fun der :: "Rule \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
 where
-(*(*uncommentL?RuleCut-BEGIN*)*)(*uncommentL?RuleCut-END*)"der (RuleCut RuleCut.SingleCut) s = (Fail, [])" | (*uncommentR?RuleCut-BEGIN*)(*(*uncommentR?RuleCut-END*)*)(* added this so that normal der cannot accept a cut rule *)
+(*(*uncommentL?RuleCut*)"der (RuleCut RuleCut.SingleCut) s = (Fail, [])" | (*uncommentR?RuleCut*)*)(* added this so that normal der cannot accept a cut rule *)
 "der r s = (if (ruleMatch (fst (rule r)) s) 
               then (r, map (replaceAll (match (fst (rule r)) s) ) (snd (rule r))) 
               else (Fail, []))"
 
 
-(*(*uncommentL?RuleCut-BEGIN*)*)(*uncommentL?RuleCut-END*)
+(*(*uncommentL?RuleCut*)
 (*der cut applies a supplied formula if the cut rule is used - a bit hacky atm *) 
 fun der_cut :: "Rule \<Rightarrow> Formula \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
 where
@@ -32,7 +32,7 @@ where
    then ((RuleCut RuleCut.SingleCut), map (replaceAll (match (fst (rule (RuleCut RuleCut.SingleCut))) s @ (map (\<lambda>(x,y). (Sequent_Structure (Structure_Formula x), Sequent_Structure (Structure_Formula y))) (match (?\<^sub>F''A'') cutForm))) ) (snd (rule (RuleCut RuleCut.SingleCut)))) 
    else (Fail, []))" |
 "der_cut _ _ _ = (Fail, [])"
-(*uncommentR?RuleCut-BEGIN*)(*(*uncommentR?RuleCut-END*)*)
+(*uncommentR?RuleCut*)*)
 
 fun isProofTree :: "Prooftree \<Rightarrow> bool" where
 "isProofTree (s \<Longleftarrow> Z(r)) = ruleMatch (fst (rule (RuleZer r))) s" | (*for modularity, perhaps this should be changed back to a definition like the ones below later...i changed it because it makes proofs in the eq file for the id case easier*)
