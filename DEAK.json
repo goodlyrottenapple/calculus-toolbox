@@ -184,6 +184,12 @@
 				"type" : "Structure_Zer_Op",
 				"isabelle" : "Z\\<^sub>S",
 				"precedence": [340, 340]
+			},
+
+			"Structure_Bin" : {
+				"type" : ["Structure", "Structure_Bin_Op", "Structure"],
+				"isabelle" : "B\\<^sub>S _",
+				"precedence": [340,340,340, 341]
 			}
 		},
 
@@ -195,7 +201,19 @@
 			}
 		},
 
-	
+		"Structure_Bin_Op" : {
+			"Structure_Comma" : {
+				"isabelle" : ";\\<^sub>S",
+				"ascii" : ";",
+				"latex" : ";"
+			},
+			"Structure_ImpR" : {
+				"isabelle" : "\\<rightarrow>\\<^sub>S",
+				"ascii" : ">>",
+				"latex" : ">>"
+			}
+		},
+
 		"Sequent" : {
 			"Sequent_Structure" : {
 				"type": "Structure"
@@ -350,7 +368,6 @@
 				"latex" : "\\rightarrow_L"
 			}
 		},
-		
 
 		"Prooftree" : {
 			"Zer" : {
