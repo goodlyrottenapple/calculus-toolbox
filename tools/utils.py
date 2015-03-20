@@ -42,8 +42,8 @@ def writeFile(file, str):
 		out.write(str)
 
 def clean(file_str, delimL = "", delimR = ""):
-	items_begin = re.findall(re.escape(delimL)+r'\w+-BEGIN'+re.escape(delimR), file_str)
-	items_end = re.findall(re.escape(delimL)+r'\w+-END'+re.escape(delimR), file_str)
+	items_begin = re.findall(re.escape(delimL)+r'[\w+\?]+-BEGIN'+re.escape(delimR), file_str)
+	items_end = re.findall(re.escape(delimL)+r'[\w+\?]+-END'+re.escape(delimR), file_str)
 
 	items_beign = list(set(items_begin))
 	items_end = list(set(items_end))
@@ -61,8 +61,8 @@ def clean(file_str, delimL = "", delimR = ""):
 def revert(file_str, delimL = "", delimR = ""):
 
 	#get the sections auto-gen code
-	items_begin = re.findall(re.escape(delimL)+r'\w+-BEGIN'+re.escape(delimR), file_str)
-	items_end = re.findall(re.escape(delimL)+r'\w+-END'+re.escape(delimR), file_str)
+	items_begin = re.findall(re.escape(delimL)+r'[\w+\?]+-BEGIN'+re.escape(delimR), file_str)
+	items_end = re.findall(re.escape(delimL)+r'[\w+\?]+-END'+re.escape(delimR), file_str)
 
 	#remove duplicates
 	items_beign = list(set(items_begin))

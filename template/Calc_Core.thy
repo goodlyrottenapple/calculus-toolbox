@@ -575,7 +575,7 @@ by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formu
 
 lemma freevars_replace_Structure_simp2 : "free \<in> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
 proof (rule, induct a)
-(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)
+(*(*uncommentL?Structure_Formula*)
   case (Structure_Formula x)
     have 0: "freevars (Structure_Formula x) = image (\<lambda>x. Structure_Formula x) (freevars x)" by simp
     then obtain ffree where "ffree \<in> freevars x"
@@ -584,12 +584,12 @@ proof (rule, induct a)
       by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formula_simp2 replace_Structure.simps(1) replace_Structure.simps(12) replace_Structure.simps(14) replace_Structure.simps(4))
     thus ?case
       by (metis freevars_replace_Formula_simp freevars_replace_Formula_simp2)
-(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
-(*(*uncommentL?Structure_Zer-BEGIN*)*)(*uncommentL?Structure_Zer-END*)
+(*uncommentR?Structure_Formula*)*)
+(*(*uncommentL?Structure_Zer*)
 next
   case (Structure_Zer c)
     thus ?case by simp
-(*uncommentR?Structure_Zer-BEGIN*)(*(*uncommentR?Structure_Zer-END*)*)
+(*uncommentR?Structure_Zer*)*)
 next
   case (Structure_Freevar x)
     thus ?case by simp
