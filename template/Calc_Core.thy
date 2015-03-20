@@ -548,27 +548,26 @@ instantiation Structure :: Varmatch
 begin   
   fun match_Structure :: "Structure \<Rightarrow> Structure \<Rightarrow> (Structure * Structure) list"
   where
-(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "match_Structure (Structure_Formula rule) (Structure_Formula form) = map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match rule form)" |(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
-(*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*)  "match_Structure (Structure_Bin var11 op1 var12) (Structure_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])" |(*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
-(*(*uncommentL?Structure_Freevar-BEGIN*)*)(*uncommentL?Structure_Freevar-END*)  "match_Structure (Structure_Freevar free) mtch = [((Structure_Freevar free), mtch)]" |(*uncommentR?Structure_Freevar-BEGIN*)(*(*uncommentR?Structure_Freevar-END*)*)
+(*(*uncommentL?Structure_Formula*)  "match_Structure (Structure_Formula rule) (Structure_Formula form) = map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match rule form)" |(*uncommentR?Structure_Formula*)*)
+(*(*uncommentL?Structure_Bin*)  "match_Structure (Structure_Bin var11 op1 var12) (Structure_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])" |(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Freevar*)  "match_Structure (Structure_Freevar free) mtch = [((Structure_Freevar free), mtch)]" |(*uncommentR?Structure_Freevar*)*)
   "match_Structure _ _ = []"
   
   fun freevars_Structure :: "Structure \<Rightarrow> Structure set"
   where
-(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "freevars_Structure (Structure_Formula var) = image (\<lambda>x. Structure_Formula x) (freevars var)" |(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
-(*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*)  "freevars_Structure (Structure_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)" |(*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
-(*(*uncommentL?Structure_Freevar-BEGIN*)*)(*uncommentL?Structure_Freevar-END*)  "freevars_Structure (Structure_Freevar var) = {(Structure_Freevar var)}" |(*uncommentR?Structure_Freevar-BEGIN*)(*(*uncommentR?Structure_Freevar-END*)*)
+(*(*uncommentL?Structure_Formula*)  "freevars_Structure (Structure_Formula var) = image (\<lambda>x. Structure_Formula x) (freevars var)" |(*uncommentR?Structure_Formula*)*)
+(*(*uncommentL?Structure_Bin*)  "freevars_Structure (Structure_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)" |(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Freevar*)  "freevars_Structure (Structure_Freevar var) = {(Structure_Freevar var)}" |(*uncommentR?Structure_Freevar*)*)
   "freevars_Structure _ = {}"
 
   fun replace_Structure :: "(Structure * Structure) \<Rightarrow> Structure \<Rightarrow> Structure"
   where
-(*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "replace_Structure ((Structure_Formula x), (Structure_Formula rep)) (Structure_Formula form) = Structure_Formula (replace (x, rep) form)" |(*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
-(*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*)  "replace_Structure (x, rep) (Structure_Bin var1 op1 var2) = Structure_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)" |(*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
-(*(*uncommentL?Structure_Freevar-BEGIN*)*)(*uncommentL?Structure_Freevar-END*)  "replace_Structure (x, mtch) (Structure_Freevar free) = (if x = (Structure_Freevar free) then mtch else (Structure_Freevar free))" |(*uncommentR?Structure_Freevar-BEGIN*)(*(*uncommentR?Structure_Freevar-END*)*)
+(*(*uncommentL?Structure_Formula*)  "replace_Structure ((Structure_Formula x), (Structure_Formula rep)) (Structure_Formula form) = Structure_Formula (replace (x, rep) form)" |(*uncommentR?Structure_Formula*)*)
+(*(*uncommentL?Structure_Bin*)  "replace_Structure (x, rep) (Structure_Bin var1 op1 var2) = Structure_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)" |(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Freevar*)  "replace_Structure (x, mtch) (Structure_Freevar free) = (if x = (Structure_Freevar free) then mtch else (Structure_Freevar free))" |(*uncommentR?Structure_Freevar*)*)
   "replace_Structure (_, _) y = y" 
 instance ..
 end
-
 
 lemma freevars_replace_Structure_simp : "free \<notin> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
 apply (induct a, cases free, auto)
