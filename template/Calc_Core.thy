@@ -569,7 +569,6 @@ begin
 instance ..
 end
 
-
 lemma freevars_replace_Structure_simp : "free \<notin> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
 apply (induct a, cases free, auto)
 by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formula_simp2 replace_Structure.simps(1) replace_Structure.simps(10) replace_Structure.simps(6) replace_Structure.simps(8))
