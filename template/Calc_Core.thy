@@ -551,6 +551,8 @@ begin
 (*(*uncommentL?Structure_Formula*)  "match_Structure (Structure_Formula rule) (Structure_Formula form) = map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match rule form)" |(*uncommentR?Structure_Formula*)*)
 (*(*uncommentL?Structure_Bin*)  "match_Structure (Structure_Bin var11 op1 var12) (Structure_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])" |(*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Freevar*)  "match_Structure (Structure_Freevar free) mtch = [((Structure_Freevar free), mtch)]" |(*uncommentR?Structure_Freevar*)*)
+  "match_Structure (Structure_Phi act1) (Structure_Phi act2) = map (\<lambda>(x,y). (Structure_Formula (Formula_Action x), Structure_Formula (Formula_Action y))) (match act1 act2)" |
+
   "match_Structure _ _ = []"
   
   fun freevars_Structure :: "Structure \<Rightarrow> Structure set"
@@ -558,6 +560,8 @@ begin
 (*(*uncommentL?Structure_Formula*)  "freevars_Structure (Structure_Formula var) = image (\<lambda>x. Structure_Formula x) (freevars var)" |(*uncommentR?Structure_Formula*)*)
 (*(*uncommentL?Structure_Bin*)  "freevars_Structure (Structure_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)" |(*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Freevar*)  "freevars_Structure (Structure_Freevar var) = {(Structure_Freevar var)}" |(*uncommentR?Structure_Freevar*)*)
+  "freevars_Structure (Structure_Phi act1) = image (\<lambda>x. Structure_Formula (Formula_Action x)) (freevars act1)" |
+
   "freevars_Structure _ = {}"
 
   fun replace_Structure :: "(Structure * Structure) \<Rightarrow> Structure \<Rightarrow> Structure"
@@ -565,13 +569,15 @@ begin
 (*(*uncommentL?Structure_Formula*)  "replace_Structure ((Structure_Formula x), (Structure_Formula rep)) (Structure_Formula form) = Structure_Formula (replace (x, rep) form)" |(*uncommentR?Structure_Formula*)*)
 (*(*uncommentL?Structure_Bin*)  "replace_Structure (x, rep) (Structure_Bin var1 op1 var2) = Structure_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)" |(*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Freevar*)  "replace_Structure (x, mtch) (Structure_Freevar free) = (if x = (Structure_Freevar free) then mtch else (Structure_Freevar free))" |(*uncommentR?Structure_Freevar*)*)
+  "replace_Structure ((Structure_Formula (Formula_Action x)), (Structure_Formula (Formula_Action rep))) (Structure_Phi act1) = Structure_Phi (replace (x, rep) act1)" |
   "replace_Structure (_, _) y = y" 
 instance ..
 end
 
+(*
 lemma freevars_replace_Structure_simp : "free \<notin> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
 apply (induct a, cases free, auto)
-by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formula_simp2 replace_Structure.simps(1) replace_Structure.simps(10) replace_Structure.simps(6) replace_Structure.simps(8))
+sorry
 
 lemma freevars_replace_Structure_simp2 : "free \<in> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
 proof (rule, induct a)
@@ -581,7 +587,7 @@ proof (rule, induct a)
     then obtain ffree where "ffree \<in> freevars x"
       by (metis Structure_Formula.prems freevars_Structure.simps(1) imageE)
     with 0 have "replace (free, free) (Structure_Formula x) = Structure_Formula (replace (ffree, ffree) x)"
-      by (metis Structure.exhaust freevars_replace_Formula_simp freevars_replace_Formula_simp2 replace_Structure.simps(1) replace_Structure.simps(12) replace_Structure.simps(14) replace_Structure.simps(4))
+sorry
     thus ?case
       by (metis freevars_replace_Formula_simp freevars_replace_Formula_simp2)
 (*uncommentR?Structure_Formula*)*)
@@ -609,7 +615,7 @@ next
     qed
     have "free \<in> freevars (Structure_Bin x c y) \<longrightarrow> replace (free, free) (Structure_Bin x c y) = Structure_Bin (replace (free, free) x) c (replace (free, free) y)" by (metis replace_Structure.simps(2))
     thus ?case by (metis "1" "2" Structure_Bin.prems)
-qed
+oops
 
 
 lemma match_Structure_simp : "\<forall>(x, y) \<in> set (match (a::Structure) a). x = y"
@@ -632,7 +638,7 @@ next
     have 0: "set (match (Structure_Bin x c y) (Structure_Bin x c y)) = set ((match x x) @m (match y y))" by simp
     from Structure_Bin have "set ((match x x) @m (match y y)) = set (match x x) \<union> set (match y y)" by simp
     with assms 0 show ?case by auto
-qed
+oops
 
 
 lemma inv_Structure[simp]:
@@ -665,7 +671,7 @@ next
 next
   case (Structure_Freevar x)
     show ?case by simp
-qed
+oops
 
 
 lemma inv_Structure2_aux[simp]: 
@@ -677,7 +683,7 @@ by (induct list a rule:replaceAll.induct, simp) (metis insert_subset inv_Structu
 
 lemma inv_Structure2: "replaceAll (match a a) a = (a::Structure)" by simp
 
-
+*)
 
 
 instantiation Sequent :: Varmatch
@@ -712,13 +718,13 @@ next
     proof auto
       fix a b
       assume 0: "(a, b) \<in> set (match x x @m match y y)"
-      have "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" by (metis match_Structure_simp)+
+      have "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" sorry (*by (metis match_Structure_simp)+*)
       with 0 have eq: "a = b" by auto
       have "a \<notin> freevars x \<longrightarrow> replace (a, b) x = x" and "a \<in> freevars x \<longrightarrow> replace (a, b) x = x"
-        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+        sorry (*by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)*)
       thus "replace (a, b) x = x" by auto
       from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
-        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+        sorry (*by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)*)
       thus "replace (a, b) y = y" by auto
     qed
     thus ?case by auto

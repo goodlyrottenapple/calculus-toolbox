@@ -5,43 +5,99 @@ begin
 (*calc_structure_rules*)
 
 
-datatype ruleder = ruleder Sequent "Sequent list" (infix "\<Longrightarrow>RD" 300)
+datatype ruleder = ruleder Sequent "Sequent \<Rightarrow> Sequent list" (infix "\<Longrightarrow>RD" 300) |
+                   ruleder_cond "Sequent \<Rightarrow> bool" Sequent "Sequent \<Rightarrow> Sequent list" ("_ \<Longrightarrow>C _ \<Longrightarrow>RD _" 300)
 
-fun rule :: "Rule \<Rightarrow> ruleder"
+
+fun is_epmod :: "Formula \<Rightarrow> Atprop option" where
+"is_epmod (Formula_Atprop p) = Some p"|
+"is_epmod (Formula_Action_Formula _ _ f) = is_epmod f"|
+"is_epmod _ = None"
+
+fun atom :: "Sequent \<Rightarrow> bool" where
+"atom ((l)\<^sub>S \<turnstile>\<^sub>S (r)\<^sub>S) = ( (is_epmod l) \<noteq> None \<and> (is_epmod l) = (is_epmod r) )"|
+"atom _ = False"
+
+
+fun swapin :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> bool" where
+"swapin fun m s = (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''alpha'') \<^sub>S) ) (match m s) of 
+                   Some (_, Sequent_Structure (Formula_Action alpha \<^sub>S)) \<Rightarrow> 
+                      (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure(Structure_Formula(Formula_Agent(Agent_Freevar ''a''))) ) (match m s) of 
+                         Some (_, Sequent_Structure (Formula_Agent a \<^sub>S)) \<Rightarrow> 
+                            (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''beta'') \<^sub>S) ) (match m s) of 
+                                Some (_, Sequent_Structure (Formula_Action beta \<^sub>S)) \<Rightarrow> fun alpha a beta
+                              |  _ \<Rightarrow> False )
+                       | _ \<Rightarrow> False)
+                 | _ \<Rightarrow> False)"
+
+
+
+datatype Locale = Cut_Formula Formula | 
+                  RelAKA "Action \<Rightarrow> Agent => Action => bool" |
+                  Swapout "Action \<Rightarrow> Agent => Action => bool" "Action list" |
+                  Empty
+
+fun rule :: "Locale \<Rightarrow> Rule \<Rightarrow> ruleder"
 where
 (*rules_rule_fun*)
-"rule _ = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD []"
+"rule _ (RuleZer Atom) = ( atom \<Longrightarrow>C 
+  ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. [])
+)"|
+"rule (RelAKA rel) (RuleU swapInL) = ( (swapin rel ( B\<^sub>S (Phi\<^sub>S (?\<^sub>Act ''alpha'')) ;\<^sub>S (?\<^sub>S''Y'')  \<turnstile>\<^sub>S (?\<^sub>S''Y'') )) \<Longrightarrow>C 
+  ( B\<^sub>S (Phi\<^sub>S (?\<^sub>Act ''alpha'')) ;\<^sub>S (?\<^sub>S''Y'')  \<turnstile>\<^sub>S (?\<^sub>S''Y'') ) \<Longrightarrow>RD (\<lambda>x. [])
+)"|
 
-fun fst :: "ruleder \<Rightarrow> Sequent" and snd :: "ruleder \<Rightarrow> Sequent list"  where
+
+
+"rule (Cut_Formula f) (RuleCut SingleCut) = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. [((?\<^sub>S ''X'') \<turnstile>\<^sub>S f \<^sub>S),(f \<^sub>S \<turnstile>\<^sub>S (?\<^sub>S ''Y''))])"|
+"rule _ _ = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. [])"
+
+(*
+((Phi alpha) ; forwK a (forwA beta X) \<turnstile> Y
+*)
+fun fst :: "ruleder \<Rightarrow> Sequent" and snd :: "ruleder \<Rightarrow> (Sequent \<Rightarrow> Sequent list)" and cond :: "ruleder \<Rightarrow> (Sequent \<Rightarrow> bool) option" where
 "fst (ruleder x _) = x" |
-"snd (ruleder _ y) = y"
+"fst (ruleder_cond _ x _) = x" |
+"snd (ruleder _ y) = y" |
+"snd (ruleder_cond _ _ y) = y" |
+"cond (ruleder_cond c _ _) = Some c" |
+"cond (ruleder _ _) = None"
 
-fun der :: "Rule \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
+fun der :: "Locale \<Rightarrow> Rule \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
 where
-(*(*uncommentL?RuleCut*)"der (RuleCut RuleCut.SingleCut) s = (Fail, [])" | (*uncommentR?RuleCut*)*)(* added this so that normal der cannot accept a cut rule *)
-"der r s = (if (ruleMatch (fst (rule r)) s) 
-              then (r, map (replaceAll (match (fst (rule r)) s) ) (snd (rule r))) 
-              else (Fail, []))"
+"der l r s =( if (ruleMatch (fst (rule l r)) s) then 
+              case cond (rule l r) of 
+                None \<Rightarrow> ( r, map (replaceAll (match (fst (rule l r)) s) ) ((snd (rule l r)) s) )
+              | Some condition \<Rightarrow> ( if condition s 
+                              then (r, map (replaceAll (match (fst (rule l r)) s) ) ((snd (rule l r)) s) )
+                              else (Fail, []) )
+            else (Fail, []) )"
 
 
-(*(*uncommentL?RuleCut*)
+(*(*uncommentL?RuleCut-BEGIN*)*)(*uncommentL?RuleCut-END*)
 (*der cut applies a supplied formula if the cut rule is used - a bit hacky atm *) 
-fun der_cut :: "Rule \<Rightarrow> Formula \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
+(*fun der_cut :: "Rule \<Rightarrow> Formula \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
 where
 "der_cut (RuleCut RuleCut.SingleCut) cutForm s = (if (ruleMatch (fst (rule (RuleCut RuleCut.SingleCut))) s) 
    then ((RuleCut RuleCut.SingleCut), map (replaceAll (match (fst (rule (RuleCut RuleCut.SingleCut))) s @ (map (\<lambda>(x,y). (Sequent_Structure (Structure_Formula x), Sequent_Structure (Structure_Formula y))) (match (?\<^sub>F''A'') cutForm))) ) (snd (rule (RuleCut RuleCut.SingleCut)))) 
    else (Fail, []))" |
-"der_cut _ _ _ = (Fail, [])"
-(*uncommentR?RuleCut*)*)
+"der_cut _ _ _ = (Fail, [])"*)
+(*uncommentR?RuleCut-BEGIN*)(*(*uncommentR?RuleCut-END*)*)
 
-fun isProofTree :: "Prooftree \<Rightarrow> bool" where
-"isProofTree (s \<Longleftarrow> Z(r)) = ruleMatch (fst (rule (RuleZer r))) s" | (*for modularity, perhaps this should be changed back to a definition like the ones below later...i changed it because it makes proofs in the eq file for the id case easier*)
-"isProofTree (s \<Longleftarrow> U(r) t) = (isProofTree t \<and> (case (der (RuleU r) s) of (Fail, []) \<Rightarrow> False | (ru,[se]) \<Rightarrow> se = concl t))" |
-"isProofTree (s \<Longleftarrow> D(r) t) = (isProofTree t \<and> (case (der (RuleDisp r) s) of (Fail, []) \<Rightarrow> False | (ru,[se]) \<Rightarrow> se = concl t))" |
-"isProofTree (s \<Longleftarrow> O(r) t) = (isProofTree t \<and> (case (der (RuleOp r) s) of (Fail, []) \<Rightarrow> False | (ru,[se]) \<Rightarrow> se = concl t))" |
-"isProofTree (s \<Longleftarrow> B(r) t1 ; t2) = (isProofTree t1 \<and> isProofTree t2 \<and> (case (der (RuleBin r) s) of (Fail, []) \<Rightarrow> False | (ru,[se1, se2]) \<Rightarrow> (se1 = concl t1 \<and> se2 = concl t2) \<or> (se1 = concl t2 \<and> se2 = concl t1)))" |
-"isProofTree (s \<Longleftarrow> C(r) t1 ; t2) = False"
 
+fun isProofTree :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" where
+"isProofTree loc (s \<Longleftarrow> L(r)) = foldr (op \<or>) (map (\<lambda>l. (der l (RuleZer r) s) \<noteq> (Fail, [])) loc) False" |
+"isProofTree loc (s \<Longleftarrow> B(r) l) = ( 
+  foldr (op \<and>) (map (isProofTree loc) l) True \<and>
+  foldr (op \<or>) (map (\<lambda>x. (
+    set (Product_Type.snd (der x r s)) = set (map concl l) \<and> 
+    Fail \<noteq> Product_Type.fst (der x r s)
+  )) loc) False
+)"
+
+(*"isProofTree loc (s \<Longleftarrow> B(r) l) = ( foldr (op \<and>) (map (isProofTree loc) l) True \<and> set (Product_Type.snd (der r s)) = set (map concl l) )"*)
+
+(*
 fun isProofTreeWCut :: "Prooftree \<Rightarrow> bool" where
 "isProofTreeWCut (s \<Longleftarrow> C(f) t1 ; t2) = (isProofTreeWCut t1 \<and> isProofTreeWCut t2 \<and> (case (der_cut (RuleCut RuleCut.SingleCut) f s) of (Fail, []) \<Rightarrow> False | (ru,[se1, se2]) \<Rightarrow> (se1 = concl t1 \<and> se2 = concl t2) \<or> (se1 = concl t2 \<and> se2 = concl t1)))" |
 "isProofTreeWCut (s \<Longleftarrow> Z(r)) = ruleMatch (fst (rule (RuleZer r))) s" | 
@@ -88,7 +144,7 @@ case (Cut s r t1 t2)
   then have False by (metis assms isProofTree.simps)
   thus ?thesis ..
 qed
-
+*)
 (*
 - equality of shallow and deep terms
   - for every deep-term with a valid proof tree there is an equivalent shallow-term in the set derivable
@@ -99,7 +155,7 @@ definition "ruleList = (*rules_rule_list*)"
 lemma Atprop_without_Freevar[simp]: "\<And>a. freevars a = {} \<Longrightarrow> \<exists>q. a = Atprop q"
   by (metis Atprop.exhaust freevars_Atprop.simps(1) insert_not_empty)
 
-
+(*
 (*perhaps things bellow should be moved to a separate utils file?? *)
 
 fun replaceLPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
@@ -115,7 +171,7 @@ fun ant :: "Sequent \<Rightarrow> Structure" and consq :: "Sequent \<Rightarrow>
 "ant (Sequent_Structure x) = x" |
 "consq (Sequent x y) = y"|
 "consq (Sequent_Structure x) = x"
-
+*)
 export_code open der isProofTree isProofTreeWCut ruleList replaceLPT replaceRPT concl ant consq in Scala
 module_name (*calc_name*) file (*export_path*)
 end
