@@ -190,6 +190,13 @@
 				"type" : ["Structure", "Structure_Bin_Op", "Structure"],
 				"isabelle" : "B\\<^sub>S _",
 				"precedence": [340,340,340, 341]
+			},
+			"Structure_Phi" : {
+				"type" : "Action",
+				"isabelle" : "Phi\\<^sub>S _",
+				"ascii" : "Phi _",
+				"latex" : "Phi( _ )",
+				"precedence": [340, 330]
 			}
 		},
 
