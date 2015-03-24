@@ -1,3 +1,11 @@
+/*
+TODO:
+
+-- reimplement printCalcDef
+-- reenable Cut
+
+*/
+
 import swing._
 import swing.event.{ButtonClicked, MouseClicked, KeyReleased, Key}
 
@@ -147,13 +155,13 @@ object GUI extends SimpleSwingApplication {
 
             val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
             val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
-            derTree(currentValue, session.currentSequent, currentAssm) match {
+            derTree(currentValue, session.currentLocale, session.currentSequent, currentAssm) match {
               case Some(r) =>
                 session.currentPT = r
                 //display prooftree r in the PTPanel
                 ptPanel.update()
                 log.text = "PT found!"
-                validPT.text = "Valid PTwCut: " + isProofTreeWCut(session.currentPT)
+                validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale, session.currentPT)
                 //add pt to the list of found proofs
                 if(globalPrefs(AUTO_ADD_PT) == true){
                   session.addPT()
@@ -179,60 +187,60 @@ object GUI extends SimpleSwingApplication {
         //println(ptToString(session.currentPT))
       }
 
-    case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
-      case Some(f) =>
-        val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
-        val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
-        val lSeq = Sequenta(ant(session.currentSequent), Structure_Formula(f))
-        val rSeq = Sequenta(Structure_Formula(f), consq(session.currentSequent))
+    // case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
+    //   case Some(f) =>
+    //     val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
+    //     val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
+    //     val lSeq = Sequenta(ant(session.currentSequent), Structure_Formula(f))
+    //     val rSeq = Sequenta(Structure_Formula(f), consq(session.currentSequent))
 
-        derTree(currentValue, lSeq, currentAssm) match {
-          case Some(resL) =>
-            derTree(currentValue, rSeq, currentAssm) match {
-              case Some(resR) => 
-                session.currentPT = Cut(session.currentSequent, f, resL, resR)
-                ptPanel.update()
-                session.addPT()
-              case None => 
-                val res = Dialog.showConfirmation(cutButton, 
-                  "Right Tree not found. Should I add an assumption?", 
-                  optionType=Dialog.Options.YesNo, title="Right tree not found")
-                if (res == Dialog.Result.Ok) {
-                  session.addAssm(rSeq)
-                  val resR = Zer( rSeq, Prem() )
-                  session.currentPT = Cut(session.currentSequent, f, resL, resR)
-                  ptPanel.update()
-                  session.addPT()
-                }
-            }
-          case None =>
-            val res = Dialog.showConfirmation(cutButton, 
-              "Left Tree not found. Should I add an assumption?", 
-              optionType=Dialog.Options.YesNo, title="Left tree not found")
-            if (res == Dialog.Result.Ok) {
-              session.addAssm(lSeq)
-              val resL = Zer( lSeq, Prem() )
-              derTree(currentValue, rSeq, currentAssm) match {
-                case Some(resR) => 
-                  session.currentPT = Cut(session.currentSequent, f, resL, resR)
-                  ptPanel.update()
-                  session.addPT()
-                case None => 
-                  val res = Dialog.showConfirmation(cutButton, 
-                    "Right Tree not found. Should I add an assumption?", 
-                    optionType=Dialog.Options.YesNo, title="Right tree not found")
-                  if (res == Dialog.Result.Ok) {
-                    session.addAssm(rSeq)
-                    val resR = Zer( rSeq, Prem() )
-                    session.currentPT = Cut(session.currentSequent, f, resL, resR)
-                    ptPanel.update()
-                    session.addPT()
-                  }
-              }
-            }
-        }
-      case None => Dialog.showMessage(cutButton, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
-    }
+    //     derTree(currentValue, lSeq, currentAssm) match {
+    //       case Some(resL) =>
+    //         derTree(currentValue, rSeq, currentAssm) match {
+    //           case Some(resR) => 
+    //             session.currentPT = Cut(session.currentSequent, f, resL, resR)
+    //             ptPanel.update()
+    //             session.addPT()
+    //           case None => 
+    //             val res = Dialog.showConfirmation(cutButton, 
+    //               "Right Tree not found. Should I add an assumption?", 
+    //               optionType=Dialog.Options.YesNo, title="Right tree not found")
+    //             if (res == Dialog.Result.Ok) {
+    //               session.addAssm(rSeq)
+    //               val resR = Zer( rSeq, Prem() )
+    //               session.currentPT = Cut(session.currentSequent, f, resL, resR)
+    //               ptPanel.update()
+    //               session.addPT()
+    //             }
+    //         }
+    //       case None =>
+    //         val res = Dialog.showConfirmation(cutButton, 
+    //           "Left Tree not found. Should I add an assumption?", 
+    //           optionType=Dialog.Options.YesNo, title="Left tree not found")
+    //         if (res == Dialog.Result.Ok) {
+    //           session.addAssm(lSeq)
+    //           val resL = Zer( lSeq, Prem() )
+    //           derTree(currentValue, rSeq, currentAssm) match {
+    //             case Some(resR) => 
+    //               session.currentPT = Cut(session.currentSequent, f, resL, resR)
+    //               ptPanel.update()
+    //               session.addPT()
+    //             case None => 
+    //               val res = Dialog.showConfirmation(cutButton, 
+    //                 "Right Tree not found. Should I add an assumption?", 
+    //                 optionType=Dialog.Options.YesNo, title="Right tree not found")
+    //               if (res == Dialog.Result.Ok) {
+    //                 session.addAssm(rSeq)
+    //                 val resR = Zer( rSeq, Prem() )
+    //                 session.currentPT = Cut(session.currentSequent, f, resL, resR)
+    //                 ptPanel.update()
+    //                 session.addPT()
+    //               }
+    //           }
+    //         }
+    //     }
+    //   case None => Dialog.showMessage(cutButton, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
+    // }
   }
 
   
@@ -411,7 +419,7 @@ object GUI extends SimpleSwingApplication {
         contents += new Separator
         contents += new MenuItem(Action("Generate LaTeX calc decription file") {
           Some(new PrintWriter("calc_description.tex")).foreach{p =>
-            val c_def = printCalcDef()
+            val c_def = "" //printCalcDef()
             p.write( s"\\documentclass[12pt]{article}\n\\usepackage{bussproofs}\n\n\\begin{document}\n\n$c_def\n\n\\end{document}" )
             p.close
           }

@@ -10,7 +10,8 @@ import PrintCalc.sequentToString
 
 case class CalcSession() {
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
-	var currentPT : Prooftree = Zer(Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))),Id())
+	var currentPT : Prooftree = Prooftreea( Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))), RuleZera(Id()), List())
+	var currentLocale : List[Locale] = List(Empty())
 
 	val assmsBuffer = ListBuffer[(Icon, Sequent)]()
 	val ptBuffer = ListBuffer[(Icon, Prooftree)]()
@@ -99,105 +100,15 @@ case class CalcSession() {
 
 	def mergePTs(repPt: Prooftree, insertPoint:SequentInPt, root:SequentInPt, children: SequentInPt => Iterable[SequentInPt]) : Prooftree = {
 	    if(insertPoint == root) return repPt
-	    else {
-	    	root.rule match {
-	    		case RuleZera(a) => Zer(root.seq, a)
-	        	case RuleUa(a) => 
-	        		val next:SequentInPt = children(root).toList(0)
-	          		val pt = mergePTs(repPt, insertPoint, next, children)
-	          		Unary(root.seq, a, pt)
-	        	case RuleDispa(a) => 
-	          		val next:SequentInPt = children(root).toList(0)
-	          		val pt = mergePTs(repPt, insertPoint, next, children)
-	          		Display(root.seq, a, pt)
-	        	case RuleOpa(a) => 
-	          		val next:SequentInPt = children(root).toList(0)
-	          		val pt = mergePTs(repPt, insertPoint, next, children)
-	          		Operational(root.seq, a, pt)
-	        	case RuleBina(a) => 
-	          		val next1:SequentInPt = children(root).toList(0)
-	          		val next2:SequentInPt = children(root).toList(1)
-	          		val pt1 = mergePTs(repPt, insertPoint, next1, children)
-	          		val pt2 = mergePTs(repPt, insertPoint, next2, children)
-	          		Binary(root.seq, a, pt1, pt2)
-	        	case RuleCuta(a) => 
-	          		val next1:SequentInPt = children(root).toList(0)
-	          		val next2:SequentInPt = children(root).toList(1)
-	          		val pt1 = mergePTs(repPt, insertPoint, next1, children)
-	          		val pt2 = mergePTs(repPt, insertPoint, next2, children)
-	          		root.cutFormula match {
-	            		case Some(form) => Cut(root.seq, form, pt1, pt2)
-	            		case None => Cut(root.seq, Formula_Atprop(Atpropa(List('a'))), pt1, pt2)
-	          		}
-	      	}
-	    }
+	    return Prooftreea( root.seq, root.rule, children(root).toList.map(x => mergePTs(repPt, insertPoint, x, children)) )
 	}
 
 	def deleteAbove(deletePoint:SequentInPt, root:SequentInPt, children: SequentInPt => Iterable[SequentInPt]) : Prooftree = {
-	    if(deletePoint == root) return Zer(root.seq, Prem())
-	    else {
-	    	root.rule match {
-	    		case RuleZera(a) => Zer(root.seq, a)
-	        	case RuleUa(a) => 
-	        		val next:SequentInPt = children(root).toList(0)
-	          		val pt = deleteAbove(deletePoint, next, children)
-	          		Unary(root.seq, a, pt)
-	        	case RuleDispa(a) => 
-	          		val next:SequentInPt = children(root).toList(0)
-	          		val pt = deleteAbove(deletePoint, next, children)
-	          		Display(root.seq, a, pt)
-	        	case RuleOpa(a) => 
-	          		val next:SequentInPt = children(root).toList(0)
-	          		val pt = deleteAbove(deletePoint, next, children)
-	          		Operational(root.seq, a, pt)
-	        	case RuleBina(a) => 
-	          		val next1:SequentInPt = children(root).toList(0)
-	          		val next2:SequentInPt = children(root).toList(1)
-	          		val pt1 = deleteAbove(deletePoint, next1, children)
-	          		val pt2 = deleteAbove(deletePoint, next2, children)
-	          		Binary(root.seq, a, pt1, pt2)
-	        	case RuleCuta(a) => 
-	          		val next1:SequentInPt = children(root).toList(0)
-	          		val next2:SequentInPt = children(root).toList(1)
-	          		val pt1 = deleteAbove(deletePoint, next1, children)
-	          		val pt2 = deleteAbove(deletePoint, next2, children)
-	          		root.cutFormula match {
-	            		case Some(form) => Cut(root.seq, form, pt1, pt2)
-	            		case None => Cut(root.seq, Formula_Atprop(Atpropa(List('a'))), pt1, pt2)
-	          		}
-	      	}
-	    }
+	    if(deletePoint == root) return Prooftreea(root.seq, RuleZera(Prem()), List())
+	    return Prooftreea( root.seq, root.rule, children(root).toList.map( x => deleteAbove(deletePoint, x, children) ) )
 	}
 
-	def rebuildFromPoint(root:SequentInPt, children: SequentInPt => Iterable[SequentInPt]) : Prooftree = root.rule match {
-		case RuleZera(a) => Zer(root.seq, a)
-    	case RuleUa(a) => 
-    		val next:SequentInPt = children(root).toList(0)
-      		val pt = rebuildFromPoint(next, children)
-      		Unary(root.seq, a, pt)
-    	case RuleDispa(a) => 
-      		val next:SequentInPt = children(root).toList(0)
-      		val pt = rebuildFromPoint(next, children)
-      		Display(root.seq, a, pt)
-    	case RuleOpa(a) => 
-      		val next:SequentInPt = children(root).toList(0)
-      		val pt = rebuildFromPoint(next, children)
-      		Operational(root.seq, a, pt)
-    	case RuleBina(a) => 
-      		val next1:SequentInPt = children(root).toList(0)
-      		val next2:SequentInPt = children(root).toList(1)
-      		val pt1 = rebuildFromPoint(next1, children)
-      		val pt2 = rebuildFromPoint(next2, children)
-      		Binary(root.seq, a, pt1, pt2)
-    	case RuleCuta(a) => 
-      		val next1:SequentInPt = children(root).toList(0)
-      		val next2:SequentInPt = children(root).toList(1)
-      		val pt1 = rebuildFromPoint(next1, children)
-      		val pt2 = rebuildFromPoint(next2, children)
-      		root.cutFormula match {
-        		case Some(form) => Cut(root.seq, form, pt1, pt2)
-        		case None => Cut(root.seq, Formula_Atprop(Atpropa(List('a'))), pt1, pt2)
-      		}
-  	}
+	def rebuildFromPoint(root:SequentInPt, children: SequentInPt => Iterable[SequentInPt]) : Prooftree = 
+		return Prooftreea( root.seq, root.rule, children(root).toList.map( x => rebuildFromPoint(x, children) ) )
 
 }

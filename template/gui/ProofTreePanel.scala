@@ -40,68 +40,18 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	def boundsOfNode(node:SequentInPt) : Rectangle2D.Double = treeLayout.getNodeBounds().get(node)
 
 	def createPTreeAux(proof: Prooftree, tree: DefaultTreeForTreeLayout[SequentInPt], root:SequentInPt, size:Int=20 ) : Unit = proof match {
-		case Zer(seq, r) => tree.addChild(root, new SequentInPt(seq, RuleZera(r), size))
-    	case Unary(seq, r, pt) => {
-    		val l = new SequentInPt(seq, RuleUa(r), size)
+		case Prooftreea(seq, r, list) => {
+    		val l = new SequentInPt(seq, r, size)
     		tree.addChild(root, l)
-    		createPTreeAux(pt, tree, l)
-    	}
-       	case Display(seq, r, pt) => {
-    		val l = new SequentInPt(seq, RuleDispa(r), size)
-    		tree.addChild(root, l)
-    		createPTreeAux(pt, tree, l)
-    	}
-    	case Operational(seq, r, pt) => {
-    		val l = new SequentInPt(seq, RuleOpa(r), size)
-    		tree.addChild(root, l)
-    		createPTreeAux(pt, tree, l)
-    	}
-    	case Binary(seq, r, pt1, pt2) => {
-    		val l = new SequentInPt(seq, RuleBina(r), size)
-    		tree.addChild(root, l)
-    		createPTreeAux(pt1, tree, l)
-    		createPTreeAux(pt2, tree, l)
-    	}
-    	case Cut(seq, form, pt1, pt2) => {
-    		val l = new SequentInPt(seq, RuleCuta(SingleCut()), size, Some(form))
-    		tree.addChild(root, l)
-    		createPTreeAux(pt1, tree, l)
-    		createPTreeAux(pt2, tree, l)
+    		list.foreach( x => createPTreeAux(x, tree, l) )
     	}
 	}
 
 	def createPTree(proof: Prooftree, size:Int=20) : DefaultTreeForTreeLayout[SequentInPt] = proof match {
-		case Zer(seq, r) => new DefaultTreeForTreeLayout[SequentInPt]( new SequentInPt(seq, RuleZera(r), size) )
-    	case Unary(seq, r, pt) => {
-    		val l = new SequentInPt(seq, RuleUa(r), size)
+		case Prooftreea(seq, r, list) => {
+    		val l = new SequentInPt(seq, r, size)
     		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		createPTreeAux(pt, tree, l, size)
-    		return tree
-    	}
-       	case Display(seq, r, pt) => {
-    		val l = new SequentInPt(seq, RuleDispa(r), size)
-    		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		createPTreeAux(pt, tree, l, size)
-    		return tree
-    	}
-    	case Operational(seq, r, pt) => {
-    		val l = new SequentInPt(seq, RuleOpa(r), size)
-    		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		createPTreeAux(pt, tree, l, size)
-    		return tree
-    	}
-    	case Binary(seq, r, pt1, pt2) => {
-    		val l = new SequentInPt(seq, RuleBina(r), size)
-    		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		createPTreeAux(pt1, tree, l, size)
-    		createPTreeAux(pt2, tree, l, size)
-    		return tree
-    	}
-    	case Cut(seq, form, pt1, pt2) => {
-    		val l = new SequentInPt(seq, RuleCuta(SingleCut()), size, Some(form))
-    		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		createPTreeAux(pt1, tree, l, size)
-    		createPTreeAux(pt2, tree, l, size)
+    		list.foreach( x => createPTreeAux(x, tree, l, size) )
     		return tree
     	}
 	}
@@ -173,7 +123,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case Some(selSeq) =>
 					tree.isLeaf(selSeq) match {
 						case true =>
-							derTree(5, selSeq.seq) match {
+							derTree(5, session.currentLocale, selSeq.seq) match {
 	              				case Some(r) => 
 	              					session.currentPT = session.mergePTs(r, selSeq, tree.getRoot(), children)
 	            					update()
@@ -197,7 +147,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 						case Some(s) =>
 							//println(selSeq.seq)
 							//println(derAll(selSeq.seq).filter{ case (r,l) => l.exists(_ == s)})
-							val pair = derAll(selSeq.seq).filter{ case (r,l) => l.exists(_ == s)} match {
+							val pair = derAll(session.currentLocale, selSeq.seq).filter{ case (r,l) => l.exists(_ == s)} match {
 								case List() => None
 								case List((rule, derList)) => Some(rule, derList)
 								case list => new RuleSelectDialog(list=list).pair 
@@ -206,13 +156,11 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 							pair match {
 								case None => Dialog.showMessage(null, "No rule found for the given sequent", "Error")
 								case Some((rule, derList)) =>
+									val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
 									val pt = rule match {
-										case RuleZera(r) => Zer(derList(0), r)
-										case RuleUa(r) => Unary( selSeq.seq, r, Zer(derList(0), Prem()) )
-										case RuleDispa(r) => Display( selSeq.seq, r, Zer(derList(0), Prem()) )
-										case RuleOpa(r) => Operational( selSeq.seq, r, Zer(derList(0), Prem()) )
-										case RuleBina(r) => Binary( selSeq.seq, r, Zer(derList(0), Prem()), Zer(derList(1), Prem()) )
-										case _ => Zer(derList(0), Prem())
+										case RuleZera(r) => m(0)
+										case Fail() => m(0)
+										case ru => Prooftreea( selSeq.seq, ru, m )
 									}
 									session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
 									update()
@@ -238,7 +186,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 						case Some(s) =>
 							//println(selSeq.seq)
 							//println(derAll(selSeq.seq).filter{ case (r,l) => l.exists(_ == s)})
-							val pair = derAll(s).filter{ case (r,l) => l.exists(_ == selSeq.seq)} match {
+							val pair = derAll(session.currentLocale, s).filter{ case (r,l) => l.exists(_ == selSeq.seq)} match {
 								case List() => None
 								case List((rule, derList)) => Some(rule, derList)
 								case list => new RuleSelectDialog(list=list).pair 
@@ -248,15 +196,12 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 								case None => Dialog.showMessage(null, "No rule found for the given sequent", "Error")
 								case Some((rule, derList)) =>
 									val rest = session.rebuildFromPoint(selSeq, children)
+
+									val intersection = derList.map(x => {if(x != concl(rest)) Prooftreea(x, RuleZera(Prem()), List()) else rest})
 									session.currentPT = rule match {
-										case RuleZera(r) => Zer(s, r)
-										case RuleUa(r) => Unary( s, r, rest )
-										case RuleDispa(r) => Display( s, r, rest )
-										case RuleOpa(r) => Operational( s, r, rest )
-										case RuleBina(r) => 
-											if(concl(rest) == derList(0)) Binary( s, r, rest, Zer(derList(1), Prem()) )
-											else Binary( s, r, rest, Zer(derList(0), Prem()) )
-										case _ => Zer(s, Prem())
+										case RuleZera(r) => Prooftreea(s, RuleZera(r), List())
+										case Fail() => Prooftreea(s, RuleZera(Prem()), List())
+										case r => Prooftreea(s, r, intersection)
 									}
 									update()
 							}

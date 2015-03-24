@@ -2,67 +2,68 @@ import scala.collection.mutable.ListBuffer
 /*calc_import*/
 
 object Proofsearch{
-	def derAllAux(s:Sequent, ruleLst:List[Rule]) : List[(Rule, List[Sequent])] = 
-		for (rule <- ruleLst) yield der(rule, s)
+	def derAllAux(loc:List[Locale], s:Sequent, rule:Rule) : List[(Rule, List[Sequent])] = {
+		for (l <- loc){
+			der(l, rule, s) match {
+				case (Fail(), _) => ;
+				case ret => return List(ret)
+			}
+		}
+		return List()
+	}
 
-	def derAll(s:Sequent) : List[(Rule, List[Sequent])] = { derAllAux(s, ruleList).filter{ case (r,l) => r != Fail()} }
+	def derAll(loc:List[Locale], s:Sequent) : List[(Rule, List[Sequent])] = ruleList.map(rule => derAllAux(loc, s, rule)).flatten
 
-	def derTrees(n:Int, seq:Sequent, prems:List[Sequent] = List()) : List[Prooftree] = n match {
+	def cr[A](xs: List[A], zss: List[List[A]]): List[List[A]] = {
+	    for {
+	        x <- xs
+	        zs <- zss
+	    } yield {
+	        x :: zs
+	    }
+	}
+	def zss[A]: List[List[A]] = List(List())
+
+	def crossProd[A](inputList : List[List[A]]) : List[List[A]] = inputList.foldRight( zss[A] ) (cr _)
+
+	def derTrees(loc:List[Locale], n:Int, seq:Sequent, prems:List[Sequent] = List()) : List[Prooftree] = n match {
 		case 0 => List[Prooftree]()
 		case n => 
 			prems.find(_ ==seq) match {
-				case Some(r) => return List(Zer(seq,Prem()))
+				case Some(r) => return List( Prooftreea(seq,RuleZera(Prem()), List()) )
 				case None => 
 			}
 			var ret = new ListBuffer[Prooftree]()
-			for( (rule, derList) <- derAll(seq) ) {
-				rule match {
-					case RuleZera(r) => ret+= Zer(seq, r) 
-					case RuleUa(r) => 
-						for(possibleDer <- derTrees(n-1, derList(0), prems) ) {
-							ret += Unary(seq, r, possibleDer)
-						}
-					case RuleDispa(r) => 
-						for(possibleDer <- derTrees(n-1, derList(0), prems) ) {
-							ret += Display(seq, r, possibleDer)
-						}
-					case RuleOpa(r) => 
-						for(possibleDer <- derTrees(n-1, derList(0), prems) ) {
-							ret += Operational(seq, r, possibleDer)
-						}
-					case RuleBina(r) => 
-						for(possibleDer0 <- derTrees(n-1, derList(0), prems);  possibleDer1 <- derTrees(n-1, derList(1), prems)) {
-							ret += Binary(seq, r, possibleDer0, possibleDer1)
-						}
-					case _ => ;
+			for( (rule, derList) <- derAll(loc, seq) ) {
+				lazy val ders = crossProd( derList.map(x => derTrees(loc, n-1, x, prems)) )
+
+				for(possibleDer <- ders ) {
+					ret += Prooftreea(seq, rule, possibleDer)
 				}
 			}
 			return ret.toList
 	}
 
-	def derTree(max:Int, seq:Sequent, prems:List[Sequent] = List(), n:Int = 0) : Option[Prooftree] = {
+	def derTree(max:Int, loc:List[Locale], seq:Sequent, prems:List[Sequent] = List(), n:Int = 0) : Option[Prooftree] = {
 		if (n > max) None
-		else derTrees(n, seq, prems) match {
-			case Nil => derTree(max, seq, prems, n+1)
+		else derTrees(loc, n, seq, prems) match {
+			case Nil => derTree(max, loc, seq, prems, n+1)
 			case res => Some(res(0))
 		}
 	}
 
 	def main(args:Array[String]) {
-/*	    Parser.parseS("y |- x >>z") match {
+/*	    Parser.parseSequent("a |- a >> a") match {
 	    	case Some(res) => 
-	    		println(derAll(res))
 
-	    		derTree(5,res, List(res)) match {
+	    		derTree(5, List(Empty()), res, List()) match {
 	    			case Some(r)=> println(r)
 	    			case _ => println("not found")
 	    		}
 
 	    }
-*/
-	    //println(derAll(seq))
-	    //println("\n\n\n")
-	    
+
+*/	    
 	}
 
 

@@ -172,13 +172,13 @@ fun replaceLPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" wh
 fun replaceRPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
 "replaceRPT (s \<Longleftarrow> B(r) t1 ; t2) rep = (s \<Longleftarrow> B(r) t1 ; rep)" |
 "replaceRPT pt rep = pt"
-
+*)
 fun ant :: "Sequent \<Rightarrow> Structure" and consq :: "Sequent \<Rightarrow> Structure" where
 "ant (Sequent x y) = x" |
 "ant (Sequent_Structure x) = x" |
 "consq (Sequent x y) = y"|
 "consq (Sequent_Structure x) = x"
-*)
-export_code open der isProofTree ruleList in Scala
+
+export_code open der isProofTree ruleList ant consq in Scala
 module_name (*calc_name*) file (*export_path*)
 end
