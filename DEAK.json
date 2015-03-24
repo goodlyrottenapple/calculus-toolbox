@@ -197,6 +197,16 @@
 				"ascii" : "Phi _",
 				"latex" : "Phi( _ )",
 				"precedence": [340, 330]
+			},
+			"Structure_Agent_Structure" : {
+				"type" : ["Structure_Agent_Structure_Op", "Agent", "Structure"],
+				"isabelle" : "AgS\\<^sub>S _",
+				"precedence": [330,330,330, 331]
+			},
+			"Structure_Action_Structure" : {
+				"type" : ["Structure_Action_Structure_Op", "Action", "Structure"],
+				"isabelle" : "ActS\\<^sub>S _",
+				"precedence": [330,330,330, 331]
 			}
 		},
 
@@ -218,6 +228,31 @@
 				"isabelle" : "\\<rightarrow>\\<^sub>S",
 				"ascii" : ">>",
 				"latex" : ">>"
+			}
+		},
+
+		"Structure_Agent_Structure_Op" : {
+			"Structure_ForwK" : {
+				"isabelle" : "forwK\\<^sub>S",
+				"ascii" : "forwK",
+				"latex" : "forwK"
+			},
+			"Structure_BackK" : {
+				"isabelle" : "backK\\<^sub>S",
+				"ascii" : "backK",
+				"latex" : "backK"
+			}
+		},
+		"Structure_Action_Structure_Op" : {
+			"Structure_ForwA" : {
+				"isabelle" : "forwA\\<^sub>S",
+				"ascii" : "forwA",
+				"latex" : "forwA"
+			},
+			"Structure_BackA" : {
+				"isabelle" : "backA\\<^sub>S",
+				"ascii" : "backA",
+				"latex" : "backA"
 			}
 		},
 
@@ -374,52 +409,7 @@
 				"ascii" : "ImpR_L",
 				"latex" : "\\rightarrow_L"
 			}
-		},
-
-		"Prooftree" : {
-			"Zer" : {
-				"type" : ["Sequent", "RuleZer"],
-				"isabelle" : "_ \\<Longleftarrow> Z _",
-				"ascii" : "_ <==Z _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Unary" : {
-				"type" : ["Sequent", "RuleU", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> U ( _ ) _",
-				"ascii" : "_ <==U _ _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Display" : {
-				"type" : ["Sequent", "RuleDisp", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> D ( _ ) _",
-				"ascii" : "_ <==D _ _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Operational" : {
-				"type" : ["Sequent", "RuleOp", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> O ( _ ) _",
-				"ascii" : "_ <==O _ _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Binary" : {
-				"type" : ["Sequent", "RuleBin", "Prooftree", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> B ( _ ) _ ; _",
-				"ascii" : "_ <==B _ _ _",
-				"precedence" : [341,341,341, 350]
-			},
-
-			"Cut" : {
-				"type" : ["Sequent", "Formula", "Prooftree", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> C ( _ ) _ ; _",
-				"ascii" : "_ <==C _ _ _",
-				"precedence" : [341,341,341, 350]
-			}
 		}
-		
 	},
 
 	"rules" : {
@@ -451,12 +441,12 @@
 			"ImpR_comma_disp2" :["?Z |- ?X ; ?Y", 			"?X >> ?Z |- ?Y"]
 		},
 		"RuleOp" : {
-			"And_L" :			["F?A ^ F?B |- ?Z", 		"F?A ; F?B |- ?Z"],
+			"And_L" :			["F?A /\\ F?B |- ?Z", 		"F?A ; F?B |- ?Z"],
 			"Or_R" :			["?Z |- F?A \\/ F?B", 		"?Z |- F?A ; F?B"],
 			"ImpR_R" :			["?Z |- F?A > F?B", 		"?Z |- F?A >> F?B"]
 		},
 		"RuleBin" : {
-			"And_R" :			["?X ; ?Y |- F?A ^ F?B",	"?X |- F?A", "?Y |- F?B"],
+			"And_R" :			["?X ; ?Y |- F?A /\\ F?B",	"?X |- F?A", "?Y |- F?B"],
 			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
 			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", "?Y |- F?B"]
 		}

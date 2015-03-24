@@ -17,7 +17,7 @@ PARSER_TEMPLATE = "Parser"
 #RULE_GEN_TEMPLATE = "Rule_Gen"
 PRINT_TEMPLATE = "Print"
 ISA_CORE_TEMPLATE = "Calc_Core"
-ISA_RULES_TEMPLATE = "Calc"
+ISA_RULES_TEMPLATE = "Calc_Rules"
 
 #calculate relative path from path1 to path2 (assuming they are prefixed by the same path)
 def nav_to_folder(path1, path2):
@@ -46,8 +46,18 @@ def cmd_output_throws_error(flags, response, err, error_msg):
     return False
 
 def usage():
-    print "This is a Display Calculus project build script v0.1"
-    print "Usage: ./build -c <calculus_file> -p <OUTPUT_PATH> -t <templates_path>"
+    print "This is a Display Calculus project build script v0.2"
+    usage = ["Usage:"]
+    usage.append( "-c  --calc                                       Specify a calculus file. Defaults to '{0}'".format(CALC_TEMPLATE) )
+    usage.append( "-p  --path                                       Specify an output path for the calculus. Defaults to '{0}'".format(OUTPUT_PATH) )
+    usage.append( "-t  --template                                   Specify a templates folder to be used. Defaults to '{0}'".format(TEMPLATE_FILES_PATH) )
+    usage.append( "-f  --force                                      Force recompile (use if isa files generation fails)" )
+    usage.append( "-v  --verbose                                    Verbose mode" )
+    usage.append( "-b  --build     {all, scala, isabelle}           Compile only selected files. Defaults to 'all' flag" )
+    usage.append( "-s  --stage     {core_calc_gen, calc_compile,    Call a specific stage of the build\n                rule_calc_gen, add_gui}    " )
+
+    print "\n".join(usage)
+
 
 def doBuild(builder, in_path, out_path):
     try:
@@ -67,7 +77,6 @@ def doBuild(builder, in_path, out_path):
         return False
 
 def core_calc_gen(flags):
-    global CALC_NAME
     print "################# Generating core calculus files ##################"
     builder = scalabuilder.ScalaBuilder(CALC_TEMPLATE)
     CALC_NAME = builder.get("calc_name")
@@ -120,8 +129,9 @@ def core_calc_gen(flags):
     
 
 
-def core_calc_compile(flags):
-    global CALC_NAME
+def calc_compile(flags):
+    builder = scalabuilder.ScalaBuilder(CALC_TEMPLATE)
+    CALC_NAME = builder.get("calc_name")
     if "final" in flags: print "################ Recompiling core calculus files ##################"
     else: print "################# Compiling core calculus files ###################"
 
@@ -146,7 +156,6 @@ def core_calc_compile(flags):
 
 
 def rule_calc_gen(flags):
-    global CALC_NAME
     print "################# Generating calculus rule files ##################"
 
     if "all" in flags or "isabelle" in flags :
@@ -155,6 +164,8 @@ def rule_calc_gen(flags):
         list = [p.split('/')[1].split('.')[0] for p in paths]
         
         builder = isabuilder.IsabelleBuilder(CALC_TEMPLATE)
+        CALC_NAME = builder.get("calc_name")
+
         builder.add("export_path", nav_to_folder(ISABELLE_SRC_PATH, SCALA_SRC_PATH))
         builder.add("parser_command", "scala -classpath {0}bin Parser".format(OUTPUT_PATH))
 
@@ -232,7 +243,7 @@ def add_gui(flags):
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hfvc:p:t:b:", ["help", "force", "verbose", "build=", "calc=", "path=", "template="])
+        opts, args = getopt.getopt(argv, "hfvc:p:t:b:s:", ["help", "force", "verbose", "build=", "calc=", "path=", "template=", "stage="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -262,6 +273,8 @@ def main(argv):
         elif opt in ( "-b", "--build"):
             BUILD_FLAGS.remove("all")
             BUILD_FLAGS += arg.split(",")
+        elif opt in ( "-s", "--stage"):
+            STAGE = arg
     #sanitize paths
     if not OUTPUT_PATH.endswith('/'):
         OUTPUT_PATH = OUTPUT_PATH + "/"
@@ -272,18 +285,19 @@ def main(argv):
     if not ISABELLE_SRC_PATH.endswith('/'):
         ISABELLE_SRC_PATH = ISABELLE_SRC_PATH + "/"
 
-    #add_gui(BUILD_FLAGS)
-
-    #build the core calculus
-    if core_calc_gen(BUILD_FLAGS):
-        #compile the core calculus
-        if core_calc_compile(BUILD_FLAGS):
-            #build the core calculus rules
-            if rule_calc_gen(BUILD_FLAGS):
-                #recompile the core calculus (now with rules)
-                if core_calc_compile(BUILD_FLAGS):
-                    add_gui(BUILD_FLAGS)
-                    print CALC_NAME, "has been successfully built..."
+    # call a single function form defined via the -s flag
+    if STAGE: globals()[STAGE](BUILD_FLAGS)
+    else:
+        #build the core calculus
+        if core_calc_gen(BUILD_FLAGS):
+            #compile the core calculus
+            if calc_compile(BUILD_FLAGS):
+                #build the core calculus rules
+                if rule_calc_gen(BUILD_FLAGS):
+                    #recompile the core calculus (now with rules)
+                    if calc_compile(BUILD_FLAGS):
+                        add_gui(BUILD_FLAGS)
+                        print CALC_NAME, "has been successfully built..."
 
 if __name__ == "__main__":
     main(sys.argv[1:])

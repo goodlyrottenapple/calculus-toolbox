@@ -4,11 +4,6 @@ begin
 
 (*calc_structure_rules*)
 
-datatype Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ \<Longleftarrow> PT ( _ ) _" [341,341] 350)
-
-fun concl :: "Prooftree \<Rightarrow> Sequent" where
-"concl (a \<Longleftarrow> PT ( b ) c) = a"
-
 datatype ruleder = ruleder      Sequent "Sequent \<Rightarrow> Sequent list option" (infix "\<Longrightarrow>RD" 300) |
                    ruleder_cond "Sequent \<Rightarrow> bool" Sequent "Sequent \<Rightarrow> Sequent list option" ("_ \<Longrightarrow>C _ \<Longrightarrow>RD _" 300)
 

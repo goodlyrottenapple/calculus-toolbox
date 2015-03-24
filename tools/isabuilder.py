@@ -208,7 +208,7 @@ class IsabelleBuilder:
 					#print dependencies
 				else : done.append(k)
 		list.append ( IsabelleBuilder.__calc_structure_all_rules(rules) )
-		list.append ( self.__calc_structure_rules_concl() )
+		# list.append ( self.__calc_structure_rules_concl() )
 
 		return "\n" + "\n\n".join(list) + "\n"
 
@@ -230,11 +230,11 @@ class IsabelleBuilder:
 				r_str = ""
 				r_list = []
 				for i in rules[r]:
-					if count == 0: r_str += "\"rule ({0} {0}.{1}) = {2} \<Longrightarrow>RD ".format(name, r, response_list[index])
+					if count == 0: r_str += "\"rule _ ({0} {0}.{1}) = {2} \<Longrightarrow>RD ".format(name, r, response_list[index])
 					else: r_list.append( response_list[index] )
 					index += 1
 					count += 1
-				r_str += "[{0}]\"".format(",".join(r_list))
+				r_str += "(\\<lambda>x. Some [{0}])\"".format(",".join(r_list))
 				ret.append(r_str)
 			return " |\n".join(ret)
 		else: return ""

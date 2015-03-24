@@ -11,6 +11,22 @@ object Parser extends JavaTokenParsers with PackratParsers {
 
 /*parser_calc_structure_rules*/
 
+
+/*/*uncommentL?core_compiled*/
+	lazy val prooftreeListParser : PackratParser[List[Prooftree]] =
+		"[" ~ "]" ^^ { _ => List[Prooftree]() } |
+		"[" ~> rep(prooftreeParser <~ ",") ~ prooftreeParser <~ "]" ^^ { case list ~ last => list ++ List[Prooftree](last) }
+
+	lazy val prooftreeParser : PackratParser[Prooftree] =
+		sequentParser ~ "<==" ~ ruleParser ~ prooftreeListParser ^^ { case a ~ "<==" ~ b ~ c => Prooftreea(a, b, c) } |
+		"(" ~> sequentParser ~ "<==" ~ ruleParser ~ prooftreeListParser  <~ ")" ^^ { case a ~ "<==" ~ b ~ c => Prooftreea(a, b, c) }
+
+	def parseProoftree(s:String) : Option[Prooftree] = parseAll(prooftreeParser,s) match {
+		case Success(result, _) => Some(result)
+		case failure : NoSuccess => None
+	}
+/*uncommentR?core_compiled*/*/
+
 	def main(args:Array[String]) {
 /*/*uncommentL?Sequent*/
 		if (args.length == 1){

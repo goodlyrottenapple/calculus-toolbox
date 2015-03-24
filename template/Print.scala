@@ -16,7 +16,24 @@ object PrintCalc{
 /*print_calc_structure_rules*/
 
 /*/*uncommentL?core_compiled*/
-	def printCalcDef() : String = {
+	def prooftreeListToString(in:List[Prooftree], format:String = LATEX) : String = "[" + in.map(x => prooftreeToString(x, format)).mkString(", ") + "]" 
+	// add print pt!!!!
+	def prooftreeToString(in:Prooftree, format:String = LATEX) : String = format match {
+		case ASCII =>
+			in match {
+				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "<==" + " " + ruleToString(b, format) + " " + prooftreeListToString(c, format) + ")"
+			}
+		case LATEX =>
+			in match {
+				case Prooftreea(a,b,c) => "\\AxiomC{$ " + sequentToString(a, format) + prooftreeListToString(c, format) + " $}\n"
+			}
+		case ISABELLE =>
+			in match {
+				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "\\<Longleftarrow>" + " " + "PT" + " " + ruleToString(b, format) + " " + prooftreeListToString(c, format) + ")"
+			}
+	}
+	
+/*	def printCalcDef() : String = {
 
 		val buf_Zer = scala.collection.mutable.ListBuffer.empty[String]
 		val buf_U = scala.collection.mutable.ListBuffer.empty[String]
@@ -62,5 +79,6 @@ object PrintCalc{
 				"\\subsection{Cut Rules}\n" + buf_Cut.toList.mkString("\n")
 
 	}
+*/
 /*uncommentR?core_compiled*/*/
 }

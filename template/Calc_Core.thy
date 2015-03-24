@@ -551,6 +551,9 @@ begin
 (*(*uncommentL?Structure_Formula*)  "match_Structure (Structure_Formula rule) (Structure_Formula form) = map (\<lambda>(x,y). (Structure_Formula x, Structure_Formula y)) (match rule form)" |(*uncommentR?Structure_Formula*)*)
 (*(*uncommentL?Structure_Bin*)  "match_Structure (Structure_Bin var11 op1 var12) (Structure_Bin var21 op2 var22) = (if op1 = op2 then (match var11 var21) @m (match var12 var22) else [])" |(*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Freevar*)  "match_Structure (Structure_Freevar free) mtch = [((Structure_Freevar free), mtch)]" |(*uncommentR?Structure_Freevar*)*)
+  
+  "match_Structure (Structure_Action_Structure op1 act1 struct1) (Structure_Action_Structure op2 act2 struct2) = (if op1 = op2 then map (\<lambda>(x,y). (Structure_Formula (Formula_Action x), Structure_Formula (Formula_Action y))) (match act1 act2) @m (match struct1 struct2) else [])" |
+  "match_Structure (Structure_Agent_Structure op1 ag1 struct1) (Structure_Agent_Structure op2 ag2 struct2) = (if op1 = op2 then map (\<lambda>(x,y). (Structure_Formula (Formula_Agent x), Structure_Formula (Formula_Agent y))) (match ag1 ag2) @m (match struct1 struct1) else [])" |
   "match_Structure (Structure_Phi act1) (Structure_Phi act2) = map (\<lambda>(x,y). (Structure_Formula (Formula_Action x), Structure_Formula (Formula_Action y))) (match act1 act2)" |
 
   "match_Structure _ _ = []"
@@ -560,6 +563,8 @@ begin
 (*(*uncommentL?Structure_Formula*)  "freevars_Structure (Structure_Formula var) = image (\<lambda>x. Structure_Formula x) (freevars var)" |(*uncommentR?Structure_Formula*)*)
 (*(*uncommentL?Structure_Bin*)  "freevars_Structure (Structure_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)" |(*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Freevar*)  "freevars_Structure (Structure_Freevar var) = {(Structure_Freevar var)}" |(*uncommentR?Structure_Freevar*)*)
+  "freevars_Structure (Structure_Action_Structure _ act1 struct) = image (\<lambda>x. Structure_Formula (Formula_Action x)) (freevars act1) \<union> (freevars struct)" |
+  "freevars_Structure (Structure_Agent_Structure _ ag1 struct) = image (\<lambda>x. Structure_Formula (Formula_Agent x)) (freevars ag1) \<union> (freevars struct)" |
   "freevars_Structure (Structure_Phi act1) = image (\<lambda>x. Structure_Formula (Formula_Action x)) (freevars act1)" |
 
   "freevars_Structure _ = {}"
@@ -569,15 +574,44 @@ begin
 (*(*uncommentL?Structure_Formula*)  "replace_Structure ((Structure_Formula x), (Structure_Formula rep)) (Structure_Formula form) = Structure_Formula (replace (x, rep) form)" |(*uncommentR?Structure_Formula*)*)
 (*(*uncommentL?Structure_Bin*)  "replace_Structure (x, rep) (Structure_Bin var1 op1 var2) = Structure_Bin (replace (x, rep) var1) op1 (replace (x, rep) var2)" |(*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Freevar*)  "replace_Structure (x, mtch) (Structure_Freevar free) = (if x = (Structure_Freevar free) then mtch else (Structure_Freevar free))" |(*uncommentR?Structure_Freevar*)*)
+
+  "replace_Structure ((Structure_Formula (Formula_Action x)), (Structure_Formula (Formula_Action rep))) (Structure_Action_Structure op1 act1 struct) = Structure_Action_Structure op1 (replace (x, rep) act1) (replace ((Structure_Formula (Formula_Action x)), (Structure_Formula (Formula_Action rep))) struct)" |
+  "replace_Structure ((Structure_Formula (Formula_Agent x)), (Structure_Formula (Formula_Agent rep))) (Structure_Agent_Structure op1 ag1 struct) = Structure_Agent_Structure op1 (replace (x, rep) ag1) (replace ((Structure_Formula (Formula_Agent x)), (Structure_Formula (Formula_Agent rep))) struct)" |
+
+  "replace_Structure (x, rep) (Structure_Action_Structure op1 act1 struct) = Structure_Action_Structure op1 act1 (replace (x, rep) struct)" |
+  "replace_Structure (x, rep) (Structure_Agent_Structure op1 ag1 struct) = Structure_Agent_Structure op1 ag1 (replace (x, rep) struct)" |
+
   "replace_Structure ((Structure_Formula (Formula_Action x)), (Structure_Formula (Formula_Action rep))) (Structure_Phi act1) = Structure_Phi (replace (x, rep) act1)" |
-  "replace_Structure (_, _) y = y" 
+  "replace_Structure (_, _) y = y"
+
 instance ..
 end
 
-(*
 lemma freevars_replace_Structure_simp : "free \<notin> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
-apply (induct a, cases free, auto)
-sorry
+proof (rule, induct a)
+  case Structure_Formula thus ?case by (cases free, auto) (metis freevars_replace_Formula_simp freevars_replace_Formula_simp2)
+next
+  case Structure_Zer thus ?case by simp
+next
+  case Structure_Bin thus ?case by simp
+next
+  case Structure_Freevar thus ?case by simp
+next
+  case (Structure_Phi act)
+    thus ?case
+    apply(cases free, cases act, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all)
+    by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+next
+  case (Structure_Action_Structure op a s)
+    thus ?case 
+    apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all)
+    by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+next
+  case (Structure_Agent_Structure op a s)
+    thus ?case 
+    apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all)
+    by (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+qed
 
 lemma freevars_replace_Structure_simp2 : "free \<in> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
 proof (rule, induct a)
@@ -586,8 +620,11 @@ proof (rule, induct a)
     have 0: "freevars (Structure_Formula x) = image (\<lambda>x. Structure_Formula x) (freevars x)" by simp
     then obtain ffree where "ffree \<in> freevars x"
       by (metis Structure_Formula.prems freevars_Structure.simps(1) imageE)
-    with 0 have "replace (free, free) (Structure_Formula x) = Structure_Formula (replace (ffree, ffree) x)"
-sorry
+    with 0 have "replace (free, free) (Structure_Formula x) = Structure_Formula (replace (ffree, ffree) x)" 
+    proof -
+      have "replace (ffree, ffree) x = x" by (metis `ffree \<in> freevars x` freevars_replace_Formula_simp2)
+      thus "replace (free, free) (x \<^sub>S) = replace (ffree, ffree) x \<^sub>S" using Structure_Formula.prems freevars_replace_Formula_simp2 by auto
+    qed
     thus ?case
       by (metis freevars_replace_Formula_simp freevars_replace_Formula_simp2)
 (*uncommentR?Structure_Formula*)*)
@@ -615,7 +652,34 @@ next
     qed
     have "free \<in> freevars (Structure_Bin x c y) \<longrightarrow> replace (free, free) (Structure_Bin x c y) = Structure_Bin (replace (free, free) x) c (replace (free, free) y)" by (metis replace_Structure.simps(2))
     thus ?case by (metis "1" "2" Structure_Bin.prems)
-oops
+next
+  case (Structure_Phi a)
+    thus ?case by(cases free, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+next
+  case (Structure_Action_Structure c x y)
+    have 1: "free \<in> freevars (Structure_Action_Structure c x y) \<longrightarrow> replace (free, free) (Structure_Formula (Formula_Action x)) = (Structure_Formula (Formula_Action x))" by(cases free, simp_all)
+    have 2: "free \<in> freevars (Structure_Action_Structure c x y) \<longrightarrow> replace (free, free) y = y"
+    proof 
+      assume "free \<in> freevars (Structure_Action_Structure c x y)"
+    { assume "free \<notin> freevars y" then have "replace (free, free) y = y" using freevars_replace_Structure_simp by simp }
+      thus "replace (free, free) y = y" by (metis Structure_Action_Structure.hyps)
+    qed
+    with 1 have "free \<in> freevars (Structure_Action_Structure c x y) \<longrightarrow> replace (free, free) (Structure_Action_Structure c x y) = Structure_Action_Structure c x (replace (free, free) y)"
+      by (cases free, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+    with 2 show ?case by (metis Structure_Action_Structure.prems)
+next
+  case (Structure_Agent_Structure c x y)
+    have 1: "free \<in> freevars (Structure_Agent_Structure c x y) \<longrightarrow> replace (free, free) (Structure_Formula (Formula_Agent x)) = (Structure_Formula (Formula_Agent x))" by(cases free, simp_all)
+    have 2: "free \<in> freevars (Structure_Agent_Structure c x y) \<longrightarrow> replace (free, free) y = y"
+    proof 
+      assume "free \<in> freevars (Structure_Agent_Structure c x y)"
+    { assume "free \<notin> freevars y" then have "replace (free, free) y = y" using freevars_replace_Structure_simp by simp }
+      thus "replace (free, free) y = y" by (metis Structure_Agent_Structure.hyps)
+    qed
+    with 1 have "free \<in> freevars (Structure_Agent_Structure c x y) \<longrightarrow> replace (free, free) (Structure_Agent_Structure c x y) = Structure_Agent_Structure c x (replace (free, free) y)"
+      by (cases free, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all) (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+    with 2 show ?case by (metis Structure_Agent_Structure.prems)
+qed
 
 
 lemma match_Structure_simp : "\<forall>(x, y) \<in> set (match (a::Structure) a). x = y"
@@ -638,8 +702,29 @@ next
     have 0: "set (match (Structure_Bin x c y) (Structure_Bin x c y)) = set ((match x x) @m (match y y))" by simp
     from Structure_Bin have "set ((match x x) @m (match y y)) = set (match x x) \<union> set (match y y)" by simp
     with assms 0 show ?case by auto
-oops
-
+next
+  case (Structure_Phi x)
+    have 0: "match (Structure_Phi x) (Structure_Phi x) = map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y))) (match x x)" by simp
+    have "\<forall>a\<in>set (match x x). case a of (x, y) \<Rightarrow> x = y" by (metis match_Action_simp)
+    then have "\<forall>a\<in>set( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y))) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+    with 0 show ?case using match_Atprop_simp by simp
+next
+  case (Structure_Action_Structure c x y)
+    have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Action_simp by simp
+    then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y))) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+    have 0: "set (match (Structure_Action_Structure c x y) (Structure_Action_Structure c x y)) = set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y))) (match x x) @m (match y y) )" by simp
+    with a Structure_Action_Structure have "set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y))) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y))) (match x x) ) \<union> set (match y y)" by simp
+    with assms 0 show ?case by (metis Structure_Action_Structure.hyps Un_iff a)
+next
+  case (Structure_Agent_Structure c x y)
+    have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Agent_simp by simp
+    then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y))) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+    have 0: "set (match (Structure_Agent_Structure c x y) (Structure_Agent_Structure c x y)) = set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y))) (match x x) @m (match y y) )" by simp
+    with a Structure_Agent_Structure have "set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y))) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y))) (match x x) ) \<union> set (match y y)" by simp
+    with assms 0 show ?case by (metis Structure_Agent_Structure.hyps Un_iff a)
+qed
 
 lemma inv_Structure[simp]:
   fixes a::Structure
@@ -671,7 +756,112 @@ next
 next
   case (Structure_Freevar x)
     show ?case by simp
-oops
+next
+  case(Structure_Phi x)
+    show ?case by auto
+next
+  case (Structure_Action_Structure c x y)
+    obtain z where 0: "z = (Structure_Action_Structure c x y)" by simp
+
+    have 1: "\<forall>free \<in> set (match z z). replace free (Structure_Formula(Formula_Action x)) = (Structure_Formula(Formula_Action x))"
+    apply (rule)
+    apply(case_tac free, auto)
+    apply(case_tac aa, auto)
+    apply(case_tac ba, auto)
+    done
+
+    have 2: "\<forall>free \<in> set (match z z). replace free y = y"
+    proof auto
+      fix a b
+      assume "(a, b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Structure_simp by (metis (full_types) splitD)
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    
+    have "\<forall>free \<in> set (match z z). replace free (Structure_Action_Structure c x y) = Structure_Action_Structure c x (replace free y)"
+    proof auto
+      fix a b
+      assume assm: "(a,b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Structure_simp by (metis (full_types) splitD)
+
+      from 0 have "match z z = map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x) @m match y y" by simp 
+      then have 3: "set (match z z) = set (map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x) @m (match y y))" by simp 
+
+      have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Action_simp by simp
+      then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+      have 0: "set (match (Structure_Action_Structure c x y) (Structure_Action_Structure c x y)) = set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x) @m (match y y) )" by simp
+      with a match_Structure_simp have "set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x) ) \<union> set (match y y)" by simp
+      with 3 eq 0 assm have ab_in_z: "(a,b) \<in> set (map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x)) \<union> set (match y y)" by simp
+
+      { assume "(a,b) \<in> set (map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x))"
+        then obtain a' b' where fact: "Structure_Formula(Formula_Action a') = a" "Structure_Formula (Formula_Action b') = b" by auto
+        then have 1: "replace (a,b) (Structure_Action_Structure c x y) = Structure_Action_Structure c (replace (a',b') x) (replace (a,b) y)" by auto
+        with fact have "(replace (a',b') x) = x" by (metis Formula.inject(1) Structure.inject(4) eq freevars_replace_Action_simp freevars_replace_Action_simp2)
+        with 1 have "replace (a,b) (Structure_Action_Structure c x y) = Structure_Action_Structure c x (replace (a,b) y)" by simp }
+      { assume "(a,b) \<notin> set (map (\<lambda>(x,y). (Structure_Formula(Formula_Action x), Structure_Formula(Formula_Action y)) ) (match x x))"
+        with ab_in_z have "(a,b) \<in> set (match y y)" by simp
+        then have 1: "replace (a,b) (Structure_Action_Structure c x y) = Structure_Action_Structure c x (replace (a,b) y)"
+          apply (cases a, auto, case_tac Formula, simp_all)
+          apply (cases b, auto, case_tac Formulaa, simp_all) by (metis Formula.inject(1) Structure.inject(4) eq freevars_replace_Action_simp freevars_replace_Action_simp2) }
+      thus "replace (a,b) (Structure_Action_Structure c x y) = Structure_Action_Structure c x (replace (a,b) y)" 
+        by (metis `(a, b) \<in> set (map (\<lambda>(x, y). (Formula_Action x \<^sub>S, Formula_Action y \<^sub>S)) (match x x)) \<Longrightarrow> replace (a, b) (ActS\<^sub>S c x y) = ActS\<^sub>S c x replace (a, b) y`)
+    qed
+    with 0 1 2 show ?case by simp
+next
+    case (Structure_Agent_Structure c x y)
+    obtain z where 0: "z = (Structure_Agent_Structure c x y)" by simp
+
+    have 1: "\<forall>free \<in> set (match z z). replace free (Structure_Formula(Formula_Agent x)) = (Structure_Formula(Formula_Agent x))"
+    apply (rule)
+    apply(case_tac free, auto)
+    apply(case_tac aa, auto)
+    apply(case_tac ba, auto)
+    done
+
+    have 2: "\<forall>free \<in> set (match z z). replace free y = y"
+    proof auto
+      fix a b
+      assume "(a, b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Structure_simp by (metis (full_types) splitD)
+      from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
+      thus "replace (a, b) y = y" by auto
+    qed
+    
+    have "\<forall>free \<in> set (match z z). replace free (Structure_Agent_Structure c x y) = Structure_Agent_Structure c x (replace free y)"
+    proof auto
+      fix a b
+      assume assm: "(a,b) \<in> set (match z z)"
+      then have eq: "a = b" using match_Structure_simp by (metis (full_types) splitD)
+
+      from 0 have "match z z = map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x) @m match y y" by simp 
+      then have 3: "set (match z z) = set (map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x) @m (match y y))" by simp 
+
+      have assms: "\<forall>(a, b) \<in> set (match x x). a = b" using match_Agent_simp by simp
+      then have a: "\<forall>a\<in>set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x) ). case a of (x, y) \<Rightarrow> x = y" by auto
+      have 0: "set (match (Structure_Agent_Structure c x y) (Structure_Agent_Structure c x y)) = set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x) @m (match y y) )" by simp
+      with a match_Structure_simp have "set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x) @m (match y y)) = 
+      set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x) ) \<union> set (match y y)" by simp
+      with 3 eq 0 assm have ab_in_z: "(a,b) \<in> set (map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x)) \<union> set (match y y)" by simp
+
+      { assume "(a,b) \<in> set (map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x))"
+        then obtain a' b' where fact: "Structure_Formula(Formula_Agent a') = a" "Structure_Formula (Formula_Agent b') = b" by auto
+        then have 1: "replace (a,b) (Structure_Agent_Structure c x y) = Structure_Agent_Structure c (replace (a',b') x) (replace (a,b) y)" by auto
+        with fact have "(replace (a',b') x) = x" by (metis Formula.inject(3) Structure.inject(4) eq freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+        with 1 have "replace (a,b) (Structure_Agent_Structure c x y) = Structure_Agent_Structure c x (replace (a,b) y)" by simp }
+      { assume "(a,b) \<notin> set (map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y)) ) (match x x))"
+        with ab_in_z have "(a,b) \<in> set (match y y)" by simp
+        then have 1: "replace (a,b) (Structure_Agent_Structure c x y) = Structure_Agent_Structure c x (replace (a,b) y)"
+          apply (cases a, auto, case_tac Formula, simp_all)
+          apply (cases b, auto, case_tac Formulaa, simp_all) by (metis Formula.inject(3) Structure.inject(4) eq freevars_replace_Agent_simp freevars_replace_Agent_simp2) }
+      thus "replace (a,b) (Structure_Agent_Structure c x y) = Structure_Agent_Structure c x (replace (a,b) y)" 
+        by (metis `(a, b) \<in> set (map (\<lambda>(x, y). (Formula_Agent x \<^sub>S, Formula_Agent y \<^sub>S)) (match x x)) \<Longrightarrow> replace (a, b) (AgS\<^sub>S c x y) = AgS\<^sub>S c x replace (a, b) y`)
+    qed
+    with 0 1 2 show ?case by simp
+qed
 
 
 lemma inv_Structure2_aux[simp]: 
@@ -683,7 +873,7 @@ by (induct list a rule:replaceAll.induct, simp) (metis insert_subset inv_Structu
 
 lemma inv_Structure2: "replaceAll (match a a) a = (a::Structure)" by simp
 
-*)
+
 
 
 instantiation Sequent :: Varmatch
@@ -718,13 +908,13 @@ next
     proof auto
       fix a b
       assume 0: "(a, b) \<in> set (match x x @m match y y)"
-      have "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" sorry (*by (metis match_Structure_simp)+*)
+      have "\<forall>(a, b) \<in> set (match x x). a = b" "\<forall>(a, b) \<in> set (match y y). a = b" by (metis match_Structure_simp)+
       with 0 have eq: "a = b" by auto
       have "a \<notin> freevars x \<longrightarrow> replace (a, b) x = x" and "a \<in> freevars x \<longrightarrow> replace (a, b) x = x"
-        sorry (*by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)*)
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
       thus "replace (a, b) x = x" by auto
       from eq have "a \<notin> freevars y \<longrightarrow> replace (a,b) y = y" "a \<in> freevars y \<longrightarrow> replace (a,b) y = y"
-        sorry (*by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)*)
+        by (metis eq freevars_replace_Structure_simp) (metis freevars_replace_Structure_simp2 eq)
       thus "replace (a, b) y = y" by auto
     qed
     thus ?case by auto

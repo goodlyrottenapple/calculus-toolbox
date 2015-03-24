@@ -157,6 +157,25 @@ class ScalaBuilder:
 		ret += "	}"
 		return ret
 
+	@staticmethod
+	def __parser_calc_structure_all_rules(rules):
+		ret = "	lazy val ruleParser : PackratParser[Rule] =\n"
+		lines = []
+		for c in sorted(rules.keys()):
+			if c.startswith("Rule"): 
+				parser = c.lower()+"Parser"
+				lines.append( "		{0} ^^ {{ case a => {1}(a) }}".format(parser, c+'a') )
+		lines.append( "		\"Fail\" ^^ { _ => Fail() }" )
+		ret += " |\n".join(lines)
+
+		ret += "\n\n	def parseRule(s:String) : Option[Rule] = parseAll(ruleParser,s) match {\n"
+		ret += "		case Success(result, _) => Some(result)\n"
+		ret += "		case failure : NoSuccess => None\n"
+		ret += "	}"
+
+		return ret
+
+
 	def parser_calc_structure(self):
 		ret = ""
 		list = []
@@ -172,6 +191,7 @@ class ScalaBuilder:
 		if "calc_structure_rules" in self.calc and "core_compiled" in self.calc:
 			for d in sorted(self.calc["calc_structure_rules"].keys()):
 				list.append ( ScalaBuilder.__parse_calc_structure_datatype(d, self.calc["calc_structure_rules"], self.calc["calc_structure"]) )
+			list.append ( ScalaBuilder.__parser_calc_structure_all_rules(self.calc["calc_structure_rules"]) )
 			ret = "\n" + "\n\n\n\n".join(list) + "\n"
 		return ret
 
@@ -208,9 +228,10 @@ class ScalaBuilder:
 			middle = " + \" \" + ".join( type_toString_isa_list )
 			
 			#the operator precednece in the isa files is not implemented!! and this might result in warnings
-			if (len(type_toString_list) > 1 or no_sugar) and len([i for i in type_toString_isa_list if not i.startswith("\"")]) > 0: 
-				isa_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
-			else : isa_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
+			# if (len(type_toString_list) > 1 or no_sugar) and len([i for i in type_toString_isa_list if not i.startswith("\"")]) > 0: 
+			# 	isa_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
+			# else : isa_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
+			isa_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
 
 			#ascii formatting
 			type_toString_ascii_list = list(type_toString_list)
