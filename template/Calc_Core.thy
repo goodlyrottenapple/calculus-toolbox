@@ -300,6 +300,9 @@ proof (rule, induct a)
     thus ?case
       by (metis freevars_replace_Atprop_simp freevars_replace_Atprop_simp2)
 next
+  case (Formula_Zer x)
+    show ?case by simp
+next
   case (Formula_Freevar x)
     show ?case by simp
 next
@@ -329,7 +332,7 @@ next
     have 0: "freevars (Formula_Precondition x) = image (\<lambda>x. Formula_Action x) (freevars x)" by simp
     then obtain afree where "afree \<in> freevars x" "Formula_Action afree = free" 
       by (metis Formula_Precondition.prems freevars_Formula.simps(6) imageE)
-    then have "replace (free, free) (Formula_Precondition x) = Formula_Precondition (replace (afree, afree) x)" by (metis replace_Formula.simps(34))
+    then have "replace (free, free) (Formula_Precondition x) = Formula_Precondition (replace (afree, afree) x)" by (metis replace_Formula.simps)
     thus ?case by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
 next
   case (Formula_Action_Formula c x y)
@@ -366,6 +369,9 @@ proof (induct a)
     have "\<forall>a\<in>set (match x x). case a of (x, y) \<Rightarrow> x = y" by (metis match_Atprop_simp)
     then have "\<forall>a\<in>set( map (\<lambda>(x,y). (Formula_Atprop x, Formula_Atprop y)) (match x x)). case a of (x, y) \<Rightarrow> x = y" by auto
     with 0 show ?case using match_Atprop_simp by simp
+next
+  case (Formula_Zer x)
+    show ?case by auto
 next
   case (Formula_Freevar x)
     show ?case by auto
@@ -432,6 +438,9 @@ next
     thus ?case by (metis "0" "1")
 next
   case (Formula_Freevar x)
+    show ?case by simp
+next
+  case (Formula_Zer x)
     show ?case by simp
 next
   case (Formula_Action x)
