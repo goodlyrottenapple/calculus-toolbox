@@ -91,45 +91,45 @@
 		"Formula_Agent_Formula_Op" : {
 			"Formula_FdiamK" : {
 				"isabelle" : "fdiamK\\<^sub>F",
-				"ascii" : "fdiamK_F",
-				"latex" : "fdiamK_F"
+				"ascii" : "fdiamK",
+				"latex" : "\\langle_\\rangle"
 			},
 			"Formula_BdiamK" : {
 				"isabelle" : "bdiamK\\<^sub>F",
-				"ascii" : "bdiamK_F",
-				"latex" : "bdiamK_F"
+				"ascii" : "bdiamK",
+				"latex" : "\\langle_\\rangle"
 			},
 			"Formula_FboxK" : {
 				"isabelle" : "fboxK\\<^sub>F",
-				"ascii" : "fboxK_F",
-				"latex" : "fboxK_F"
+				"ascii" : "fboxK",
+				"latex" : "\\langle_\\rangle"
 			},
 			"Formula_BboxK" : {
 				"isabelle" : "bboxK\\<^sub>F",
-				"ascii" : "bboxK_F",
-				"latex" : "bboxK_F"
+				"ascii" : "bboxK",
+				"latex" : "\\,\\rotatebox[origin=c]{90}{$[\\kern{1.8mu}\\rotatebox[origin=c]{-90}{$_$}\\kern{1.8mu}]$}\\,"
 			}
 		},
 		"Formula_Action_Formula_Op" : {
 			"Formula_FdiamA" : {
 				"isabelle" : "fdiamA\\<^sub>F",
-				"ascii" : "fdiamA_F",
-				"latex" : "fdiamA_F"
+				"ascii" : "fdiamA",
+				"latex" : "\\langle_\\rangle"
 			},
 			"Formula_BdiamA" : {
 				"isabelle" : "bdiamA\\<^sub>F",
-				"ascii" : "bdiamA_F",
-				"latex" : "bdiamA_F"
+				"ascii" : "bdiamA",
+				"latex" : "\\langle_\\rangle"
 			},
 			"Formula_FboxA" : {
 				"isabelle" : "fboxA\\<^sub>F",
-				"ascii" : "fboxA_F",
+				"ascii" : "fboxA",
 				"latex" : "fboxA_F"
 			},
 			"Formula_BboxA" : {
 				"isabelle" : "bboxA\\<^sub>F",
-				"ascii" : "bboxA_F",
-				"latex" : "bboxA_F"
+				"ascii" : "bboxA",
+				"latex" : "\\langle_\\rangle"
 			}
 		},
 		"Formula_Bin_Op" : {
@@ -278,6 +278,12 @@
 				"latex" : "Id"
 			},
 
+			"Atom" : {
+				"ascii" : "Atom",
+				"latex" : "Atom",
+				"condition" : "atom"
+			},
+
 			"Prem" : {
 				"ascii" : "Prem",
 				"latex" : "Prem"
@@ -287,7 +293,9 @@
 		"RuleCut" : {
 			"SingleCut" : {
 				"ascii" : "Cut",
-				"latex" : "Cut"
+				"latex" : "Cut",
+				"locale" : "Cut_Formula f",
+				"antecedent" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
 			}
 		},
 
@@ -409,12 +417,28 @@
 				"ascii" : "ImpR_L",
 				"latex" : "\\rightarrow_L"
 			}
+		},
+
+		"RuleSwapin" : {
+			"Swapin_L" : {
+				"ascii" : "swapin'L",
+				"latex" : "swapin'L",
+				"condition" : "swapin rel ((B\\<^sub>S (Phi\\<^sub>S (?\\<^sub>Act ''alpha'')) (;\\<^sub>S) (AgS\\<^sub>S (forwK\\<^sub>S) (?\\<^sub>Ag ''a'') (ActS\\<^sub>S (forwA\\<^sub>S) (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'')))) \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))",
+				"locale" : "RelAKA rel"
+			},
+			"Swapin_R" : {
+				"ascii" : "swapin'R",
+				"latex" : "swapin'R",
+				"condition" : "swapin rel ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S (B\\<^sub>S (Phi\\<^sub>S (?\\<^sub>Act ''alpha'')) (\\<rightarrow>\\<^sub>S) (AgS\\<^sub>S (forwK\\<^sub>S) (?\\<^sub>Ag ''a'') (ActS\\<^sub>S (forwA\\<^sub>S) (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'')))))",
+				"locale" : "RelAKA rel"
+			}
 		}
 	},
 
 	"rules" : {
 		"RuleZer" : {
-			"Id" : 				["A?p |- A?p",				""]
+			"Id" : 				["A?p |- A?p",				""],
+			"Atom" : 			["?X |- ?Y",				""]
 		},
 		"RuleU" : {
 			"I_impR" : 			["I |- ?X >> ?Y", 			"?X |- ?Y"],
@@ -449,6 +473,13 @@
 			"And_R" :			["?X ; ?Y |- F?A /\\ F?B",	"?X |- F?A", "?Y |- F?B"],
 			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
 			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", "?Y |- F?B"]
+		},
+		"RuleSwapin" : {
+			"Swapin_L" :		["Phi Act?alpha ; forwK Ag?a (forwA Act?beta ?X) |- ?Y",	"forwA Act?alpha (forwK Ag?a ?X) |- ?Y"],
+			"Swapin_R" :		["?Y |- (Phi Act?alpha) >> forwK Ag?a (forwA Act?beta ?X)",	"?Y |- forwA Act?alpha (forwK Ag?a ?X)"]
+		},
+		"RuleCut" : {
+			"SingleCut" :		["?X |- ?Y",	""]
 		}
 	}
 }

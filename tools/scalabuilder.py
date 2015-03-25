@@ -271,6 +271,27 @@ class ScalaBuilder:
 						type_toString_latex_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
 				#else:
 				#	type_toString_latex_list.insert(0, "\"{0}\"".format(c))
+
+				if "_Agent_" in c or "_Action_" in c :
+
+					type_toString_latex_list = []
+					x = 0
+					op = ""
+					flag = -1
+					for t in type:
+						if "op" in t.lower() : 
+							op = "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ])
+							type_toString_latex_list.append(  op+".split(\"_\")(0)" )
+							flag = x+1
+						else: type_toString_latex_list.append( "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ]) )
+								
+						if flag == x : 
+							type_toString_latex_list.append(  op+".split(\"_\")(1)" )
+						
+						x += 1
+
+						
+
 				middle = " + \" \" + ".join( type_toString_latex_list )
 				#if len(type_toString_list) > 1 and len([i for i in type_toString_latex_list if not i.startswith("\"")]) > 0 and "sequent" not in name.lower(): 
 				#i feel like the following code is a terrible mess...it basically does magic to remove all but the essential bracketing from a latex term
@@ -283,20 +304,43 @@ class ScalaBuilder:
 						args_list[type.index(name)] = "{0}({1})".format(constructor1, ",".join(ascii_lowercase[len(type):len(type)+len(type1)])) 
 						args1 = ",".join(args_list)
 
-						x = 0
-						flag = True
 						type_toString_list = []
-						for t in type:
-							if t == name and flag : 
-								type_toString_list.append( "\"(\" + {0}ToString({1}, format) + \")\"".format(t.lower(), args_list[ x ]) )
-								flag = False
-							else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
-							x += 1
 
-						if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
-							filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
-							for filtered_latex_symb in filtered_latex_symbs:
-								type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+						if "_Agent_" in c1 or "_Action_" in c1 :
+							# print constructor, middle
+							x = 0
+							flag = -1
+							op = ""
+							for t in type:
+								if "op" in t.lower() : 
+									op = "{0}ToString({1}, format)".format(t.lower(), args_list[ x ])
+									type_toString_list.append(  op+".split(\"_\")(0)" )
+									flag = x+1
+								else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
+								
+								if flag == x : 
+									type_toString_list.append(  op+".split(\"_\")(1)" )
+								x += 1
+
+							if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+								filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+								for filtered_latex_symb in filtered_latex_symbs:
+									type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+
+						else:
+							x = 0
+							flag = True
+							for t in type:
+								if t == name and flag : 
+									type_toString_list.append( "\"(\" + {0}ToString({1}, format) + \")\"".format(t.lower(), args_list[ x ]) )
+									flag = False
+								else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
+								x += 1
+
+							if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+								filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+								for filtered_latex_symb in filtered_latex_symbs:
+									type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
 						middle1 = " + \" \" + ".join( type_toString_list )
 						latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args1, middle1) )
 				latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )

@@ -213,7 +213,7 @@ class IsabelleBuilder:
 		return "\n" + "\n\n".join(list) + "\n"
 
 	@staticmethod
-	def __calc_structure_rules_rule_list_aux(name, rules, parser_command):
+	def __calc_structure_rules_rule_list_aux(name, rules, rule_def, parser_command):
 		import shlex
 		from subprocess import Popen, PIPE
 
@@ -229,12 +229,21 @@ class IsabelleBuilder:
 				count = 0
 				r_str = ""
 				r_list = []
+				locale = "({0})".format(rule_def[r]["locale"]) if "locale" in rule_def[r] else "_"
 				for i in rules[r]:
-					if count == 0: r_str += "\"rule _ ({0} {0}.{1}) = {2} \<Longrightarrow>RD ".format(name, r, response_list[index])
-					else: r_list.append( response_list[index] )
+					if count == 0: 
+						if "condition" in rule_def[r]: 
+							r_str += "\"rule {3} ({0} {0}.{1}) = ( {4} \<Longrightarrow>C {2} \<Longrightarrow>RD ".format(name, r, response_list[index], locale, rule_def[r]["condition"])
+						else: r_str += "\"rule {3} ({0} {0}.{1}) = {2} \<Longrightarrow>RD ".format(name, r, response_list[index], locale)
+					if "antecedent" in rule_def[r]:
+						r_str += rule_def[r]["antecedent"]
+						break
+					if count > 0: r_list.append( response_list[index] )
 					index += 1
 					count += 1
-				r_str += "(\\<lambda>x. Some [{0}])\"".format(",".join(r_list))
+				if "antecedent" not in rule_def[r]: r_str += "(\\<lambda>x. Some [{0}])".format(",".join(r_list))
+				if "condition" in rule_def[r]: r_str += " )\""
+				else : r_str += "\""
 				ret.append(r_str)
 			return " |\n".join(ret)
 		else: return ""
@@ -243,7 +252,7 @@ class IsabelleBuilder:
 		if "parser_command" in self.calc and "rules" in self.calc:
 			ret = []
 			for r in sorted(self.calc["rules"]):
-				ret.append( IsabelleBuilder.__calc_structure_rules_rule_list_aux(r, self.calc["rules"][r], self.calc["parser_command"]) )
+				ret.append( IsabelleBuilder.__calc_structure_rules_rule_list_aux(r, self.calc["rules"][r], self.calc["calc_structure_rules"][r], self.calc["parser_command"]) )
 			return "\n" + "| \n".join(ret) + "|\n"
 		return ""
 
