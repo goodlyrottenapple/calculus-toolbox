@@ -34,7 +34,7 @@ object Proofsearch{
 				case None => 
 			}
 			var ret = new ListBuffer[Prooftree]()
-			for( (rule, derList) <- derAll(loc, seq) ) {
+			for( (rule, derList) <- derAll(loc, seq).sortWith(_._2.length < _._2.length) ) {
 				lazy val ders = crossProd( derList.map(x => derTrees(loc, n-1, x, prems)) )
 
 				for(possibleDer <- ders ) {
