@@ -573,9 +573,8 @@
 		"RuleOp" : {
 			"And_L" :			["F?A /\\ F?B |- ?Z", 		"F?A ; F?B |- ?Z"],
 			"Or_R" :			["?Z |- F?A \\/ F?B", 		"?Z |- F?A ; F?B"],
-			"ImpR_R" :			["?Z |- F?A > F?B", 		"?Z |- F?A >> F?B"]
-		},
-		"RuleBin" : {
+			"ImpR_R" :			["?Z |- F?A > F?B", 		"?Z |- F?A >> F?B"],
+			
 			"And_R" :			["?X ; ?Y |- F?A /\\ F?B",	"?X |- F?A", "?Y |- F?B"],
 			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
 			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", "?Y |- F?B"]
