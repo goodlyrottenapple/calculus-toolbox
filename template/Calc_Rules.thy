@@ -46,7 +46,7 @@ datatype Locale = Cut_Formula Formula |
 fun rule :: "Locale \<Rightarrow> Rule \<Rightarrow> ruleder"
 where
 (*rules_rule_fun*)
-"rule _ (RuleZer Atom) = ( atom \<Longrightarrow>C 
+(*"rule _ (RuleZer Atom) = ( atom \<Longrightarrow>C 
   ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. Some [])
 )"|
 "rule (RelAKA rel) (RuleU swapInL) = ( 
@@ -55,6 +55,7 @@ where
 )"|
 
 "rule (Cut_Formula f) (RuleCut SingleCut) = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. Some [((?\<^sub>S ''X'') \<turnstile>\<^sub>S f \<^sub>S),(f \<^sub>S \<turnstile>\<^sub>S (?\<^sub>S ''Y''))])"|
+*)
 "rule _ _ = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. None)"
 
 (*

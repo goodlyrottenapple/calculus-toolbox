@@ -255,6 +255,7 @@ def main(argv):
     global CALC_TEMPLATE
     #user flag settings
     BUILD_FLAGS = ["all"]
+    STAGE = None
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
