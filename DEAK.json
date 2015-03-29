@@ -227,6 +227,14 @@
 				"type" : ["Structure_Action_Structure_Op", "Action", "Structure"],
 				"isabelle" : "ActS\\<^sub>S _",
 				"precedence": [330,330,330, 331]
+			},
+
+			"Structure_Bigcomma" : {
+				"type" : ["Structure list"],
+				"isabelle" : ";;\\<^sub>S _",
+				"ascii" : ";; _",
+				"latex" : "; _ ",
+				"precedence": [330,330,330, 331]
 			}
 		},
 
@@ -320,12 +328,12 @@
 				"ascii" : "Cut",
 				"latex" : "Cut",
 				"locale" : "Cut_Formula f",
-				"antecedent" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
 			}
 		},
 
 
-		"RuleU" : {
+		"RuleStruct" : {
 			"I_impL" : {
 				"ascii" : "I_impL",
 				"latex" : "I <_R"
@@ -414,9 +422,108 @@
 				"ascii" : "A_L",
 				"latex" : "A_L"
 			}, 		
-			"A_L2"  : {
+			"A_L2" : {
 				"ascii" : "A_L2",
 				"latex" : "A_L"
+			},
+
+			"Nec_K_L" : {
+				"ascii" : "Nec_K_L",
+				"latex" : "Nec_K_L"
+			},
+			"Nec_K_R" : {
+				"ascii" : "Nec_K_R",
+				"latex" : "Nec_K_R"
+			},
+			"K_nec_L" : {
+				"ascii" : "K_nec_L",
+				"latex" : "K_nec_L"
+			},
+			"K_nec_R" : {
+				"ascii" : "K_nec_R",
+				"latex" : "K_nec_R"
+			},
+			"FS_K_L" : {
+				"ascii" : "FS_K_L",
+				"latex" : "FS_K_L"
+			},
+			"FS_K_R" : {
+				"ascii" : "FS_K_R",
+				"latex" : "FS_K_R"
+			},
+			"Mon_K_L" : {
+				"ascii" : "Mon_K_L",
+				"latex" : "Mon_K_L"
+			},
+			"Mon_K_R" : {
+				"ascii" : "Mon_K_R",
+				"latex" : "Mon_K_R"
+			},
+			"K_FS_L" : {
+				"ascii" : "K_FS_L",
+				"latex" : "K_FS_L"
+			},
+			"K_FS_R" : {
+				"ascii" : "K_FS_R",
+				"latex" : "K_FS_R"
+			},
+			"K_mon_L" : {
+				"ascii" : "K_mon_L",
+				"latex" : "K_mon_L"
+			},
+			"K_mon_R" : {
+				"ascii" : "K_mon_R",
+				"latex" : "K_mon_R"
+			},
+
+			
+			"Nec_A_L" : {
+				"ascii" : "Nec_A_L",
+				"latex" : "Nec_A_L"
+			},
+			"Nec_A_R" : {
+				"ascii" : "Nec_A_R",
+				"latex" : "Nec_A_R"
+			},
+			"A_nec_L" : {
+				"ascii" : "A_nec_L",
+				"latex" : "A_nec_L"
+			},
+			"A_nec_R" : {
+				"ascii" : "A_nec_R",
+				"latex" : "A_nec_R"
+			},
+			"FS_A_L" : {
+				"ascii" : "FS_A_L",
+				"latex" : "FS_A_L"
+			},
+			"FS_A_R" : {
+				"ascii" : "FS_A_R",
+				"latex" : "FS_A_R"
+			},
+			"Mon_A_L" : {
+				"ascii" : "Mon_A_L",
+				"latex" : "Mon_A_L"
+			},
+			"Mon_A_R" : {
+				"ascii" : "Mon_A_R",
+				"latex" : "Mon_A_R"
+			},
+			"A_FS_L" : {
+				"ascii" : "A_FS_L",
+				"latex" : "A_FS_L"
+			},
+			"A_FS_R" : {
+				"ascii" : "A_FS_R",
+				"latex" : "A_FS_R"
+			},
+			"A_mon_L" : {
+				"ascii" : "A_mon_L",
+				"latex" : "A_mon_L"
+			},
+			"A_mon_R" : {
+				"ascii" : "A_mon_R",
+				"latex" : "A_mon_R"
 			}
 		},
 
@@ -452,7 +559,64 @@
 			"ImpR_comma_disp2" : {
 				"ascii" : "ImpR_comma_disp2",
 				"latex" : "(>, ;)"
+			},
+
+			"Forw_back_K" : {
+				"ascii" : "Forw_back_K",
+				"latex" : "Forw_back_K"
+			},
+			"Forw_back_K2" : {
+				"ascii" : "Forw_back_K2",
+				"latex" : "Forw_back_K2"
+			},
+			"Back_forw_K" : {
+				"ascii" : "Back_forw_K",
+				"latex" : "Back_forw_K"
+			},
+			"Back_forw_K2" : {
+				"ascii" : "Back_forw_K2",
+				"latex" : "Back_forw_K2"
+			},
+
+
+			"Forw_back_A" : {
+				"ascii" : "Forw_back_A",
+				"latex" : "Forw_back_A"
+			},
+			"Forw_back_A2" : {
+				"ascii" : "Forw_back_A2",
+				"latex" : "Forw_back_A2"
+			},
+			"Back_forw_A" : {
+				"ascii" : "Back_forw_A",
+				"latex" : "Back_forw_A"
+			},
+			"Back_forw_A2" : {
+				"ascii" : "Back_forw_A2",
+				"latex" : "Back_forw_A2"
+			},
+
+			"Balance" : {
+				"ascii" : "Balance",
+				"latex" : "Balance"
+			},
+			"CompA_L" : {
+				"ascii" : "CompA_L",
+				"latex" : "CompA_L"
+			},
+			"CompA_R" : {
+				"ascii" : "CompA_R",
+				"latex" : "CompA_R"
+			},
+			"Reduce_L" : {
+				"ascii" : "Reduce'L",
+				"latex" : "Reduce'L"
+			},
+			"Reduce_R" : {
+				"ascii" : "Reduce'R",
+				"latex" : "Reduce'R"
 			}
+			
 		},
 
 		"RuleGrish" : {
@@ -515,6 +679,17 @@
 				"ascii" : "ImpL_R",
 				"latex" : "\\leftarrow_R"
 			},
+
+			"DImpL_L" : {
+				"ascii" : "DImpL_L",
+				"latex" : "-<_L"
+			},
+
+			"DImpL_R" : {
+				"ascii" : "DImpL_R",
+				"latex" : "-<_R"
+			},
+
 			"ImpR_L" : {
 				"ascii" : "ImpR_L",
 				"latex" : "\\rightarrow_L"
@@ -522,6 +697,57 @@
 			"ImpR_R" : {
 				"ascii" : "ImpR_R",
 				"latex" : "\\rightarrow_R"
+			},
+
+			"DImpR_L" : {
+				"ascii" : "DImpR_L",
+				"latex" : ">-_L"
+			},
+
+			"DImpR_R" : {
+				"ascii" : "DImpR_R",
+				"latex" : ">-_R"
+			},
+			"FdiamK_L" : {
+				"ascii" : "FdiamK_L",
+				"latex" : "FdiamK_L"
+			},
+			"FdiamK_R" : {
+				"ascii" : "FdiamK_R",
+				"latex" : "FdiamK_R"
+			},
+			"FboxK_L" : {
+				"ascii" : "FboxK_L",
+				"latex" : "FboxK_L"
+			},
+			"FboxK_R" : {
+				"ascii" : "FboxK_R",
+				"latex" : "FboxK_R"
+			},
+
+			"FdiamA_L" : {
+				"ascii" : "FdiamA_L",
+				"latex" : "FdiamA_L"
+			},
+			"FdiamA_R" : {
+				"ascii" : "FdiamA_R",
+				"latex" : "FdiamA_R"
+			},
+			"FboxA_L" : {
+				"ascii" : "FboxA_L",
+				"latex" : "FboxA_L"
+			},
+			"FboxA_R" : {
+				"ascii" : "FboxA_R",
+				"latex" : "FboxA_R"
+			},
+			"Pre_L" : {
+				"ascii" : "Pre_L",
+				"latex" : "Pre_L"
+			},
+			"Pre_R" : {
+				"ascii" : "Pre_R",
+				"latex" : "Pre_R"
 			}
 		},
 
@@ -538,6 +764,18 @@
 				"condition" : "swapin rel ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S (B\\<^sub>S (Phi\\<^sub>S (?\\<^sub>Act ''alpha'')) (\\<rightarrow>\\<^sub>S) (AgS\\<^sub>S (forwK\\<^sub>S) (?\\<^sub>Ag ''a'') (ActS\\<^sub>S (forwA\\<^sub>S) (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'')))))",
 				"locale" : "RelAKA rel"
 			}
+		},
+		"RuleSwapout" : {
+			"Swapout_L" : {
+				"ascii" : "swapout'L",
+				"latex" : "swapout'L",
+				"locale" : "Swapout rel blist"
+			},
+			"Swapout_R" : {
+				"ascii" : "Swapout'R",
+				"latex" : "Swapout'R",
+				"locale" : "Swapout rel blist"
+			}
 		}
 	},
 
@@ -546,15 +784,25 @@
 			"Id" : 				["A?p |- A?p",				""],
 			"Atom" : 			["?X |- ?Y",				""]
 		},
-		"RuleU" : {
+		"RuleStruct" : {
+			"I_impL" : 			["I |- ?Y << ?X", 			"?X |- ?Y"],
+			"I_impL2" : 		["?X |- ?Y",				"I |- ?Y << ?X"],
 			"I_impR" : 			["I |- ?X >> ?Y", 			"?X |- ?Y"],
 			"I_impR2" : 		["?X |- ?Y",				"I |- ?X >> ?Y"],
+			
+			"ImpL_I" : 			["?X << ?Y |- I",			"?X |- ?Y"],
+			"ImpL_I2" : 		["?X |- ?Y", 				"?X << ?Y |- I"],
 			"ImpR_I" : 			["?Y >> ?X |- I",			"?X |- ?Y"],
 			"ImpR_I2" : 		["?X |- ?Y", 				"?Y >> ?X |- I"],
+
 			"IW_L" : 			["?X |- ?Y", 				"I |- ?Y"],
 			"IW_R" : 			["?X |- ?Y", 				"?X |- I"],
+
+			"W_impL_L" :		["?Y |- ?Z << ?X", 			"?X |- ?Z"],			
+			"W_impL_R" :		["?X << ?Z |- ?Y", 			"?X |- ?Z"],
 			"W_impR_L" :		["?Z >> ?X |- ?Y", 			"?X |- ?Z"],
 			"W_impR_R" :		["?Y |- ?X >> ?Z", 			"?X |- ?Z"],
+
 			"C_L" : 			["?X |- ?Y", 				"?X ; ?X |- ?Y"],
 			"C_R" : 			["?X |- ?Y", 				"?X |- ?Y ; ?Y"],
 			"E_L" : 			["?X2 ; ?X1 |- ?Y", 		"?X1 ; ?X2 |- ?Y"],
@@ -562,26 +810,123 @@
 			"A_R" : 			["?W |- ?X ; (?Y ; ?Z)",	"?W |- (?X ; ?Y) ; ?Z"],
 			"A_R2" : 			["?W |- (?X ; ?Y) ; ?Z",	"?W |- ?X ; (?Y ; ?Z)"],
 			"A_L" : 			["?X ; (?Y ; ?Z) |- ?W",	"(?X ; ?Y) ; ?Z |- ?W"],
-			"A_L2" : 			["(?X ; ?Y) ; ?Z |- ?W",	"?X ; (?Y ; ?Z) |- ?W"]
+			"A_L2" : 			["(?X ; ?Y) ; ?Z |- ?W",	"?X ; (?Y ; ?Z) |- ?W"],
+
+			"Nec_K_L" :			["forwK Ag?a I ⊢ ?X", 		"I |- ?X"],
+			"Nec_K_R" :			["?X |- forwK Ag?a I", 		"?X |- I"],
+			"K_nec_L" :			["backK Ag?a I ⊢ ?X", 		"I |- ?X"],
+			"K_nec_R" :			["?X |- backK Ag?a I", 		"?X |- I"],
+
+			"FS_K_L" :			["forwK Ag?a (?Y >> ?Z) |- ?X", 		"forwK Ag?a ?Y >> forwK Ag?a ?Z |- ?X"],
+			"FS_K_R" :			["?X |- forwK Ag?a (?Y >> ?Z)", 		"?X |- forwK Ag?a ?Y >> forwK Ag?a ?Z"],
+			"Mon_K_L" :			["forwK Ag?a (?X ; ?Y) |- ?Z", 			"forwK Ag?a ?X ; forwK Ag?a ?Y |- ?Z"],
+			"Mon_K_R" :			["?Z |- forwK Ag?a (?X ; ?Y)", 			"?Z |- forwK Ag?a ?X ; forwK Ag?a ?Y"],
+
+			"K_FS_L" :			["backK Ag?a (?Y >> ?Z) ⊢ ?X", 			"backK Ag?a ?Y >> backK Ag?a ?Z |- ?X"],
+			"K_FS_R" :			["?X |- backK Ag?a (?Y >> ?Z)", 		"?X |- backK Ag?a ?Y >> backK Ag?a ?Z"],
+  			"K_mon_L" : 		["backK Ag?a (?X ; ?Y) |- ?Z", 			"backK Ag?a ?X ; backK Ag?a ?Y |- ?Z"],
+  			"K_mon_R" : 		["?Z |- backK Ag?a (?X ; ?Y)", 			"?Z |- backK Ag?a ?X ; backK Ag?a ?Y"],
+
+
+  			"Nec_A_L" :			["forwA Act?a I |- ?X",		"I |- ?X"],
+  			"Nec_A_R" :			["?X |- forwA Act?a I", 	"?X |- I"],
+  			"A_nec_L" :			["backA Act?a I |- ?X", 	"I |- ?X"],
+  			"A_nec_R" :			["?X |- backA Act?a I", 	"?X |- I"],
+
+  			"FS_A_L" :			["forwA Act?a (?Y >> ?Z) |- ?X", 		"forwA Act?a ?Y >> forwA Act?a ?Z |- ?X"],
+  			"FS_A_R" :			["?X |- forwA Act?a (?Y >> ?Z)", 		"?X |- forwA Act?a ?Y >> forwA Act?a ?Z"],
+
+  			"Mon_A_L" :			["forwA Act?a (?X ; ?Y) |- ?Z", 		"forwA Act?a ?X ; forwA Act?a ?Y |- ?Z"],
+  			"Mon_A_R" :			["?Z |- forwA Act?a (?X ; ?Y)", 		"?Z |- forwA Act?a ?X ; forwA Act?a ?Y"],
+  			"A_FS_L" :			["backA Act?a (?Y >> ?Z) |- ?X", 		"backA Act?a ?Y >> backA Act?a ?Z |- ?X"],
+  			"A_FS_R" :			["?X |- backA Act?a (?Y >> ?Z)", 		"?X |- backA Act?a ?Y >> backA Act?a ?Z"],
+  			"A_mon_L" :			["backA Act?a (?X ; ?Y) |- ?Z", 		"backA Act?a ?X ; backA Act?a ?Y |- ?Z"],
+  			"A_mon_R" :			["?Z |- backA Act?a (?X ; ?Y)", 		"?Z |- backA Act?a ?X ; backA Act?a ?Y"],
+
+  			"Reduce" :			["forwA Act?a X |- forwA Act?a Y", 		"?X |- ?Y"],
+  			"CompA_L" :			["(Phi Act?a) ; ?X |- ?Y", 				"forwA Act?a (backA Act?a ?X) |- ?Y"],
+  			"CompA_R" :			["?Y |- (Phi Act?a) >> ?X", 			"?Y |- forwA Act?a (backA Act?a ?X)"],
+  			"Reduce_L" :		["forwA Act?a ?X |- ?Y", 				"(Phi Act?a) ; forwA Act?a ?X |- ?Y"],
+  			"Reduce_R" :		["?Y |- forwA Act?a ?X", 				"?Y |- (Phi Act?a) >> forwA Act?a ?X"]
+
 		},
 		"RuleDisp" : {
+			"Comma_impL_disp" :	["?X |- ?Z << ?Y", 			"?X ; ?Y |- ?Z"],
+			"Comma_impL_disp2" :	["?X ; ?Y |- ?Z", 			"?X |- ?Z << ?Y"],
 			"Comma_impR_disp" :	["?Y |- ?X >> ?Z", 			"?X ; ?Y |- ?Z"],
 			"Comma_impR_disp2" :["?X ; ?Y |- ?Z", 			"?Y |- ?X >> ?Z"],
+
+			"ImpL_comma_disp" :	["?Z << ?Y |- ?X", 			"?Z |- ?X ; ?Y"],
+			"ImpL_comma_disp2" :["?Z |- ?X ; ?Y", 			"?Z << ?Y |- ?X"],
+
 			"ImpR_comma_disp" :	["?X >> ?Z |- ?Y", 			"?Z |- ?X ; ?Y"],
-			"ImpR_comma_disp2" :["?Z |- ?X ; ?Y", 			"?X >> ?Z |- ?Y"]
+			"ImpR_comma_disp2" :["?Z |- ?X ; ?Y", 			"?X >> ?Z |- ?Y"],
+
+			"Forw_back_K" :		["?X |- backK Ag?a ?Y", 	"forwK Ag?a ?X |- ?Y"],
+			"Forw_back_K2" :	["forwK Ag?a ?X |- ?Y", 	"?X |- backK Ag?a ?Y"],
+			"Back_forw_K" : 	["backK Ag?a ?X |- ?Y", 	"?X |- forwK Ag?a ?Y"],
+			"Back_forw_K2" : 	["?X |- forwK Ag?a ?Y", 	"backK Ag?a ?X |- ?Y"],
+
+			"Forw_back_A" :		["?X |- backA Act?a ?Y", 	"forwA Act?a ?X |- ?Y"],
+			"Forw_back_A2" :	["forwA Act?a ?X |- ?Y", 	"?X |- backA Act?a ?Y"],
+			"Back_forw_A" :		["backA Act?a ?X |- ?Y", 	"?X |- forwA Act?a ?Y"],
+			"Back_forw_A2" :	["?X |- forwA Act?a ?Y", 	"backA Act?a ?X |- ?Y"],
+
+		},
+		"RuleGrish" : {
+			"Grishin_L" :		["(?X >> ?Y); ?Z |- ?W", 	"?X >> (?Y ; ?Z) |- ?W"],
+			"Grishin_L2" :		["?X >> (?Y ; ?Z) |- ?W", 	"(?X >> ?Y); ?Z |- ?W"],
+
+			"Grishin_R" :		["?W |- (?X >> ?Y) ; ?Z", 	"?W |- ?X >> (?Y ; ?Z)"],
+			"Grishin_R2" :		["?W |- ?X >> (?Y ; ?Z)", 	"?W |- (?X >> ?Y) ; ?Z"]
 		},
 		"RuleOp" : {
+			"Bot_L" :			["B |- I", 		""],
+			"Bot_R" :			["?X |- B", 		"?X |- I"],
+			"Top_L" :			["T |- ?X", 		"I |- ?X"],
+			"Top_R" :			["I |- T", 		""],
+
 			"And_L" :			["F?A /\\ F?B |- ?Z", 		"F?A ; F?B |- ?Z"],
+			"And_R" :			["?X ; ?Y |- F?A /\\ F?B",	"?X |- F?A", 	"?Y |- F?B"],
+
+			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", 	"F?B |- ?Y"],
 			"Or_R" :			["?Z |- F?A \\/ F?B", 		"?Z |- F?A ; F?B"],
+
+			"ImpL_L" :			["F?B < F?A |- ?Y << ?X",	"?X |- F?A", 	"F?B |- ?Y"],
+			"ImpL_R" :			["?Z |- F?B < F?A", 		"?Z |- F?B << F?A"],
+
+			"DImpL_L" :			["F?B -< F?A |- ?Z", 		"F?B << F?A |- ?Z"],
+			"DImpL_R" :			["?Y << ?X |- F?B -< F?A",	"F?A |- ?X", 	"?Y |- F?B"],
+
+			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", 	"F?B |- ?Y"],
 			"ImpR_R" :			["?Z |- F?A > F?B", 		"?Z |- F?A >> F?B"],
-			
-			"And_R" :			["?X ; ?Y |- F?A /\\ F?B",	"?X |- F?A", "?Y |- F?B"],
-			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
-			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", "?Y |- F?B"]
+
+			"DImpR_L" :			["F?A >- F?B |- ?Z", 		"F?A >> F?B |- ?Z"],
+			"DImpR_R" :			["?X >> ?Y |- F?A >- F?B",	"F?A |- ?X", 	"?Y |- F?B"],
+
+			"FdiamK_L" :		["fdiamK Ag?a F?A |- ?X",	"forwK Ag?a F?A |- ?X"],
+			"FdiamK_R" :		["forwK Ag?a ?X |- fdiamK Ag?a F?A",	"?X |- F?A"],
+			"FboxK_L" :			["fboxK Ag?a F?A |- forwK Ag?a ?X",		"?X |- F?A"],
+			"FboxK_R" :			["?X |- fboxK Ag?a F?A",	"?X |- forwK Ag?a F?A"],
+
+			"FdiamA_L" :		["fdiamA Act?alpha F?A |- ?X",	"forwA Act?alpha F?A |- ?X"],
+			"FdiamA_R" :		["forwA Act?alpha ?X |- fdiamA Act?alpha F?A",	"?X |- F?A"],
+			"FboxA_L" :			["fboxA Act?alpha F?A |- forwA Act?alpha ?X",	"F?A |- ?X"],
+			"FboxA_R" :			["?X |- fboxA Act?alpha F?A",	"?X |- forwA Act?alpha F?A"],
+			"Pre_L" :			["Pre Act?alpha |- ?X",		"Phi Act?alpha |- ?X"],
+			"Pre_R" :			["Phi Act?alpha |- Pre Act?alpha",	""]
+		},
+		"RuleBigcomma" : {
+			"Swapout_L" :		["forwA Act?alpha (forwK Ag?a ?X) |- ?Ylist",	""],
+			"Swapout_R" :		["?Ylist |- forwA Act?alpha (forwK Ag?a ?X)",	""]
 		},
 		"RuleSwapin" : {
 			"Swapin_L" :		["Phi Act?alpha ; forwK Ag?a (forwA Act?beta ?X) |- ?Y",	"forwA Act?alpha (forwK Ag?a ?X) |- ?Y"],
 			"Swapin_R" :		["?Y |- (Phi Act?alpha) >> forwK Ag?a (forwA Act?beta ?X)",	"?Y |- forwA Act?alpha (forwK Ag?a ?X)"]
+		},
+		"RuleSwapout" : {
+			"Swapout_L" :		["forwA Act?alpha (forwK Ag?a ?X) |- ?Ylist",	""],
+			"Swapout_R" :		["?Ylist |- forwA Act?alpha (forwK Ag?a ?X)",	""]
 		},
 		"RuleCut" : {
 			"SingleCut" :		["?X |- ?Y",	""]

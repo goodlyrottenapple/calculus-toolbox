@@ -46,21 +46,9 @@ datatype Locale = Cut_Formula Formula |
 fun rule :: "Locale \<Rightarrow> Rule \<Rightarrow> ruleder"
 where
 (*rules_rule_fun*)
-(*"rule _ (RuleZer Atom) = ( atom \<Longrightarrow>C 
-  ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. Some [])
-)"|
-"rule (RelAKA rel) (RuleU swapInL) = ( 
-  (swapin rel ( B\<^sub>S (Phi\<^sub>S (?\<^sub>Act ''alpha'')) ;\<^sub>S (?\<^sub>S''Y'')  \<turnstile>\<^sub>S (?\<^sub>S''Y'') )) \<Longrightarrow>C 
-  ( B\<^sub>S (Phi\<^sub>S (?\<^sub>Act ''alpha'')) ;\<^sub>S (?\<^sub>S''Y'')  \<turnstile>\<^sub>S (?\<^sub>S''Y'') ) \<Longrightarrow>RD  (\<lambda>x. Some [])
-)"|
-
-"rule (Cut_Formula f) (RuleCut SingleCut) = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. Some [((?\<^sub>S ''X'') \<turnstile>\<^sub>S f \<^sub>S),(f \<^sub>S \<turnstile>\<^sub>S (?\<^sub>S ''Y''))])"|
-*)
 "rule _ _ = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. None)"
 
-(*
-((Phi alpha) ; forwK a (forwA beta X) \<turnstile> Y
-*)
+
 fun fst :: "ruleder \<Rightarrow> Sequent" and snd :: "ruleder \<Rightarrow> Sequent \<Rightarrow> Sequent list option" and cond :: "ruleder \<Rightarrow> (Sequent \<Rightarrow> bool) option" where
 "fst (ruleder x _) = x" |
 "fst (ruleder_cond _ x _) = x" |

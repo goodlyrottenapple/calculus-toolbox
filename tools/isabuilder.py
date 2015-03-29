@@ -235,13 +235,13 @@ class IsabelleBuilder:
 						if "condition" in rule_def[r]: 
 							r_str += "\"rule {3} ({0} {0}.{1}) = ( {4} \<Longrightarrow>C {2} \<Longrightarrow>RD ".format(name, r, response_list[index], locale, rule_def[r]["condition"])
 						else: r_str += "\"rule {3} ({0} {0}.{1}) = {2} \<Longrightarrow>RD ".format(name, r, response_list[index], locale)
-					if "antecedent" in rule_def[r]:
-						r_str += rule_def[r]["antecedent"]
+					if "premise" in rule_def[r]:
+						r_str += rule_def[r]["premise"]
 						break
 					if count > 0: r_list.append( response_list[index] )
 					index += 1
 					count += 1
-				if "antecedent" not in rule_def[r]: r_str += "(\\<lambda>x. Some [{0}])".format(",".join(r_list))
+				if "premise" not in rule_def[r]: r_str += "(\\<lambda>x. Some [{0}])".format(",".join(r_list))
 				if "condition" in rule_def[r]: r_str += " )\""
 				else : r_str += "\""
 				ret.append(r_str)
