@@ -1,2 +1,5 @@
 # Python compiled files
 *.py[cod]
+
+# Isabelle temp files
+*.thy~
