@@ -36,6 +36,23 @@ fun swapin :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> Sequ
 
 
 
+fun bigcomma_cons_L :: "Sequent \<Rightarrow> Sequent list option" where
+"bigcomma_cons_L ( (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)) \<turnstile>\<^sub>S Y ) = Some [(;;\<^sub>S (X#Xs) \<turnstile>\<^sub>S Y)]"|
+"bigcomma_cons_L _ = None"
+
+fun bigcomma_cons_L2 :: "Sequent \<Rightarrow> Sequent list option" where
+"bigcomma_cons_L2 ( ;;\<^sub>S (X#Xs) \<turnstile>\<^sub>S Y ) = Some [((B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)) \<turnstile>\<^sub>S Y)]"|
+"bigcomma_cons_L2 _ = None"
+
+
+fun bigcomma_cons_R :: "Sequent \<Rightarrow> Sequent list option" where
+"bigcomma_cons_R ( Y \<turnstile>\<^sub>S (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)) ) = Some [(Y \<turnstile>\<^sub>S ;;\<^sub>S (X#Xs))]"|
+"bigcomma_cons_R _ = None"
+
+fun bigcomma_cons_R2 :: "Sequent \<Rightarrow> Sequent list option" where
+"bigcomma_cons_R2 ( Y \<turnstile>\<^sub>S ;;\<^sub>S (X#Xs) ) = Some [(Y \<turnstile>\<^sub>S (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)))]"|
+"bigcomma_cons_R2 _ = None"
+
 
 
 datatype Locale = Cut_Formula Formula | 
@@ -43,11 +60,7 @@ datatype Locale = Cut_Formula Formula |
                   Swapout "Action \<Rightarrow> Agent => Action => bool" "Action list" |
                   Empty
 
-fun rule :: "Locale \<Rightarrow> Rule \<Rightarrow> ruleder"
-where
 (*rules_rule_fun*)
-"rule _ _ = ((?\<^sub>S''X'') \<turnstile>\<^sub>S (?\<^sub>S''Y'')) \<Longrightarrow>RD (\<lambda>x. None)"
-
 
 fun fst :: "ruleder \<Rightarrow> Sequent" and snd :: "ruleder \<Rightarrow> Sequent \<Rightarrow> Sequent list option" and cond :: "ruleder \<Rightarrow> (Sequent \<Rightarrow> bool) option" where
 "fst (ruleder x _) = x" |
