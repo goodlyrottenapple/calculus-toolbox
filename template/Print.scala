@@ -11,6 +11,10 @@ object PrintCalc{
 		case ISABELLE => "''" + x.mkString +"''"
 	}
 
+/*/*uncommentL?Structure*/
+	def structure_listToString(in:List[Structure], format:String = LATEX) : String = "[" + in.map(x => structureToString(x, format)).mkString(", ") + "]" 
+/*uncommentR?Structure*/*/
+
 /*print_calc_structure*/
 
 /*print_calc_structure_rules*/

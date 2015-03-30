@@ -100,6 +100,8 @@ class IsabelleBuilder:
 		for c in sorted(datatype.keys()):
 			con = datatype[c]
 			type = con.get("type",[])
+			for x in range(len(type)):
+				if len(type[x].split(' ')) > 1: type[x] = '\"' + type[x] + '\"'
 
 			precedence = con.get("precedence", [])
 			if precedence:
@@ -231,10 +233,14 @@ class IsabelleBuilder:
 				r_list = []
 				locale = "({0})".format(rule_def[r]["locale"]) if "locale" in rule_def[r] else "_"
 				for i in rules[r]:
-					if count == 0: 
+					if count == 0:
+						r_str += "\"rule{0} x {0}.{1} = ".format(name, r)
+						if "locale" in rule_def[r]: 
+							r_str += "( case x of {0} \\<Rightarrow>".format(locale)
+						elif "condition" in rule_def[r]: r_str += "( "
 						if "condition" in rule_def[r]: 
-							r_str += "\"rule {3} ({0} {0}.{1}) = ( {4} \<Longrightarrow>C {2} \<Longrightarrow>RD ".format(name, r, response_list[index], locale, rule_def[r]["condition"])
-						else: r_str += "\"rule {3} ({0} {0}.{1}) = {2} \<Longrightarrow>RD ".format(name, r, response_list[index], locale)
+							r_str += "{0} \<Longrightarrow>C {1} \<Longrightarrow>RD ".format(rule_def[r]["condition"], response_list[index])
+						else: r_str += "{0} \<Longrightarrow>RD ".format(response_list[index])
 					if "premise" in rule_def[r]:
 						r_str += rule_def[r]["premise"]
 						break
@@ -242,18 +248,27 @@ class IsabelleBuilder:
 					index += 1
 					count += 1
 				if "premise" not in rule_def[r]: r_str += "(\\<lambda>x. Some [{0}])".format(",".join(r_list))
-				if "condition" in rule_def[r]: r_str += " )\""
+				if "locale" in rule_def[r]: r_str += " | _ \\<Rightarrow> ((?\\<^sub>S''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S''Y'')) \\<Longrightarrow>RD (\\<lambda>x. None) )\""
+				elif "condition" in rule_def[r]: r_str += " )\""
 				else : r_str += "\""
 				ret.append(r_str)
-			return " |\n".join(ret)
+			for r in list(set(rule_def.keys()) - set(rules.keys())):
+				if "premise" in rule_def[r]: ret.append( "\"rule{0} x {0}.{1} = ((?\\<^sub>S''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S''Y'')) \\<Longrightarrow>RD {2}\"".format(name, r, rule_def[r]["premise"]) )
+				else: ret.append( "\"rule{0} x {0}.{1} = ((?\\<^sub>S''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S''Y'')) \\<Longrightarrow>RD (\\<lambda>x. None)\"".format(name, r) )
+			return "primrec rule{0} :: \"Locale \<Rightarrow> {0} \<Rightarrow> ruleder\" where\n".format(name) + " |\n".join(ret) + '\n'
 		else: return ""
 		
 	def rules_rule_fun(self):
 		if "parser_command" in self.calc and "rules" in self.calc:
 			ret = []
+			rules = []
 			for r in sorted(self.calc["rules"]):
+				rules.append( "\"rule l ({0} r) = rule{0} l r\"".format(r) )
 				ret.append( IsabelleBuilder.__calc_structure_rules_rule_list_aux(r, self.calc["rules"][r], self.calc["calc_structure_rules"][r], self.calc["parser_command"]) )
-			return "\n" + "| \n".join(ret) + "|\n"
+			#return "\n" + "\n".join(ret) #+ "|\n"
+			rules.append( "\"rule _ _ = ((?\\<^sub>S''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S''Y'')) \\<Longrightarrow>RD (\\<lambda>x. None)\"" )
+
+			return '\n' + "\n".join(ret) + "\nfun rule :: \"Locale \<Rightarrow> Rule \<Rightarrow> ruleder\" where\n" + " |\n".join(rules) + '\n'  
 		return ""
 
 	def rules_rule_list(self):

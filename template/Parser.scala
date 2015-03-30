@@ -7,6 +7,12 @@ object Parser extends JavaTokenParsers with PackratParsers {
 	lazy val stringParser:PackratParser[List[Char]] = 
 		ident ^^ { i => i.toList }
 
+/*/*uncommentL?Structure*/
+	lazy val structure_listParser:PackratParser[List[Structure]] =
+		"[" ~ "]" ^^ { _ => List[Structure]() } |
+		"[" ~> rep(structureParser <~ ",") ~ structureParser <~ "]" ^^ { case list ~ last => list ++ List[Structure](last) }
+/*uncommentR?Structure*/*/
+
 /*parser_calc_structure*/
 
 /*parser_calc_structure_rules*/

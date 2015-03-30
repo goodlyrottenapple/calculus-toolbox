@@ -150,7 +150,8 @@ def calc_compile(flags):
         shutil.rmtree(OUTPUT_PATH + "bin")
         os.makedirs(OUTPUT_PATH + "bin")
 
-    cmd = "scalac -d " + OUTPUT_PATH + "bin -classpath . " + " ".join(paths)
+    cmd = "scalac -J-Xmx1024m -d " + OUTPUT_PATH + "bin -classpath . " + " ".join(paths)
+    print cmd
     response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
     return not cmd_output_throws_error(flags, response, err, "Compiling core calculus classes failed!")
 

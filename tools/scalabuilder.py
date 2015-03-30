@@ -108,7 +108,7 @@ class ScalaBuilder:
 			type = datatype[c].get("type", [])
 
 			constructor_with_args = "{0}({1})".format( constructor, ", ".join(ascii_lowercase[:len(type)]) )
-			used_parsers_list = ["{0}Parser".format(t.lower()) for t in type]
+			used_parsers_list = ["{0}Parser".format(t.lower()).replace(' ', '_') for t in type]
 			tilde_case_list = [ str(x) for x in ascii_lowercase[:len(type)] ]
 
 			#ascii formatting
@@ -212,7 +212,7 @@ class ScalaBuilder:
 			x = 0
 			type_toString_list = []
 			for t in type:
-				type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ]) )
+				type_toString_list.append( "{0}ToString({1}, format)".format(t.lower().replace(' ', '_'), ascii_lowercase[ x ]) )
 				x += 1
 
 			no_sugar = False
