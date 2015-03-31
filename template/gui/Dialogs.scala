@@ -200,6 +200,23 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
   var pt:Option[Prooftree] = None
   modal = true
 
+  val (f, cancel) = interruptableFuture[Option[Prooftree]] { () =>
+    Thread.sleep(100) // hack!! do not remove!! this is to make sure the window is fully initialized...otherwise the gui deadlocks
+    derTree(depth, locale, seq)
+  }
+
+  
+  f.onSuccess {
+    case result =>
+      pt = result
+      close()
+  }
+
+  f.onFailure { 
+    case ex => 
+      println(ex.getClass)
+      close()
+  }
   
 
   contents = new BorderPanel {
@@ -215,23 +232,6 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
   }
 
   centerOnScreen()
-
-
-  val (f, cancel) = interruptableFuture[Option[Prooftree]] { () =>
-    derTree(depth, locale, seq)
-  }
-
-  f.onSuccess {
-    case result =>
-      pt = result
-      close()
-  }
-
-  f.onFailure { 
-    case ex => 
-      println(ex.getClass) 
-      close()
-  }
 
   open()
 
