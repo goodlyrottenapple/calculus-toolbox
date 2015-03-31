@@ -126,6 +126,12 @@ object GUI extends SimpleSwingApplication {
   })
   popup.add(menuItem2);
 
+  val menuItem3 = new MenuItem(Action("Export to LaTeX") {
+    session.exportLatexFromSelPT()
+
+  })
+  popup.add(menuItem3);
+
   // ptPanel stuff here
   val ptPanel = new ProofTreePanel(session)
   ptPanel.build()
@@ -410,7 +416,8 @@ object GUI extends SimpleSwingApplication {
             }
             val result = chooser.showSaveDialog(null)
             if (result == FileChooser.Result.Approve) {
-              saveFile = Some(chooser.selectedFile)
+              val file = if (!chooser.selectedFile.toString.endsWith(".cs")) new java.io.File(chooser.selectedFile.toString+".cs") else chooser.selectedFile
+              saveFile = Some(file)
               saveCSFile(saveFile.get)
             }
           } else saveCSFile(saveFile.get)
@@ -427,8 +434,9 @@ object GUI extends SimpleSwingApplication {
           }
           val result = chooser.showSaveDialog(null)
           if (result == FileChooser.Result.Approve) {
-            saveFile = Some(chooser.selectedFile)
-            saveCSFile(saveFile.get)
+              val file = if (!chooser.selectedFile.toString.endsWith(".cs")) new java.io.File(chooser.selectedFile.toString+".cs") else chooser.selectedFile
+              saveFile = Some(file)
+              saveCSFile(file)
           }
           
         })

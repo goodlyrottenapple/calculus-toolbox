@@ -1,12 +1,15 @@
-import swing.{Button, ListView}
+import swing.{Button, ListView, FileChooser}
 import scala.collection.mutable.ListBuffer
 
+import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.Icon
+
+import java.io.PrintWriter
 
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import PrintCalc.sequentToString
+import PrintCalc.{sequentToString, prooftreeToString}
 
 case class CalcSession() {
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
@@ -92,9 +95,27 @@ case class CalcSession() {
 		ptBuffer.clear()
 	}
 
-	 def addAssmFromSelPT() : Unit = {
+	def addAssmFromSelPT() : Unit = {
 		var sel = ptListView.selection.items.head
 		addAssm(concl(sel._2))
+	}
+
+	def exportLatexFromSelPT() : Unit = {
+		var sel = ptListView.selection.items.head
+
+		val chooser = new FileChooser(new java.io.File(".")) {
+			title = "Save LaTeX File"
+			fileFilter = new FileNameExtensionFilter("LaTeX (.tex)", "tex")
+		}
+		val result = chooser.showSaveDialog(null)
+		if (result == FileChooser.Result.Approve) {
+			val file = if (!chooser.selectedFile.toString.endsWith(".tex")) chooser.selectedFile.toString+".tex" else chooser.selectedFile.toString
+			Some(new PrintWriter(file)).foreach{p =>
+		    	p.write(prooftreeToString(sel._2) + "\\DisplayProof")
+		    	p.close
+		    }
+		}
+
 	}
 
 	def ptToIcon(pt:Prooftree) : TeXIcon = {

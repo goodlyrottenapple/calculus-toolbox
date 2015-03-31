@@ -20,7 +20,10 @@ object PrintCalc{
 /*print_calc_structure_rules*/
 
 /*/*uncommentL?core_compiled*/
-	def prooftreeListToString(in:List[Prooftree], format:String = LATEX) : String = "[" + in.map(x => prooftreeToString(x, format)).mkString(", ") + "]" 
+	def prooftreeListToString(in:List[Prooftree], format:String = LATEX) : String = format match {
+		case ASCII | ISABELLE => "[" + in.map(x => prooftreeToString(x, format)).mkString(", ") + "]"
+		case LATEX => in.map(x => prooftreeToString(x, format)).mkString("\n")
+	}
 	// add print pt!!!!
 	def prooftreeToString(in:Prooftree, format:String = LATEX) : String = format match {
 		case ASCII =>
@@ -29,7 +32,12 @@ object PrintCalc{
 			}
 		case LATEX =>
 			in match {
-				case Prooftreea(a,b,c) => "\\AxiomC{$ " + sequentToString(a, format) + prooftreeListToString(c, format) + " $}\n"
+				case Prooftreea(a,b,List()) => "\\AxiomC{$ " + sequentToString(a, format)  + " $}\n"
+				case Prooftreea(a,b,List(c)) => prooftreeToString(c, format) + "\\UnaryInfC{$ " + sequentToString(a, format)  + " $}\n"
+				case Prooftreea(a,b,List(c, d)) => prooftreeListToString(List(c, d), format) + "\\BinaryInfC{$ " + sequentToString(a, format)  + " $}\n"
+				case Prooftreea(a,b,List(c, d, e)) => prooftreeListToString(List(c, d, e), format) + "\\TrinaryInfC{$ " + sequentToString(a, format)  + " $}\n"
+				case Prooftreea(a,b,List(c, d, e, f)) => prooftreeListToString(List(c, d, e, f), format) + "\\QuaternaryInfC{$ " + sequentToString(a, format)  + " $}\n"
+				case Prooftreea(a,b,list) => prooftreeListToString(list, format) + "\\QuinaryInfC{$ " + sequentToString(a, format)  + " $}\n"
 			}
 		case ISABELLE =>
 			in match {
