@@ -56,6 +56,7 @@ fun bigcomma_cons_R2 :: "Sequent \<Rightarrow> Sequent list option" where
 
 
 datatype Locale = Cut_Formula Formula | 
+                  Premise Sequent |
                   RelAKA "Action \<Rightarrow> Agent => Action => bool" |
                   Swapout "Action \<Rightarrow> Agent => Action => bool" "Action list" |
                   Empty
