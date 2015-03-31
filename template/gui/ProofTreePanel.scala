@@ -123,7 +123,9 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case Some(selSeq) =>
 					tree.isLeaf(selSeq) match {
 						case true =>
-							derTree(5, session.currentLocale, selSeq.seq) match {
+							//val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
+							val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
+            				new PSDialog(locale=session.currentLocale++currentAssm, seq=selSeq.seq).pt match {
 	              				case Some(r) => 
 	              					session.currentPT = session.mergePTs(r, selSeq, tree.getRoot(), children)
 	            					update()
@@ -143,7 +145,9 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		selectedSequentInPt match {
 			case Some(selSeq) =>
 				if(tree.isLeaf(selSeq)) {
-					new SequentInputDialog().sequent match {
+					val list = derAll(session.currentLocale, selSeq.seq)
+					new SequentListDialog(list=list).pair match {
+					/*new SequentInputDialog().sequent match {
 						case Some(s) =>
 							//println(selSeq.seq)
 							//println(derAll(selSeq.seq).filter{ case (r,l) => l.exists(_ == s)})
@@ -153,7 +157,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 								case list => new RuleSelectDialog(list=list).pair 
 							}
 
-							pair match {
+							pair match {*/
 								case None => Dialog.showMessage(null, "No rule found for the given sequent", "Error")
 								case Some((rule, derList)) =>
 									val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
@@ -164,8 +168,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 									}
 									session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
 									update()
-							}
-						case None => Dialog.showMessage(null, "Invalid sequent entered", "Error")
+						//	}
+						//case None => Dialog.showMessage(null, "Invalid sequent entered", "Error")
 					}
 				} 
 				else Dialog.showMessage(null, "The sequent is not a leaf please delete pt above to proceed", "Error")

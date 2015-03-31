@@ -272,10 +272,11 @@ class IsabelleBuilder:
 		return ""
 
 	def rules_rule_list(self):
-		if "parser_command" in self.calc and "rules" in self.calc:
+		if "parser_command" in self.calc and "calc_structure_rules" in self.calc:
 			ret = []
-			for r in sorted(self.calc["rules"]):
-				ret.append( "(map ({0}) [{1}])".format(r, ",".join(self.calc["rules"][r].keys())) )
+			for r in sorted(self.calc["calc_structure_rules"]):
+				rules = [rr for rr in self.calc["calc_structure_rules"][r].keys() if rr in self.calc["rules"][r].keys() or "premise" in self.calc["calc_structure_rules"][r][rr] ]
+				if len(rules) > 0: ret.append( "(map ({0}) [{1}])".format( r, ",".join(rules) ) )
 			return " @ ".join(ret)
 		return ""
 

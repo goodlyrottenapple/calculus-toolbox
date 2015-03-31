@@ -273,7 +273,6 @@ class ScalaBuilder:
 				#	type_toString_latex_list.insert(0, "\"{0}\"".format(c))
 
 				if "_Agent_" in c or "_Action_" in c :
-
 					type_toString_latex_list = []
 					x = 0
 					op = ""
@@ -306,8 +305,7 @@ class ScalaBuilder:
 
 						type_toString_list = []
 
-						if "_Agent_" in c1 or "_Action_" in c1 :
-							# print constructor, middle
+						if "_Agent_" in constructor or "_Action_" in constructor :
 							x = 0
 							flag = -1
 							op = ""

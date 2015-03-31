@@ -152,10 +152,10 @@ object GUI extends SimpleSwingApplication {
             println("LATEX: " + sequentToString(session.currentSequent, PrintCalc.LATEX))
             println("ISABELLE: " + sequentToString(session.currentSequent, PrintCalc.ISABELLE))
 
-
             val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
-            val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
-            derTree(currentValue, session.currentLocale, session.currentSequent, currentAssm) match {
+            val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
+            //derTree(currentValue, session.currentLocale++currentAssm, session.currentSequent) match {
+            new PSDialog(depth=currentValue, locale=session.currentLocale++currentAssm, seq=session.currentSequent).pt match {
               case Some(r) =>
                 session.currentPT = r
                 //display prooftree r in the PTPanel
@@ -167,7 +167,7 @@ object GUI extends SimpleSwingApplication {
                   session.addPT()
                   if(globalPrefs(AUTO_ADD_ASSM) == true) session.addAssm()
                 }
-              case None => log.text = "PT could not be found!"
+                case None => Dialog.showMessage(null, "No Prooftree could be found...", "Error")
             }
           }
         }

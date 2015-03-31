@@ -233,7 +233,7 @@
 				"type" : ["Structure list"],
 				"isabelle" : ";;\\<^sub>S _",
 				"ascii" : ";; _",
-				"latex" : "; _ ",
+				"latex" : "\\mbox{\\Large {\\bf ;}} _ ",
 				"precedence": [330, 331]
 			}
 		},
@@ -319,7 +319,9 @@
 
 			"Prem" : {
 				"ascii" : "Prem",
-				"latex" : "Prem"
+				"latex" : "Prem",
+				"condition" : "(\\<lambda>x. seq = x)",
+				"locale" : "Premise seq"
 			}
 		},
 
@@ -845,7 +847,8 @@
 	"rules" : {
 		"RuleZer" : {
 			"Id" : 				["A?p |- A?p",				""],
-			"Atom" : 			["?X |- ?Y",				""]
+			"Atom" : 			["?X |- ?Y",				""],
+			"Prem" : 			["?X |- ?Y",				""]
 		},
 		"RuleStruct" : {
 			"I_impL" : 			["I |- ?Y << ?X", 			"?X |- ?Y"],
@@ -883,15 +886,15 @@
 			"K_nec_L" :			["backK Ag?a I |- ?X", 		"I |- ?X"],
 			"K_nec_R" :			["?X |- backK Ag?a I", 		"?X |- I"],
 
-			"FS_K_L" :			["forwK Ag?a (?Y >> ?Z) |- ?X", 		"forwK Ag?a ?Y >> forwK Ag?a ?Z |- ?X"],
-			"FS_K_R" :			["?X |- forwK Ag?a (?Y >> ?Z)", 		"?X |- forwK Ag?a ?Y >> forwK Ag?a ?Z"],
-			"Mon_K_L" :			["forwK Ag?a (?X ; ?Y) |- ?Z", 			"forwK Ag?a ?X ; forwK Ag?a ?Y |- ?Z"],
-			"Mon_K_R" :			["?Z |- forwK Ag?a (?X ; ?Y)", 			"?Z |- forwK Ag?a ?X ; forwK Ag?a ?Y"],
+			"FS_K_L" :			["forwK Ag?a (?Y >> ?Z) |- ?X", 		"(forwK Ag?a ?Y) >> (forwK Ag?a ?Z) |- ?X"],
+			"FS_K_R" :			["?X |- forwK Ag?a (?Y >> ?Z)", 		"?X |- (forwK Ag?a ?Y) >> (forwK Ag?a ?Z)"],
+			"Mon_K_L" :			["forwK Ag?a (?X ; ?Y) |- ?Z", 			"(forwK Ag?a ?X) ; (forwK Ag?a ?Y) |- ?Z"],
+			"Mon_K_R" :			["?Z |- forwK Ag?a (?X ; ?Y)", 			"?Z |- (forwK Ag?a ?X) ; (forwK Ag?a ?Y)"],
 
-			"K_FS_L" :			["backK Ag?a (?Y >> ?Z) |- ?X", 		"backK Ag?a ?Y >> backK Ag?a ?Z |- ?X"],
-			"K_FS_R" :			["?X |- backK Ag?a (?Y >> ?Z)", 		"?X |- backK Ag?a ?Y >> backK Ag?a ?Z"],
-  			"K_mon_L" : 		["backK Ag?a (?X ; ?Y) |- ?Z", 			"backK Ag?a ?X ; backK Ag?a ?Y |- ?Z"],
-  			"K_mon_R" : 		["?Z |- backK Ag?a (?X ; ?Y)", 			"?Z |- backK Ag?a ?X ; backK Ag?a ?Y"]
+			"K_FS_L" :			["backK Ag?a (?Y >> ?Z) |- ?X", 		"(backK Ag?a ?Y) >> (backK Ag?a ?Z) |- ?X"],
+			"K_FS_R" :			["?X |- backK Ag?a (?Y >> ?Z)", 		"?X |- (backK Ag?a ?Y) >> (backK Ag?a ?Z)"],
+  			"K_mon_L" : 		["backK Ag?a (?X ; ?Y) |- ?Z", 			"(backK Ag?a ?X) ; (backK Ag?a ?Y) |- ?Z"],
+  			"K_mon_R" : 		["?Z |- backK Ag?a (?X ; ?Y)", 			"?Z |- (backK Ag?a ?X) ; (backK Ag?a ?Y)"]
 
   		},
 
@@ -902,15 +905,15 @@
   			"A_nec_L" :			["backA Act?a I |- ?X", 	"I |- ?X"],
   			"A_nec_R" :			["?X |- backA Act?a I", 	"?X |- I"],
 
-  			"FS_A_L" :			["forwA Act?a (?Y >> ?Z) |- ?X", 		"forwA Act?a ?Y >> forwA Act?a ?Z |- ?X"],
-  			"FS_A_R" :			["?X |- forwA Act?a (?Y >> ?Z)", 		"?X |- forwA Act?a ?Y >> forwA Act?a ?Z"],
+  			"FS_A_L" :			["forwA Act?a (?Y >> ?Z) |- ?X", 		"(forwA Act?a ?Y) >> (forwA Act?a ?Z) |- ?X"],
+  			"FS_A_R" :			["?X |- forwA Act?a (?Y >> ?Z)", 		"?X |- (forwA Act?a ?Y) >> (forwA Act?a ?Z)"],
 
-  			"Mon_A_L" :			["forwA Act?a (?X ; ?Y) |- ?Z", 		"forwA Act?a ?X ; forwA Act?a ?Y |- ?Z"],
+  			"Mon_A_L" :			["forwA Act?a (?X ; ?Y) |- ?Z", 		"(forwA Act?a ?X) ; (forwA Act?a ?Y) |- ?Z"],
   			"Mon_A_R" :			["?Z |- forwA Act?a (?X ; ?Y)", 		"?Z |- forwA Act?a ?X ; forwA Act?a ?Y"],
-  			"A_FS_L" :			["backA Act?a (?Y >> ?Z) |- ?X", 		"backA Act?a ?Y >> backA Act?a ?Z |- ?X"],
-  			"A_FS_R" :			["?X |- backA Act?a (?Y >> ?Z)", 		"?X |- backA Act?a ?Y >> backA Act?a ?Z"],
-  			"A_mon_L" :			["backA Act?a (?X ; ?Y) |- ?Z", 		"backA Act?a ?X ; backA Act?a ?Y |- ?Z"],
-  			"A_mon_R" :			["?Z |- backA Act?a (?X ; ?Y)", 		"?Z |- backA Act?a ?X ; backA Act?a ?Y"]
+  			"A_FS_L" :			["backA Act?a (?Y >> ?Z) |- ?X", 		"(backA Act?a ?Y) >> (backA Act?a ?Z) |- ?X"],
+  			"A_FS_R" :			["?X |- backA Act?a (?Y >> ?Z)", 		"?X |- (backA Act?a ?Y) >> (backA Act?a ?Z)"],
+  			"A_mon_L" :			["backA Act?a (?X ; ?Y) |- ?Z", 		"(backA Act?a ?X) ; (backA Act?a ?Y) |- ?Z"],
+  			"A_mon_R" :			["?Z |- backA Act?a (?X ; ?Y)", 		"?Z |- (backA Act?a ?X) ; (backA Act?a ?Y)"]
   		},
 
 
@@ -924,7 +927,7 @@
 		},
 		"RuleDisp" : {
 			"Comma_impL_disp" :	["?X |- ?Z << ?Y", 			"?X ; ?Y |- ?Z"],
-			"Comma_impL_disp2" :	["?X ; ?Y |- ?Z", 			"?X |- ?Z << ?Y"],
+			"Comma_impL_disp2" :["?X ; ?Y |- ?Z", 			"?X |- ?Z << ?Y"],
 			"Comma_impR_disp" :	["?Y |- ?X >> ?Z", 			"?X ; ?Y |- ?Z"],
 			"Comma_impR_disp2" :["?X ; ?Y |- ?Z", 			"?Y |- ?X >> ?Z"],
 
