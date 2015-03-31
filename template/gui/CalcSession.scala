@@ -64,6 +64,10 @@ case class CalcSession() {
 		//if (listView.listData.isEmpty) removeAssmButton.enabled = false
 	}
 
+	def clearAssms() = {
+		assmsBuffer.clear()
+	}
+
     def addPT(pt: Prooftree = currentPT) = {
 		val newPt = (ptToIcon(pt), pt)
 		ptBuffer += newPt
@@ -82,6 +86,10 @@ case class CalcSession() {
 			removePTsButton.enabled = false
 			loadPTButton.enabled = false
 		}*/
+	}
+
+	def clearPT() = {
+		ptBuffer.clear()
 	}
 
 	 def addAssmFromSelPT() : Unit = {

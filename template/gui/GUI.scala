@@ -345,27 +345,42 @@ object GUI extends SimpleSwingApplication {
     border = Swing.EmptyBorder(0, 0, 0, 0)
   }
 
-  // copied form https://www.cis.upenn.edu/~matuszek/cis554-2011/Pages/scala-io-code-samples.html
-  def openCSFile(title: String = ""): Option[java.io.File] = {  
-    val chooser = new FileChooser(new java.io.File(".")) {
-      fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
+  def openCSFile(file:java.io.File) = {
+    val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
+    Some(JSON.parseFull(jsonStr)) match {
+      case Some(M(map))  =>
+        map.get("assms") match {
+          case L(assms) =>
+            val ass = assms.map(parseSequent(_))
+            session.clearAssms
+            for (Some(a) <- ass){
+              session.addAssm(a)
+            }
+          case _ => ;
+        }
+        map.get("pts") match {
+          case L(pts) =>
+            val ptss = pts.map(parseProoftree(_))
+            session.clearPT
+            for (Some(pt) <- ptss){
+              session.addPT(pt)
+            }
+          case _ => ;
+        }
+      case _ => ;
     }
-    chooser.title = title
-    val result = chooser.showOpenDialog(null)
-    if (result == FileChooser.Result.Approve) {
-      Some(chooser.selectedFile)
-    } else None
   }
 
-  def saveCSFile(title: String = ""): Option[java.io.File] = {  
-    val chooser = new FileChooser(new java.io.File(".")) {
-      fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
+  def saveCSFile(file:java.io.File) = {  
+    Some(new PrintWriter(file)).foreach{p =>
+      p.write(
+        JSONObject( 
+          Map( 
+            "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
+            "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
+          .toString())
+      p.close
     }
-    chooser.title = title
-    val result = chooser.showSaveDialog(null)
-    if (result == FileChooser.Result.Approve) {
-      Some(chooser.selectedFile)
-    } else None
   }
 
   def top = new MainFrame {
@@ -378,70 +393,42 @@ object GUI extends SimpleSwingApplication {
     menuBar = new MenuBar {
       contents += new Menu("File") {
         contents += new MenuItem(Action("Open..."){
-          openCSFile("Open Calc Session File") match {
-            case Some(file) =>
-              val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
-              Some(JSON.parseFull(jsonStr)) match {
-                case Some(M(map))  =>
-                  map.get("assms") match {
-                    case L(assms) =>
-                      val ass = assms.map(parseSequent(_))
-                      session.clearAssms
-                      for (Some(a) <- ass){
-                        session.addAssm(a)
-                      }
-                    case _ => ;
-                  }
-                  map.get("pts") match {
-                    case L(pts) =>
-                      val ptss = pts.map(parseProoftree(_))
-                      session.clearPT
-                      for (Some(pt) <- ptss){
-                        session.addPT(pt)
-                      }
-                    case _ => ;
-                  }
-                case _ => ;
-              }
-            case None => Dialog.showMessage(null, "File could not be opened", "Error")
+          val chooser = new FileChooser(new java.io.File(".")) {
+            title = "Open Calc Session File"
+            fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
           }
-          
+          val result = chooser.showOpenDialog(null)
+          if (result == FileChooser.Result.Approve) openCSFile(chooser.selectedFile)
           //println(res)
         })
         contents += new MenuItem(Action("Save") {
           println("Action '"+ title +"' invoked")
-          if(saveFile == None) saveFile = saveCSFile("Open Calc Session File")
-          saveFile match {
-            case Some(file) =>
-              Some(new PrintWriter(file)).foreach{p =>
-                p.write(
-                  JSONObject( 
-                    Map( 
-                      "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
-                      "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
-                    .toString())
-                p.close
-              }
-            case None => Dialog.showMessage(null, "File could not be saved", "Error")
-          }
+          if(saveFile == None){
+            val chooser = new FileChooser(new java.io.File(".")) {
+              title = "Save Calc Session File"
+              fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
+            }
+            val result = chooser.showSaveDialog(null)
+            if (result == FileChooser.Result.Approve) {
+              saveFile = Some(chooser.selectedFile)
+              saveCSFile(saveFile.get)
+            }
+          } else saveCSFile(saveFile.get)
           
         })
 
+
         contents += new MenuItem(Action("Save As...") {
           println("Action '"+ title +"' invoked")
-          saveFile = saveCSFile("Open Calc Session File")
-          saveFile match {
-            case Some(file) =>
-              Some(new PrintWriter(file)).foreach{p =>
-                p.write(
-                  JSONObject( 
-                    Map( 
-                      "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
-                      "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
-                    .toString())
-                p.close
-              }
-            case None => Dialog.showMessage(null, "File could not be saved", "Error")
+          
+          val chooser = new FileChooser(new java.io.File(".")) {
+            title = "Save Calc Session File"
+            fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
+          }
+          val result = chooser.showSaveDialog(null)
+          if (result == FileChooser.Result.Approve) {
+            saveFile = Some(chooser.selectedFile)
+            saveCSFile(saveFile.get)
           }
           
         })
