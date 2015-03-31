@@ -6,6 +6,11 @@ import java.awt.event.KeyEvent
 import java.awt.Color
 import java.awt.geom.Rectangle2D
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+
+
 import scala.collection.JavaConversions._
 
 import org.abego.treelayout.TreeLayout
@@ -91,6 +96,21 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	
 
 	val popup = new PopupMenu
+
+	val copy = new MenuItem(Action("Copy") {
+		selectedSequentInPt match {
+			case Some(seqIPT) => 
+				val str = sequentToString(seqIPT.seq, PrintCalc.ASCII)
+				val toolkit = Toolkit.getDefaultToolkit()
+				val clipboard = toolkit.getSystemClipboard()
+				val strSel = new StringSelection(str)
+				clipboard.setContents(strSel, null)
+		}
+		
+	})
+	popup.add(copy);
+
+	
 	val addAssm = new MenuItem(Action("Add as assm") {
 		selectedSequentInPt match {
 			case Some(seqIPT) => session.addAssm(seqIPT.seq)
