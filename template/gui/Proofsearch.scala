@@ -26,16 +26,12 @@ object Proofsearch{
 
 	def crossProd[A](inputList : List[List[A]]) : List[List[A]] = inputList.foldRight( zss[A] ) (cr _)
 
-	def derTrees(loc:List[Locale], n:Int, seq:Sequent, prems:List[Sequent] = List()) : List[Prooftree] = n match {
+	def derTrees(loc:List[Locale], n:Int, seq:Sequent) : List[Prooftree] = n match {
 		case 0 => List[Prooftree]()
 		case n => 
-			prems.find(_ ==seq) match {
-				case Some(r) => return List( Prooftreea(seq,RuleZera(Prem()), List()) )
-				case None => 
-			}
 			var ret = new ListBuffer[Prooftree]()
 			for( (rule, derList) <- derAll(loc, seq).sortWith(_._2.length < _._2.length) ) {
-				lazy val ders = crossProd( derList.map(x => derTrees(loc, n-1, x, prems)) )
+				lazy val ders = crossProd( derList.map(x => derTrees(loc, n-1, x)) )
 
 				for(possibleDer <- ders ) {
 					ret += Prooftreea(seq, rule, possibleDer)
@@ -44,10 +40,10 @@ object Proofsearch{
 			return ret.toList
 	}
 
-	def derTree(max:Int, loc:List[Locale], seq:Sequent, prems:List[Sequent] = List(), n:Int = 0) : Option[Prooftree] = {
+	def derTree(max:Int, loc:List[Locale], seq:Sequent, n:Int = 0) : Option[Prooftree] = {
 		if (n > max) None
-		else derTrees(loc, n, seq, prems) match {
-			case Nil => derTree(max, loc, seq, prems, n+1)
+		else derTrees(loc, n, seq) match {
+			case Nil => derTree(max, loc, seq, n+1)
 			case res => Some(res(0))
 		}
 	}
