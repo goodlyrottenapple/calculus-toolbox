@@ -17,6 +17,8 @@ import scala.util.parsing.json.{JSON, JSONObject, JSONArray}
 
 import java.awt.event.MouseEvent
 import javax.swing.{Icon, SpinnerNumberModel, JSpinner}
+import javax.swing.filechooser.FileNameExtensionFilter
+
 import java.io.PrintWriter
 
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
@@ -31,6 +33,8 @@ object GUI extends SimpleSwingApplication {
   val AUTO_ADD_PT = "AUTO_ADD_PT"
   val AUTO_ADD_ASSM = "AUTO_ADD_ASSM"
   var globalPrefs = scala.collection.mutable.Map[String, Boolean]()
+
+  var saveFile:Option[java.io.File] = None
 
   val session = CalcSession()
   //UI elements
@@ -341,6 +345,29 @@ object GUI extends SimpleSwingApplication {
     border = Swing.EmptyBorder(0, 0, 0, 0)
   }
 
+  // copied form https://www.cis.upenn.edu/~matuszek/cis554-2011/Pages/scala-io-code-samples.html
+  def openCSFile(title: String = ""): Option[java.io.File] = {  
+    val chooser = new FileChooser(new java.io.File(".")) {
+      fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
+    }
+    chooser.title = title
+    val result = chooser.showOpenDialog(null)
+    if (result == FileChooser.Result.Approve) {
+      Some(chooser.selectedFile)
+    } else None
+  }
+
+  def saveCSFile(title: String = ""): Option[java.io.File] = {  
+    val chooser = new FileChooser(new java.io.File(".")) {
+      fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
+    }
+    chooser.title = title
+    val result = chooser.showSaveDialog(null)
+    if (result == FileChooser.Result.Approve) {
+      Some(chooser.selectedFile)
+    } else None
+  }
+
   def top = new MainFrame {
     title = "Min Calc Toolbox"
     contents = ui
@@ -350,41 +377,73 @@ object GUI extends SimpleSwingApplication {
 
     menuBar = new MenuBar {
       contents += new Menu("File") {
-        contents += new MenuItem(Action("Open"){
-          val jsonStr = scala.io.Source.fromFile("foo.txt").getLines.mkString
-          Some(JSON.parseFull(jsonStr)) match {
-            case Some(M(map))  =>
-              map.get("assms") match {
-                case L(assms) =>
-                  val ass = assms.map(parseSequent(_))
-                  for (Some(a) <- ass){
-                    session.addAssm(a)
+        contents += new MenuItem(Action("Open..."){
+          openCSFile("Open Calc Session File") match {
+            case Some(file) =>
+              val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
+              Some(JSON.parseFull(jsonStr)) match {
+                case Some(M(map))  =>
+                  map.get("assms") match {
+                    case L(assms) =>
+                      val ass = assms.map(parseSequent(_))
+                      session.clearAssms
+                      for (Some(a) <- ass){
+                        session.addAssm(a)
+                      }
+                    case _ => ;
+                  }
+                  map.get("pts") match {
+                    case L(pts) =>
+                      val ptss = pts.map(parseProoftree(_))
+                      session.clearPT
+                      for (Some(pt) <- ptss){
+                        session.addPT(pt)
+                      }
+                    case _ => ;
                   }
                 case _ => ;
               }
-              map.get("pts") match {
-                case L(pts) =>
-                  val ptss = pts.map(parseProoftree(_))
-                  for (Some(pt) <- ptss){
-                    session.addPT(pt)
-                  }
-                case _ => ;
-              }
-            case _ => ;
+            case None => Dialog.showMessage(null, "File could not be opened", "Error")
           }
+          
           //println(res)
         })
         contents += new MenuItem(Action("Save") {
           println("Action '"+ title +"' invoked")
-          Some(new PrintWriter("foo.txt")).foreach{p =>
-            p.write(
-              JSONObject( 
-                Map( 
-                  "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
-                  "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
-                .toString())
-            p.close
+          if(saveFile == None) saveFile = saveCSFile("Open Calc Session File")
+          saveFile match {
+            case Some(file) =>
+              Some(new PrintWriter(file)).foreach{p =>
+                p.write(
+                  JSONObject( 
+                    Map( 
+                      "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
+                      "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
+                    .toString())
+                p.close
+              }
+            case None => Dialog.showMessage(null, "File could not be saved", "Error")
           }
+          
+        })
+
+        contents += new MenuItem(Action("Save As...") {
+          println("Action '"+ title +"' invoked")
+          saveFile = saveCSFile("Open Calc Session File")
+          saveFile match {
+            case Some(file) =>
+              Some(new PrintWriter(file)).foreach{p =>
+                p.write(
+                  JSONObject( 
+                    Map( 
+                      "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
+                      "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
+                    .toString())
+                p.close
+              }
+            case None => Dialog.showMessage(null, "File could not be saved", "Error")
+          }
+          
         })
         contents += new Separator
         contents += new MenuItem(Action("Quit") {

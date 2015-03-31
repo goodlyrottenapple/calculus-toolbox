@@ -100,6 +100,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	val copy = new MenuItem(Action("Copy") {
 		selectedSequentInPt match {
 			case Some(seqIPT) => 
+				// adapted from http://www.avajava.com/tutorials/lessons/how-do-i-copy-a-string-to-the-clipboard.html
 				val str = sequentToString(seqIPT.seq, PrintCalc.ASCII)
 				val toolkit = Toolkit.getDefaultToolkit()
 				val clipboard = toolkit.getSystemClipboard()
@@ -143,7 +144,6 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case Some(selSeq) =>
 					tree.isLeaf(selSeq) match {
 						case true =>
-							//val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
 							val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
             				new PSDialog(locale=session.currentLocale++currentAssm, seq=selSeq.seq).pt match {
 	              				case Some(r) => 

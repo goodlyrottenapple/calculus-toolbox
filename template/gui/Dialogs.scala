@@ -3,6 +3,7 @@ import swing.event.{KeyReleased, Key, SelectionChanged}
 import swing.BorderPanel.Position._
 import swing.ListView.IntervalMode
 import javax.swing.Icon
+
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import java.util.concurrent.atomic.AtomicReference
@@ -19,7 +20,7 @@ class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])]
   modal = true
 
   val listView = new ListView[(Icon, Rule, List[Sequent])]() {   
-    listData = for((r,l) <- list) yield (new TeXFormula(sequentToString( l(0) )).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
+    listData = for((r,l) <- list) yield (new TeXFormula(l.map( sequentToString(_) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
     renderer = ListView.Renderer(_._1)
     selection.intervalMode = IntervalMode.Single
   }
@@ -220,9 +221,15 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
     derTree(depth, locale, seq)
   }
 
-  f onSuccess {
+  f.onSuccess {
     case result =>
       pt = result
+      close()
+  }
+
+  f.onFailure { 
+    case ex => 
+      println(ex.getClass) 
       close()
   }
 
