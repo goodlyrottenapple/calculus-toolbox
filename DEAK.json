@@ -795,12 +795,14 @@
 			"Swapout_L" : {
 				"ascii" : "swapout'L",
 				"latex" : "swapout'L",
-				"locale" : "Swapout rel blist"
+				"locale" : "Swapout rel blist",
+				"premise" : "swapout_L rel blist (AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))"
 			},
 			"Swapout_R" : {
 				"ascii" : "Swapout'R",
 				"latex" : "Swapout'R",
-				"locale" : "Swapout rel blist"
+				"locale" : "Swapout rel blist",
+				"premise" : "swapout_R rel blist ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X''))"
 			}
 		},
 

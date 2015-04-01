@@ -28,7 +28,7 @@ object PrintCalc{
 	def prooftreeToString(in:Prooftree, format:String = LATEX) : String = format match {
 		case ASCII =>
 			in match {
-				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "<==" + " " + ruleToString(b, format) + " " + prooftreeListToString(c, format) + ")"
+				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "<==" + " (" + ruleToString(b, format) + ") " + prooftreeListToString(c, format) + ")"
 			}
 		case LATEX =>
 			in match {

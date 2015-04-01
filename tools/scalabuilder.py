@@ -132,7 +132,9 @@ class ScalaBuilder:
 		#definition for _Parser : PackratParser[_] = ...
 		ordered_d = {k : ScalaBuilder.__calc_structure_datatype_constructor_rank(name, k, structure) for k in datatype}
 
-		for c in sorted(ordered_d, key=ordered_d.get, reverse=False):
+		# fix for rules... the parser for 'rule2' should always be before 'rule' 
+		sortedL = sorted(ordered_d, key=ordered_d.get, reverse=False) if "rule" not in name.lower() else sorted(ordered_d.keys(), reverse=True)
+		for c in sortedL:
 			if "ascii" in datatype[c] or "latex" in datatype[c] or "isabelle" in datatype[c]:
 				constructor = c
 				#scala language fix introduced in isabelle -> scala conversion when the datatype and constructor for set datatype are the same
@@ -248,100 +250,100 @@ class ScalaBuilder:
 			#latex formatting
 			
 			#redirect for building latex pt output
-			if "prooftree" in name.lower(): 
-				seqs = [i for i in type_toString_list if "sequent" in i]
-				pts = [i for i in type_toString_list if "prooftree" in i]
-				type_toString_latex_list = pts
-				if len(pts) == 1: 
-					type_toString_latex_list .append("\"\\\\UnaryInfC{$ \"")
-				elif len(pts) == 2: 
-					type_toString_latex_list .append("\"\\\\BinaryInfC{$ \"")
-				else:
-					type_toString_latex_list.append("\"\\\\AxiomC{$ \"")
-				type_toString_latex_list += seqs
-				type_toString_latex_list.append("\" $}\\n\"")
+			# if "prooftree" in name.lower(): 
+			# 	seqs = [i for i in type_toString_list if "sequent" in i]
+			# 	pts = [i for i in type_toString_list if "prooftree" in i]
+			# 	type_toString_latex_list = pts
+			# 	if len(pts) == 1: 
+			# 		type_toString_latex_list .append("\"\\\\UnaryInfC{$ \"")
+			# 	elif len(pts) == 2: 
+			# 		type_toString_latex_list .append("\"\\\\BinaryInfC{$ \"")
+			# 	else:
+			# 		type_toString_latex_list.append("\"\\\\AxiomC{$ \"")
+			# 	type_toString_latex_list += seqs
+			# 	type_toString_latex_list.append("\" $}\\n\"")
 
-				middle = " + ".join( type_toString_latex_list )
-				latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
-			else:
-				type_toString_latex_list = list(type_toString_list)
-				if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
-					filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
-					for filtered_latex_symb in filtered_latex_symbs:
-						type_toString_latex_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
-				#else:
-				#	type_toString_latex_list.insert(0, "\"{0}\"".format(c))
+			# 	middle = " + ".join( type_toString_latex_list )
+			# 	latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
+			# else:
+			type_toString_latex_list = list(type_toString_list)
+			if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+				filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+				for filtered_latex_symb in filtered_latex_symbs:
+					type_toString_latex_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+			#else:
+			#	type_toString_latex_list.insert(0, "\"{0}\"".format(c))
 
-				if "_Agent_" in c or "_Action_" in c :
-					type_toString_latex_list = []
-					x = 0
-					op = ""
-					flag = -1
-					for t in type:
-						if "op" in t.lower() : 
-							op = "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ])
-							type_toString_latex_list.append(  op+".split(\"_\")(0)" )
-							flag = x+1
-						else: type_toString_latex_list.append( "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ]) )
-								
-						if flag == x : 
-							type_toString_latex_list.append(  op+".split(\"_\")(1)" )
-						
-						x += 1
+			if "_Agent_" in c or "_Action_" in c :
+				type_toString_latex_list = []
+				x = 0
+				op = ""
+				flag = -1
+				for t in type:
+					if "op" in t.lower() : 
+						op = "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ])
+						type_toString_latex_list.append(  op+".split(\"_\")(0)" )
+						flag = x+1
+					else: type_toString_latex_list.append( "{0}ToString({1}, format)".format(t.lower(), ascii_lowercase[ x ]) )
+							
+					if flag == x : 
+						type_toString_latex_list.append(  op+".split(\"_\")(1)" )
+					
+					x += 1
 
-						
+					
 
-				middle = " + \" \" + ".join( type_toString_latex_list )
-				#if len(type_toString_list) > 1 and len([i for i in type_toString_latex_list if not i.startswith("\"")]) > 0 and "sequent" not in name.lower(): 
-				#i feel like the following code is a terrible mess...it basically does magic to remove all but the essential bracketing from a latex term
-				if name in type:
-					for c1 in [i for i in datatype.keys() if name in datatype[i]["type"] and len(datatype[i]["type"]) > 2]:
-						constructor1 = c1
-						if c1 == name: constructor1 += "a" # fix for scala export, as you cant have the same datatype name and constructor
-						type1 = datatype[c1].get("type", [])
-						args_list = list(ascii_lowercase[0:len(type)])
-						args_list[type.index(name)] = "{0}({1})".format(constructor1, ",".join(ascii_lowercase[len(type):len(type)+len(type1)])) 
-						args1 = ",".join(args_list)
+			middle = " + \" \" + ".join( type_toString_latex_list )
+			#if len(type_toString_list) > 1 and len([i for i in type_toString_latex_list if not i.startswith("\"")]) > 0 and "sequent" not in name.lower(): 
+			#i feel like the following code is a terrible mess...it basically does magic to remove all but the essential bracketing from a latex term
+			if name in type:
+				for c1 in [i for i in datatype.keys() if name in datatype[i]["type"] and len(datatype[i]["type"]) > 2]:
+					constructor1 = c1
+					if c1 == name: constructor1 += "a" # fix for scala export, as you cant have the same datatype name and constructor
+					type1 = datatype[c1].get("type", [])
+					args_list = list(ascii_lowercase[0:len(type)])
+					args_list[type.index(name)] = "{0}({1})".format(constructor1, ",".join(ascii_lowercase[len(type):len(type)+len(type1)])) 
+					args1 = ",".join(args_list)
 
-						type_toString_list = []
+					type_toString_list = []
 
-						if "_Agent_" in constructor or "_Action_" in constructor :
-							x = 0
-							flag = -1
-							op = ""
-							for t in type:
-								if "op" in t.lower() : 
-									op = "{0}ToString({1}, format)".format(t.lower(), args_list[ x ])
-									type_toString_list.append(  op+".split(\"_\")(0)" )
-									flag = x+1
-								else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
-								
-								if flag == x : 
-									type_toString_list.append(  op+".split(\"_\")(1)" )
-								x += 1
+					if "_Agent_" in constructor or "_Action_" in constructor :
+						x = 0
+						flag = -1
+						op = ""
+						for t in type:
+							if "op" in t.lower() : 
+								op = "{0}ToString({1}, format)".format(t.lower(), args_list[ x ])
+								type_toString_list.append(  op+".split(\"_\")(0)" )
+								flag = x+1
+							else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
+							
+							if flag == x : 
+								type_toString_list.append(  op+".split(\"_\")(1)" )
+							x += 1
 
-							if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
-								filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
-								for filtered_latex_symb in filtered_latex_symbs:
-									type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+						if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+							filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+							for filtered_latex_symb in filtered_latex_symbs:
+								type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
 
-						else:
-							x = 0
-							flag = True
-							for t in type:
-								if t == name and flag : 
-									type_toString_list.append( "\"(\" + {0}ToString({1}, format) + \")\"".format(t.lower(), args_list[ x ]) )
-									flag = False
-								else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
-								x += 1
+					else:
+						x = 0
+						flag = True
+						for t in type:
+							if t == name and flag : 
+								type_toString_list.append( "\"(\" + {0}ToString({1}, format) + \")\"".format(t.lower(), args_list[ x ]) )
+								flag = False
+							else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
+							x += 1
 
-							if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
-								filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
-								for filtered_latex_symb in filtered_latex_symbs:
-									type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
-						middle1 = " + \" \" + ".join( type_toString_list )
-						latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args1, middle1) )
-				latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
+						if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+							filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+							for filtered_latex_symb in filtered_latex_symbs:
+								type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+					middle1 = " + \" \" + ".join( type_toString_list )
+					latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args1, middle1) )
+			latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
 
 		ret += "		case ASCII =>\n			in match {\n"
 		ret += "\n".join(ascii_list)
