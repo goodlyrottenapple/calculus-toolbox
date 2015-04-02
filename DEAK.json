@@ -1004,7 +1004,7 @@
 			"Pre_R" :			["Phi Act?alpha |- Pre Act?alpha",				""]
 		},
 		"RuleBigcomma" : {
-			"Bigcomma_Nil_L" :	["I |- ?Y",		";;[] |- Y"],
+			"Bigcomma_Nil_L" :	["I |- ?Y",		";;[] |- ?Y"],
 			"Bigcomma_Nil_L2" :	[";;[] |- ?Y",	"I |- ?Y"],
 			"Bigcomma_Nil_R" :	["?Y |- I",		"?Y |- ;;[]"],
 			"Bigcomma_Nil_R2" :	["?Y |- ;;[]",	"?Y |- I"]
