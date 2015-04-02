@@ -22,18 +22,19 @@ fun atom :: "Sequent \<Rightarrow> bool" where
 "atom ((l)\<^sub>S \<turnstile>\<^sub>S (r)\<^sub>S) = ( (is_epmod l) \<noteq> None \<and> (is_epmod l) = (is_epmod r) )"|
 "atom _ = False"
 
-
-fun swapin :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> bool" where
-"swapin fun m s = (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''alpha'') \<^sub>S) ) (match m s) of 
+fun relAKACheck :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> ((Sequent \<times> Sequent) list) \<Rightarrow> bool" where
+"relAKACheck fun mlist = (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''alpha'') \<^sub>S) ) mlist of 
                    Some (_, Sequent_Structure (Formula_Action alpha \<^sub>S)) \<Rightarrow> 
-                      (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure(Structure_Formula(Formula_Agent(Agent_Freevar ''a''))) ) (match m s) of 
+                      (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure(Structure_Formula(Formula_Agent(Agent_Freevar ''a''))) ) mlist of 
                          Some (_, Sequent_Structure (Formula_Agent a \<^sub>S)) \<Rightarrow> 
-                            (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''beta'') \<^sub>S) ) (match m s) of 
+                            (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''beta'') \<^sub>S) ) mlist of 
                                 Some (_, Sequent_Structure (Formula_Action beta \<^sub>S)) \<Rightarrow> fun alpha a beta
                               |  _ \<Rightarrow> False )
                        | _ \<Rightarrow> False)
                  | _ \<Rightarrow> False)"
 
+fun swapin :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> bool" where
+"swapin fun m s = relAKACheck fun (match m s)"
 
 
 fun bigcomma_cons_L :: "Sequent \<Rightarrow> Sequent list option" where
@@ -53,34 +54,60 @@ fun bigcomma_cons_R2 :: "Sequent \<Rightarrow> Sequent list option" where
 "bigcomma_cons_R2 ( Y \<turnstile>\<^sub>S ;;\<^sub>S (X#Xs) ) = Some [(Y \<turnstile>\<^sub>S (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)))]"|
 "bigcomma_cons_R2 _ = None"
 
-
+(*
 value"replaceAll (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#(match (ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')) X))) (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))"
 value"(AgS\<^sub>S (forwK\<^sub>S) (Agent ''a'') (ActS\<^sub>S (forwA\<^sub>S) (Action ''beta'') (((Atprop ''X'') \<^sub>F) \<^sub>S)))"
 value"match (ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X''))) (ActS\<^sub>S (forwA\<^sub>S) (Action ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''a'') (((Atprop ''X'') \<^sub>F) \<^sub>S)))"
 value"(ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))"
-
+*)
 fun swapout_L :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> (Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_L relAKA [] ( X \<turnstile>\<^sub>S ;;\<^sub>S [] ) seq = Some []" |
-"swapout_L relAKA (b#list) ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) seq = (
-  case ( swapout_L relAKA list ( X \<turnstile>\<^sub>S ;;\<^sub>S Ys ) seq ) of (Some list) \<Rightarrow> 
-    (case (replaceAll (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X)))) seq) of applied \<Rightarrow>
-    (if (swapin relAKA seq applied) then 
-    Some (applied#list) else None))
+"swapout_L relAKA [] seq ( X \<turnstile>\<^sub>S ;;\<^sub>S [] ) = Some []" |
+"swapout_L relAKA (b#list) seq ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) = (
+  case ( swapout_L relAKA list seq ( X \<turnstile>\<^sub>S ;;\<^sub>S Ys ) ) of (Some list) \<Rightarrow> 
+    (case (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X)))) of mlist \<Rightarrow>
+      (case (replaceAll mlist seq) of applied \<Rightarrow>
+        (if (relAKACheck relAKA (List.union (match seq applied) mlist) ) then 
+        Some (applied#list) else None)))
 | None \<Rightarrow> None)"|
 "swapout_L relAKA _ _ _ = None"
 
+
+
+
 fun swapout_R :: "(Action \<Rightarrow> Agent => Action => bool) \<Rightarrow> (Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_R relAKA [] ( ;;\<^sub>S [] \<turnstile>\<^sub>S X ) seq = Some []" |
-"swapout_R relAKA (b#list) ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) seq = (
-  case ( swapout_R relAKA list ( X \<turnstile>\<^sub>S ;;\<^sub>S Ys ) seq ) of (Some list) \<Rightarrow> 
-    (case (replaceAll (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match (ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X''))) X)))) seq) of applied \<Rightarrow>
-    (if (swapin relAKA seq applied) then 
-    Some (applied#list) else None))
+"swapout_R relAKA [] seq ( ;;\<^sub>S [] \<turnstile>\<^sub>S X ) = Some []" |
+"swapout_R relAKA (b#list) seq ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) = (
+  case ( swapout_R relAKA list seq ( ;;\<^sub>S Ys \<turnstile>\<^sub>S X ) ) of (Some list) \<Rightarrow> 
+    (case (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X)))) of mlist \<Rightarrow>
+      (case (replaceAll mlist seq) of applied \<Rightarrow>
+        (if (relAKACheck relAKA (List.union (match seq applied) mlist) ) then 
+        Some (applied#list) else None)))
 | None \<Rightarrow> None)"|
 "swapout_R relAKA _ _ _ = None"
 
-value"swapout_L rel blist ( (?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X'') )"
 
+
+(*
+fun relAKAA :: "Action \<Rightarrow> Agent \<Rightarrow> Action \<Rightarrow> bool" where
+"relAKAA (Action x) (Agent a) (Action y) = ((x = y) \<or> (x=''ep'' \<and> a = ''c'' \<and> y=''ew''))" |
+"relAKAA _ _ _ = False"
+
+definition "const_seq = ((?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))"
+definition "seq_empty = ((;;\<^sub>S []) \<turnstile>\<^sub>S (ActS\<^sub>S (forwA\<^sub>S) (Action ''epa'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''c'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S))))"
+definition "seq = ((;;\<^sub>S [((AgF\<^sub>F (fboxK\<^sub>F) (Agent ''c'') (B\<^sub>F (Pre\<^sub>F (Action ''epa'')) (\<rightarrow>\<^sub>F) ((Atprop ''Ga'') \<^sub>F))) \<^sub>S)]) \<turnstile>\<^sub>S (ActS\<^sub>S (forwA\<^sub>S) (Action ''epa'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''c'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S))))"
+definition "seqO = (((AgF\<^sub>F (fboxK\<^sub>F) (Agent ''c'') (B\<^sub>F (Pre\<^sub>F (Action ''epa'')) (\<rightarrow>\<^sub>F) ((Atprop ''Ga'') \<^sub>F))) \<^sub>S) \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (Agent ''c'') ActS\<^sub>S forwA\<^sub>S (Action ''epa'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S) )"
+
+definition "mtchList X b Y= (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X))))"
+
+definition "mList = mtchList ((ActS\<^sub>S (forwA\<^sub>S) (Action ''epa'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''c'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S)))) (Action(''epa'')) ((AgF\<^sub>F (fboxK\<^sub>F) (Agent ''c'') (B\<^sub>F (Pre\<^sub>F (Action ''epa'')) (\<rightarrow>\<^sub>F) ((Atprop ''Ga'') \<^sub>F))) \<^sub>S)"
+value " match (((?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))) seqO "
+value "relAKACheck relAKAA (List.union (match (((?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))) seqO) mList)"
+value "swapout_R relAKAA [] const_seq seq_empty"
+value "swapout_R relAKAA [Action(''epa'')] const_seq seq"
+
+
+value"swapout_L rel blist ( (?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X'') )"
+*)
 
 
 datatype Locale = Cut_Formula Formula | 
