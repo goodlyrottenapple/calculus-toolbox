@@ -6,7 +6,9 @@ TODO:
 
 */
 
-import swing._
+import swing.{FileChooser, Orientation, Publisher, BoxPanel, FlowPanel, 
+  Button, Dialog, Component, Swing, SimpleSwingApplication, TextField, Label, MenuBar, MenuItem, 
+  Menu, BorderPanel, MainFrame, ScrollPane, Separator, Dimension, CheckMenuItem}
 import swing.event.{ButtonClicked, MouseClicked, KeyReleased, Key}
 
 import swing.BorderPanel.Position._
@@ -18,6 +20,7 @@ import scala.util.parsing.json.{JSON, JSONObject, JSONArray}
 import java.awt.event.MouseEvent
 import javax.swing.{Icon, SpinnerNumberModel, JSpinner}
 import javax.swing.filechooser.FileNameExtensionFilter
+import javax.swing.event.{ChangeListener, ChangeEvent}
 
 import java.io.PrintWriter
 
@@ -73,22 +76,24 @@ object GUI extends SimpleSwingApplication {
   val session.session.removePTsButton = new Button {
     text = "Remove PTs"
     enabled = false
-  }*/
-
-  val editButton = new Button {
-    text = "Edit"
+  }
+*/
+  val reloadrelAKAButton = new Button {
+    text = "Reload relAKA"
   }
 
-  val cutButton = new Button {
-    text = "Cut"
-  }
 
   val numberModel = new SpinnerNumberModel(5, //initial value
     0, //min
     15, //max
-    1)
+    1) // who knows...
   val ptSearchHeightSpinner = new JSpinner(numberModel)
 
+  ptSearchHeightSpinner.addChangeListener(new ChangeListener() {
+    def stateChanged(e:ChangeEvent) {
+      session.proofDepth = (ptSearchHeightSpinner.getValue()).asInstanceOf[Int]
+    }
+  })
 
   //define list of assms
   /*val session.listView = new ListView[(Icon, Sequent)]() {   
@@ -115,18 +120,18 @@ object GUI extends SimpleSwingApplication {
 
 
   val popup = new PopupMenu
-  val menuItem = new MenuItem(Action("Add as assm") {
+  val menuItem = new MenuItem(swing.Action("Add as assm") {
     session.addAssmFromSelPT()
   })
   popup.add(menuItem);
-  val menuItem2 = new MenuItem(Action("Delete") {
+  val menuItem2 = new MenuItem(swing.Action("Delete") {
     session.removePTs()
     session.ptListView.revalidate()
     session.ptListView.repaint()
   })
   popup.add(menuItem2);
 
-  val menuItem3 = new MenuItem(Action("Export to LaTeX") {
+  val menuItem3 = new MenuItem(swing.Action("Export to LaTeX") {
     session.exportLatexFromSelPT()
 
   })
@@ -141,7 +146,7 @@ object GUI extends SimpleSwingApplication {
 
   //add components to listener here
 
-  listenTo(session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, editButton, cutButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
+  listenTo(session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
   reactions += {
     case KeyReleased(session.listView, Key.BackSpace, _, _) => session.removeAssms
     case KeyReleased(session.listView, Key.Delete, _, _) => session.removeAssms
@@ -164,16 +169,16 @@ object GUI extends SimpleSwingApplication {
             println("LATEX: " + sequentToString(session.currentSequent, PrintCalc.LATEX))
             println("ISABELLE: " + sequentToString(session.currentSequent, PrintCalc.ISABELLE))
 
-            val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
-            val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
+            //val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
+            //val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
             //derTree(currentValue, session.currentLocale++currentAssm, session.currentSequent) match {
-            new PSDialog(depth=currentValue, locale=session.currentLocale++currentAssm, seq=session.currentSequent).pt match {
+            new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=session.currentSequent).pt match {
               case Some(r) =>
                 session.currentPT = r
                 //display prooftree r in the PTPanel
                 ptPanel.update()
                 //log.text = "PT found!"
-                validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale++currentAssm, session.currentPT)
+                validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale, session.currentPT)
                 //add pt to the list of found proofs
                 if(globalPrefs(AUTO_ADD_PT) == true){
                   session.addPT()
@@ -190,16 +195,45 @@ object GUI extends SimpleSwingApplication {
     case ButtonClicked(`addPtButton`) => session.addPT()
     case ButtonClicked(`addAssmButton`) => session.addAssm()
 
-    case ButtonClicked(`editButton`) => 
+    case ButtonClicked(`reloadrelAKAButton`) =>
+      val buff = scala.collection.mutable.Map[Tuple2[Action, Agent], List[Action]]()
+      for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
+        val arr = l.split(",")
+        if (arr.length == 3) {
+          val alpha = Actiona(arr(0).trim.toList)
+          val a = Agenta(arr(1).trim.toList)
+          val beta = Actiona(arr(2).trim.toList)
+
+          buff.get((alpha, a)) match {
+            case Some(list) => buff += ((alpha, a) -> (list ++ List(beta)))
+            case None => buff += ((alpha, a) -> List(beta))
+          }
+
+        }
+      }
+      session.relAKAMap = buff.toMap
+      for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
+        val arr = l.split(",")
+        if (arr.length == 3) {
+          val alpha = Actiona(arr(0).trim.toList)
+          val a = Agenta(arr(1).trim.toList)
+          val beta = Actiona(arr(2).trim.toList)
+
+          println(session.relAKA(alpha)(a))
+
+        }
+      }
+
+/*    case ButtonClicked(`editButton`) => 
       ptPanel.edit = !ptPanel.edit
       if (ptPanel.edit) editButton.text = "Done"
       else{
         editButton.text = "Edit"
         session.savePT()
         //println(ptToString(session.currentPT))
-      }
+      }*/
 
-    case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
+    /*case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
       case Some(f) =>
         val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
         val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
@@ -252,7 +286,7 @@ object GUI extends SimpleSwingApplication {
             }
         }
       case None => Dialog.showMessage(cutButton, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
-    }
+    }*/
   }
 
   
@@ -334,8 +368,8 @@ object GUI extends SimpleSwingApplication {
   }
 
   lazy val bottomPanel = new FlowPanel {
-    contents += editButton
-    contents += cutButton
+    //contents += editButton
+    contents += reloadrelAKAButton
     contents += new Label("PT search depth:")
     contents += Component.wrap(ptSearchHeightSpinner)
     //contents += log
@@ -400,7 +434,7 @@ object GUI extends SimpleSwingApplication {
 
     menuBar = new MenuBar {
       contents += new Menu("File") {
-        contents += new MenuItem(Action("Open..."){
+        contents += new MenuItem(swing.Action("Open..."){
           val chooser = new FileChooser(new java.io.File(".")) {
             title = "Open Calc Session File"
             fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
@@ -409,7 +443,7 @@ object GUI extends SimpleSwingApplication {
           if (result == FileChooser.Result.Approve) openCSFile(chooser.selectedFile)
           //println(res)
         })
-        contents += new MenuItem(Action("Save") {
+        contents += new MenuItem(swing.Action("Save") {
           println("Action '"+ title +"' invoked")
           if(saveFile == None){
             val chooser = new FileChooser(new java.io.File(".")) {
@@ -427,7 +461,7 @@ object GUI extends SimpleSwingApplication {
         })
 
 
-        contents += new MenuItem(Action("Save As...") {
+        contents += new MenuItem(swing.Action("Save As...") {
           println("Action '"+ title +"' invoked")
           
           val chooser = new FileChooser(new java.io.File(".")) {
@@ -443,7 +477,7 @@ object GUI extends SimpleSwingApplication {
           
         })
         contents += new Separator
-        contents += new MenuItem(Action("Quit") {
+        contents += new MenuItem(swing.Action("Quit") {
           System.exit(1)
           //accelerator = Some(KeyStroke.getKeyStroke("ctrl S"))
         })
@@ -473,7 +507,7 @@ object GUI extends SimpleSwingApplication {
         }
 
         contents += new Separator
-        contents += new MenuItem(Action("Generate LaTeX calc decription file") {
+        contents += new MenuItem(swing.Action("Generate LaTeX calc decription file") {
           Some(new PrintWriter("calc_description.tex")).foreach{p =>
             val c_def = "" //printCalcDef()
             p.write( s"\\documentclass[12pt]{article}\n\\usepackage{bussproofs}\n\n\\begin{document}\n\n$c_def\n\n\\end{document}" )
