@@ -20,7 +20,7 @@ class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])]
   modal = true
 
   val listView = new ListView[(Icon, Rule, List[Sequent])]() {   
-    listData = for((r,l) <- list) yield (new TeXFormula(l.map( sequentToString(_) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
+    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( sequentToString(_) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
     renderer = ListView.Renderer(_._1)
     selection.intervalMode = IntervalMode.Single
   }
@@ -201,7 +201,7 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
   modal = true
 
   val (f, cancel) = interruptableFuture[Option[Prooftree]] { () =>
-    Thread.sleep(100) // hack!! do not remove!! this is to make sure the window is fully initialized...otherwise the gui deadlocks
+    while(!visible) Thread.sleep(100) // hack!! do not remove!! this is to make sure the window is fully initialized...otherwise the gui deadlocks
     derTree(depth, locale, seq)
   }
 
