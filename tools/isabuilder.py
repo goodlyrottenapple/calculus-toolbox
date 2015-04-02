@@ -228,6 +228,7 @@ class IsabelleBuilder:
 		if len(response_list) == len(l):
 			index = 0
 			for r in rules:
+				premise_added = False
 				count = 0
 				r_str = ""
 				r_list = []
@@ -241,10 +242,10 @@ class IsabelleBuilder:
 						if "condition" in rule_def[r]: 
 							r_str += "{0} \<Longrightarrow>C {1} \<Longrightarrow>RD ".format(rule_def[r]["condition"], response_list[index])
 						else: r_str += "{0} \<Longrightarrow>RD ".format(response_list[index])
-					if "premise" in rule_def[r]:
+					if "premise" in rule_def[r] and not premise_added:
 						r_str += rule_def[r]["premise"]
-						break
-					if count > 0: r_list.append( response_list[index] )
+						premise_added = True
+					elif count > 0: r_list.append( response_list[index] )
 					index += 1
 					count += 1
 				if "premise" not in rule_def[r]: r_str += "(\\<lambda>x. Some [{0}])".format(",".join(r_list))
