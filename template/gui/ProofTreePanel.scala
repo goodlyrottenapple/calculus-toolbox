@@ -34,7 +34,6 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	border = Swing.EmptyBorder(10, 10, 10, 10)
 
 	var selectedSequentInPt : Option[SequentInPt] = None
-	var edit = false
 
 	preferredSize = treeLayout.getBounds().getBounds().getSize()
 
@@ -72,7 +71,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	listenTo(mouse.clicks)
 	reactions += {
-		case ButtonClicked(b) if( edit ) =>
+		case ButtonClicked(b) =>
 
 			val pressed = b.asInstanceOf[SequentInPt]
 			/*println(b.text)
@@ -120,7 +119,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	})
 	popup.add(addAssm);
 
-	val merge = new MenuItem(Action("Merge") {
+	val merge = new MenuItem(Action("Merge above") {
 		selectedSequentInPt match {
 			case Some(selSeq) =>
 				session.findMatches(selSeq.seq) match {
@@ -128,6 +127,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 						Dialog.showMessage(null, "No matching pt found!", "Error")
 					case (x::xs) => 
 						session.currentPT = session.mergePTs(x, selSeq, tree.getRoot(), children)
+						session.savePT()
+
             			update()
             			//session.addPT()
 				}
@@ -144,10 +145,11 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case Some(selSeq) =>
 					tree.isLeaf(selSeq) match {
 						case true =>
-							val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
-            				new PSDialog(locale=session.currentLocale++currentAssm, seq=selSeq.seq).pt match {
+            				new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=selSeq.seq).pt match {
 	              				case Some(r) => 
 	              					session.currentPT = session.mergePTs(r, selSeq, tree.getRoot(), children)
+	              					session.savePT()
+
 	            					update()
 	            				case None =>
 	            					Dialog.showMessage(null, "PT couldn't be found", "Error")
@@ -187,6 +189,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 										case ru => Prooftreea( selSeq.seq, ru, m )
 									}
 									session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
+									session.savePT()
 									update()
 						//	}
 						//case None => Dialog.showMessage(null, "Invalid sequent entered", "Error")
@@ -227,6 +230,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 										case Fail() => Prooftreea(s, RuleZera(Prem()), List())
 										case r => Prooftreea(s, r, intersection)
 									}
+									session.savePT()
 									update()
 							}
 						case None => Dialog.showMessage(null, "Invalid sequent entered", "Error")
@@ -249,6 +253,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			selectedSequentInPt match {
 				case Some(selSeq) =>
 					session.currentPT = session.deleteAbove(selSeq, tree.getRoot(), children)
+	            	session.savePT()
 	            	update()
 			}
 		}
@@ -261,12 +266,80 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
       		selectedSequentInPt match {
 				case Some(selSeq) =>
 					session.currentPT = session.rebuildFromPoint(selSeq, children)
+	            	session.savePT()
 	            	update()
 					
 			}
 		}
 	})
 	popup.add(delete2);
+
+
+	def cut() = {
+		selectedSequentInPt match {
+			case Some(selSeq) =>
+				if(tree.isLeaf(selSeq)) {
+					new FormulaInputDialog().formula match {
+			      		case Some(f) =>
+							val lSeq = Sequenta(ant(selSeq.seq), Structure_Formula(f))
+							val rSeq = Sequenta(Structure_Formula(f), consq(selSeq.seq))
+							new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=lSeq).pt match {
+								case Some(resL) =>
+									new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=rSeq).pt match {
+									  case Some(resR) => 
+									    session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									    session.savePT()
+										update()
+									  case None => 
+									    val res = Dialog.showConfirmation(null, 
+									      "Right Tree not found. Should I add an assumption?", 
+									      optionType=Dialog.Options.YesNo, title="Right tree not found")
+									    if (res == Dialog.Result.Ok) {
+									      session.addAssm(rSeq)
+									      val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
+									      session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									      session.savePT()
+										  update()
+									    }
+									}
+								case None =>
+									val res = Dialog.showConfirmation(null, 
+									  "Left Tree not found. Should I add an assumption?", 
+									  optionType=Dialog.Options.YesNo, title="Left tree not found")
+									if (res == Dialog.Result.Ok) {
+									  session.addAssm(lSeq)
+									  val resL = Prooftreea( lSeq, RuleZera(Prem()), List() )
+									  new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=rSeq).pt match {
+									    case Some(resR) => 
+									      session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									      session.savePT()
+										  update()
+									    case None => 
+									      val res = Dialog.showConfirmation(null, 
+									        "Right Tree not found. Should I add an assumption?", 
+									        optionType=Dialog.Options.YesNo, title="Right tree not found")
+									      if (res == Dialog.Result.Ok) {
+									        session.addAssm(rSeq)
+									        val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
+									        session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									        session.savePT()
+											update()
+									      }
+									  }
+									}
+							}
+				    	case None => Dialog.showMessage(null, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
+				    }
+				}
+				else Dialog.showMessage(null, "The sequent is not a leaf please delete pt above to proceed", "Error")
+		}
+	}
+
+	val cutt = new MenuItem(new Action("Apply Cut") {
+		accelerator = Some(getKeyStroke('c'))
+      	def apply = cut()
+	})
+	popup.add(cutt);
 
 
 	def unselect(root:SequentInPt = tree.getRoot) : Unit = {
