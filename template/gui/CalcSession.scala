@@ -13,17 +13,35 @@ import PrintCalc.{sequentToString, prooftreeToString}
 
 case class CalcSession() {
 
-	def relAKA(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
-		case (Actiona(List('e','p')), Agenta(List('c')), Actiona(List('e','w'))) => true
-		// shoudl we have this one as well? :
-		case (Actiona(List('e','w')), Agenta(List('c')), Actiona(List('e','p'))) => true
-		case (Actiona(x), _, Actiona(y)) => x == y
+	var relAKAMap : Map[Tuple2[Action, Agent], List[Action]] = Map()
+
+	def relAKAOld(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
+		// case (Actiona(List('e','p')), Agenta(List('c')), Actiona(List('e','w'))) => true
+		// should we have this one as well? :
+		// case (Actiona(List('e','w')), Agenta(List('c')), Actiona(List('e','p'))) => true
+		case (Actiona(x), Agenta(a), Actiona(y)) => 
+			if (x == y) true
+			else {
+				relAKAMap.get((Actiona(x), Agenta(a))) match {
+					case Some(list) => list.indexOf(Actiona(y)) != -1
+					case None => false
+				}
+			}
 		case _ => false
+	}
+
+	def relAKA(alpha : Action)(a : Agent) : List[Action] = relAKAMap.get((alpha, a)) match {
+		case Some(h::list) =>
+		// makes sure relAKA(a, x, a) is always true
+		if(alpha != h && list.indexOf(alpha) == -1) alpha::h::list
+		else h::list
+		case None => List(alpha)
 	}
 
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
 	var currentPT : Prooftree = Prooftreea( Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))), RuleZera(Id()), List())
-	var currentLocale : List[Locale] = List(Empty(), RelAKA(relAKA), Swapout(relAKA, List(Actiona(List('e','p','a'))) ))
+
+
 	var currentPTsel : Option[(Icon, Prooftree)] = None
 
 	val assmsBuffer = ListBuffer[(Icon, Sequent)]()
@@ -38,6 +56,15 @@ case class CalcSession() {
     	renderer = ListView.Renderer(_._1)
     }
 
+    def currentLocale() : List[Locale] = List(
+		Empty(), 
+		RelAKA(relAKA)//, 
+		//Swapout(relAKA, List(Actiona(List('e','p','a'))) )
+	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)})
+
+
+
+    var proofDepth = 5
 	/*val addAssmButton = new Button {
 		text = "Add assm"
 	}
@@ -115,6 +142,7 @@ case class CalcSession() {
 	def removePTs() = {
 		for (i <- ptListView.selection.items) ptBuffer -= i
 		ptListView.listData = ptBuffer
+		currentPTsel = None
 		/*if (ptListView.listData.isEmpty){
 			removePTsButton.enabled = false
 			loadPTButton.enabled = false
