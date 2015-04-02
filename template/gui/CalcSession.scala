@@ -12,9 +12,19 @@ import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 import PrintCalc.{sequentToString, prooftreeToString}
 
 case class CalcSession() {
+
+	def relAKA(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
+		case (Actiona(List('e','p')), Agenta(List('c')), Actiona(List('e','w'))) => true
+		// shoudl we have this one as well? :
+		case (Actiona(List('e','w')), Agenta(List('c')), Actiona(List('e','p'))) => true
+		case (Actiona(x), _, Actiona(y)) => x == y
+		case _ => false
+	}
+
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
 	var currentPT : Prooftree = Prooftreea( Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))), RuleZera(Id()), List())
-	var currentLocale : List[Locale] = List(Empty())
+	var currentLocale : List[Locale] = List(Empty(), RelAKA(relAKA), Swapout(relAKA, List(Actiona(List('e','p','a'))) ))
+	var currentPTsel : Option[(Icon, Prooftree)] = None
 
 	val assmsBuffer = ListBuffer[(Icon, Sequent)]()
 	val ptBuffer = ListBuffer[(Icon, Prooftree)]()
@@ -75,11 +85,31 @@ case class CalcSession() {
 		val newPt = (ptToIcon(pt), pt)
 		ptBuffer += newPt
 		ptListView.listData = ptBuffer
+		currentPTsel = Some(newPt)
+
 		//if (!removePTsButton.enabled) removePTsButton.enabled = true
 		//if (!loadPTButton.enabled) loadPTButton.enabled = true
 	}
+
+	def savePT(ptSel: Option[(Icon, Prooftree)] = currentPTsel, pt : Prooftree = currentPT) = ptSel match {
+		case Some(sel) =>
+			// if delete or add below was used, we want a new pt....
+			if (concl(sel._2) == concl(pt)){
+				val newPt = (sel._1, pt)
+				val index = ptBuffer.indexOf(sel)
+				ptBuffer.update(index, newPt)
+				ptListView.listData = ptBuffer
+			} else {
+				addPT(pt)
+			}
+		case None => addPT(pt)
+		//if (!removePTsButton.enabled) removePTsButton.enabled = true
+		//if (!loadPTButton.enabled) loadPTButton.enabled = true
+	}
+
 	def loadPT() = {
 		var sel = ptListView.selection.items.head
+		currentPTsel = Some(sel)
 		currentPT = sel._2
 	}
 	def removePTs() = {

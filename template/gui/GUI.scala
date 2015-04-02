@@ -48,7 +48,7 @@ object GUI extends SimpleSwingApplication {
     icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)    
   }
 
-  val log = new Label()
+  //val log = new Label()
   val validPT = new Label("Valid PTwCut: ")
 
   val addAssmButton = new Button {
@@ -133,7 +133,9 @@ object GUI extends SimpleSwingApplication {
   popup.add(menuItem3);
 
   // ptPanel stuff here
-  val ptPanel = new ProofTreePanel(session)
+  val ptPanel = new ProofTreePanel(session){
+    preferredSize = new java.awt.Dimension(800, 600)
+  }
   ptPanel.build()
 
 
@@ -170,13 +172,13 @@ object GUI extends SimpleSwingApplication {
                 session.currentPT = r
                 //display prooftree r in the PTPanel
                 ptPanel.update()
-                log.text = "PT found!"
-                validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale, session.currentPT)
+                //log.text = "PT found!"
+                validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale++currentAssm, session.currentPT)
                 //add pt to the list of found proofs
                 if(globalPrefs(AUTO_ADD_PT) == true){
                   session.addPT()
                   if(globalPrefs(AUTO_ADD_ASSM) == true) session.addAssm()
-                }
+                } else session.currentPTsel = None
                 case None => Dialog.showMessage(null, "No Prooftree could be found...", "Error")
             }
           }
@@ -193,64 +195,64 @@ object GUI extends SimpleSwingApplication {
       if (ptPanel.edit) editButton.text = "Done"
       else{
         editButton.text = "Edit"
-        session.addPT()
+        session.savePT()
         //println(ptToString(session.currentPT))
       }
 
-    // case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
-    //   case Some(f) =>
-    //     val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
-    //     val currentAssm = session.assmsBuffer.toList.map({case (i,s) => s})
-    //     val lSeq = Sequenta(ant(session.currentSequent), Structure_Formula(f))
-    //     val rSeq = Sequenta(Structure_Formula(f), consq(session.currentSequent))
-
-    //     derTree(currentValue, lSeq, currentAssm) match {
-    //       case Some(resL) =>
-    //         derTree(currentValue, rSeq, currentAssm) match {
-    //           case Some(resR) => 
-    //             session.currentPT = Cut(session.currentSequent, f, resL, resR)
-    //             ptPanel.update()
-    //             session.addPT()
-    //           case None => 
-    //             val res = Dialog.showConfirmation(cutButton, 
-    //               "Right Tree not found. Should I add an assumption?", 
-    //               optionType=Dialog.Options.YesNo, title="Right tree not found")
-    //             if (res == Dialog.Result.Ok) {
-    //               session.addAssm(rSeq)
-    //               val resR = Zer( rSeq, Prem() )
-    //               session.currentPT = Cut(session.currentSequent, f, resL, resR)
-    //               ptPanel.update()
-    //               session.addPT()
-    //             }
-    //         }
-    //       case None =>
-    //         val res = Dialog.showConfirmation(cutButton, 
-    //           "Left Tree not found. Should I add an assumption?", 
-    //           optionType=Dialog.Options.YesNo, title="Left tree not found")
-    //         if (res == Dialog.Result.Ok) {
-    //           session.addAssm(lSeq)
-    //           val resL = Zer( lSeq, Prem() )
-    //           derTree(currentValue, rSeq, currentAssm) match {
-    //             case Some(resR) => 
-    //               session.currentPT = Cut(session.currentSequent, f, resL, resR)
-    //               ptPanel.update()
-    //               session.addPT()
-    //             case None => 
-    //               val res = Dialog.showConfirmation(cutButton, 
-    //                 "Right Tree not found. Should I add an assumption?", 
-    //                 optionType=Dialog.Options.YesNo, title="Right tree not found")
-    //               if (res == Dialog.Result.Ok) {
-    //                 session.addAssm(rSeq)
-    //                 val resR = Zer( rSeq, Prem() )
-    //                 session.currentPT = Cut(session.currentSequent, f, resL, resR)
-    //                 ptPanel.update()
-    //                 session.addPT()
-    //               }
-    //           }
-    //         }
-    //     }
-    //   case None => Dialog.showMessage(cutButton, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
-    // }
+    case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
+      case Some(f) =>
+        val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
+        val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
+        val lSeq = Sequenta(ant(session.currentSequent), Structure_Formula(f))
+        val rSeq = Sequenta(Structure_Formula(f), consq(session.currentSequent))
+        derTree(currentValue, session.currentLocale++currentAssm, lSeq) match {
+          case Some(resL) =>
+            derTree(currentValue, session.currentLocale++currentAssm, rSeq) match {
+              case Some(resR) => 
+                session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
+                ptPanel.update()
+                session.addPT()
+              case None => 
+                val res = Dialog.showConfirmation(cutButton, 
+                  "Right Tree not found. Should I add an assumption?", 
+                  optionType=Dialog.Options.YesNo, title="Right tree not found")
+                if (res == Dialog.Result.Ok) {
+                  session.addAssm(rSeq)
+                  val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
+                  session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
+                  ptPanel.update()
+                  session.addPT()
+                }
+            }
+          case None =>
+            val res = Dialog.showConfirmation(cutButton, 
+              "Left Tree not found. Should I add an assumption?", 
+              optionType=Dialog.Options.YesNo, title="Left tree not found")
+            if (res == Dialog.Result.Ok) {
+              session.addAssm(lSeq)
+              val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
+              val resL = Prooftreea( lSeq, RuleZera(Prem()), List() )
+              derTree(currentValue, session.currentLocale++currentAssm, rSeq) match {
+                case Some(resR) => 
+                  session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
+                  ptPanel.update()
+                  session.addPT()
+                case None => 
+                  val res = Dialog.showConfirmation(cutButton, 
+                    "Right Tree not found. Should I add an assumption?", 
+                    optionType=Dialog.Options.YesNo, title="Right tree not found")
+                  if (res == Dialog.Result.Ok) {
+                    session.addAssm(rSeq)
+                    val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
+                    session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
+                    ptPanel.update()
+                    session.addPT()
+                  }
+              }
+            }
+        }
+      case None => Dialog.showMessage(cutButton, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
+    }
   }
 
   
@@ -336,7 +338,7 @@ object GUI extends SimpleSwingApplication {
     contents += cutButton
     contents += new Label("PT search depth:")
     contents += Component.wrap(ptSearchHeightSpinner)
-    contents += log
+    //contents += log
     contents += validPT
     border = Swing.EmptyBorder(0,0,0,0)
   }
@@ -344,7 +346,7 @@ object GUI extends SimpleSwingApplication {
 
   lazy val ui = new BorderPanel{
     layout (topPanel) = North
-    layout (ptPanel) = Center
+    layout (new ScrollPane(ptPanel){border = Swing.EmptyBorder(0, 0, 0, 0)}) = Center
     layout (bottomPanel) = South
     layout (assmsPanel) = East
 
