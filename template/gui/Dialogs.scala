@@ -4,6 +4,8 @@ import swing.BorderPanel.Position._
 import swing.ListView.IntervalMode
 import javax.swing.Icon
 
+import swing.event.WindowOpened
+
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import java.util.concurrent.atomic.AtomicReference
@@ -200,24 +202,35 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
   var pt:Option[Prooftree] = None
   modal = true
 
-  val (f, cancel) = interruptableFuture[Option[Prooftree]] { () =>
-    while(!visible) Thread.sleep(100) // hack!! do not remove!! this is to make sure the window is fully initialized...otherwise the gui deadlocks
-    derTree(depth, locale, seq)
-  }
+  var cancel :() => Boolean = {() => true}
 
   
-  f.onSuccess {
-    case result =>
-      pt = result
-      close()
+  listenTo(this)
+  reactions += {
+    case WindowOpened(_) =>
+      val (f, c) = interruptableFuture[Option[Prooftree]] { () =>
+        derTree(depth, locale, seq)
+      }
+
+      cancel = c
+
+      f.onSuccess {
+        case result =>
+          pt = result
+          close()
+      }
+
+      f.onFailure { 
+        case ex => 
+          println(ex.getClass)
+          close()
+      }
   }
 
-  f.onFailure { 
-    case ex => 
-      println(ex.getClass)
-      close()
+  override def closeOperation { 
+    cancel()
+    super.closeOperation  
   }
-  
 
   contents = new BorderPanel {
     layout(new BoxPanel(Orientation.Horizontal) {
