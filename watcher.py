@@ -9,10 +9,11 @@ from tools import utils
 def usage():
     print "This is a watchdog decomiler for calc-toolbox src files"
     usage = ["Usage:"]
-    usage.append( "-s  --source    Specify a calculus file. Defaults to '{0}'".format(CALC_TEMPLATE) )
-    usage.append( "-d  --dest      Specify an output path for the calculus. Defaults to '{0}'".format(OUTPUT_PATH) )
-    usage.append( "-e  --ext       Specify a templates folder to be used. Defaults to '{0}'".format(TEMPLATE_FILES_PATH) )
-    usage.append( "-r  --rules     Force recompile (use if isa files generation fails)" )
+    usage.append( "-s  --source    Specify a source folder to be watched" )
+    usage.append( "-d  --dest      Specify an output path for decompiled files" )
+    usage.append( "-e  --ext       Specify file extensions to be monitored. The default are *.scala and *.thy".format(TEMPLATE_FILES_PATH) )
+    usage.append( "-r  --rules     Specify path rewrite rules (currently only hard coded strings, no regex)" )
+    usage.append( "-i  --ignore    Specify paths (or substrings of a path) from the source folder to be ignored (currently only hard coded strings, no regex)" )
 
     print "\n".join(usage)
 
@@ -93,7 +94,8 @@ def main(argv):
         elif opt in ("-d", "--dest"):
             DEST = arg
         elif opt in ("-e", "--ext"):
-            PATTERNS = arg
+            PATTERNS = ["*."+a.strip() if not a.strip().startswith("*.") else a.strip() for a in arg.split(',')]
+            print PATTERNS
         elif opt in ("-r", "--rules"):
             RULES = []
             for a in arg.split(','):
@@ -113,17 +115,18 @@ def main(argv):
     if SOURCE.endswith('/') : SOURCE = SOURCE[:-1]
     if DEST.endswith('/') : DEST = DEST[:-1]
 
-    observer = Observer()
-    observer.schedule(MyHandler(PATTERNS, SOURCE, DEST, RULES, IGNORE), path=SOURCE, recursive=True)
-    observer.start()
+    if DEST:
+        observer = Observer()
+        observer.schedule(MyHandler(PATTERNS, SOURCE, DEST, RULES, IGNORE), path=SOURCE, recursive=True)
+        observer.start()
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
 
-    observer.join()
+        observer.join()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
