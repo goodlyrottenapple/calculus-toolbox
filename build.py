@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os,sys,getopt,shlex, shutil
+import os,sys,getopt,shlex,shutil
 from subprocess import Popen, PIPE
 from glob import glob
 from tools import utils, isabuilder, scalabuilder

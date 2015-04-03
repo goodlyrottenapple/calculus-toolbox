@@ -1,4 +1,6 @@
-import swing.{Button, ListView, FileChooser}
+import swing.{Button, ListView, FileChooser, Publisher}
+import swing.event.Event
+
 import scala.collection.mutable.ListBuffer
 
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -11,11 +13,13 @@ import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 /*calc_import*/
 import PrintCalc.{sequentToString, prooftreeToString}
 
-case class CalcSession() {
+case class PTChanged(valid : Boolean) extends Event
+
+case class CalcSession() extends Publisher {
 
 	var relAKAMap : Map[Tuple2[Action, Agent], List[Action]] = Map()
 
-	def relAKAOld(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
+	/*def relAKAOld(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
 		// case (Actiona(List('e','p')), Agenta(List('c')), Actiona(List('e','w'))) => true
 		// should we have this one as well? :
 		// case (Actiona(List('e','w')), Agenta(List('c')), Actiona(List('e','p'))) => true
@@ -28,7 +32,7 @@ case class CalcSession() {
 				}
 			}
 		case _ => false
-	}
+	}*/
 
 	def relAKA(alpha : Action)(a : Agent) : List[Action] = relAKAMap.get((alpha, a)) match {
 		case Some(h::list) =>
@@ -39,8 +43,14 @@ case class CalcSession() {
 	}
 
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
-	var currentPT : Prooftree = Prooftreea( Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))), RuleZera(Id()), List())
 
+	private var _currentPT : Prooftree = Prooftreea( Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))), RuleZera(Id()), List())
+	
+	def currentPT = _currentPT
+	def currentPT_= (value:Prooftree):Unit = {
+		_currentPT = value
+		publish(PTChanged(isProofTree(currentLocale, currentPT)))
+	}
 
 	var currentPTsel : Option[(Icon, Prooftree)] = None
 
@@ -97,15 +107,17 @@ case class CalcSession() {
 				listView.listData = assmsBuffer
 				//if (!removeAssmButton.enabled) removeAssmButton.enabled = true
 		}
+		publish(PTChanged(isProofTree(currentLocale, currentPT)))
 	}
 	def removeAssms() = {
 		for (i <- listView.selection.items) assmsBuffer -= i
 		listView.listData = assmsBuffer
-		//if (listView.listData.isEmpty) removeAssmButton.enabled = false
+		publish(PTChanged(isProofTree(currentLocale, currentPT)))
 	}
 
 	def clearAssms() = {
 		assmsBuffer.clear()
+		publish(PTChanged(isProofTree(currentLocale, currentPT)))
 	}
 
     def addPT(pt: Prooftree = currentPT) = {
@@ -124,7 +136,7 @@ case class CalcSession() {
 			if (concl(sel._2) == concl(pt)){
 				val newPt = (sel._1, pt)
 				val index = ptBuffer.indexOf(sel)
-				ptBuffer.update(index, newPt)
+				if (index >= 0) ptBuffer.update(index, newPt)
 				ptListView.listData = ptBuffer
 			} else {
 				addPT(pt)
@@ -138,11 +150,14 @@ case class CalcSession() {
 		var sel = ptListView.selection.items.head
 		currentPTsel = Some(sel)
 		currentPT = sel._2
+		publish(PTChanged(isProofTree(currentLocale, currentPT)))
 	}
 	def removePTs() = {
-		for (i <- ptListView.selection.items) ptBuffer -= i
+		for (i <- ptListView.selection.items) {
+			ptBuffer -= i
+			if(i == currentPTsel) currentPTsel = None
+		}
 		ptListView.listData = ptBuffer
-		currentPTsel = None
 		/*if (ptListView.listData.isEmpty){
 			removePTsButton.enabled = false
 			loadPTButton.enabled = false
@@ -151,6 +166,8 @@ case class CalcSession() {
 
 	def clearPT() = {
 		ptBuffer.clear()
+		currentPTsel = None
+		ptListView.listData = ptBuffer
 	}
 
 	def addAssmFromSelPT() : Unit = {

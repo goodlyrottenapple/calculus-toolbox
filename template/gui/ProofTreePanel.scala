@@ -20,6 +20,7 @@ import org.abego.treelayout.util.{DefaultConfiguration, DefaultTreeForTreeLayout
 import PrintCalc.sequentToString
 import Proofsearch._
 
+
 class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 60) extends scala.swing.Panel {
 	val configuration = new DefaultConfiguration[SequentInPt](gapBetweenLevels, gapBetweenNodes, org.abego.treelayout.Configuration.Location.Bottom)
 	val nodeExtentProvider = new SequentInPtNodeExtentProvider()

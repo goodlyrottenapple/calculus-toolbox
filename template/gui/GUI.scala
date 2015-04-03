@@ -17,6 +17,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.util.parsing.json.{JSON, JSONObject, JSONArray}
 
+import java.awt.FileDialog
 import java.awt.event.MouseEvent
 import javax.swing.{Icon, SpinnerNumberModel, JSpinner}
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -52,7 +53,10 @@ object GUI extends SimpleSwingApplication {
   }
 
   //val log = new Label()
-  val validPT = new Label("Valid PTwCut: ")
+  val validPT = new Label("Valid Prooftree: ")
+  val validPTval = new Label("true"){
+    foreground = new java.awt.Color(101,163,44)
+  }
 
   val addAssmButton = new Button {
     text = "Add assm"
@@ -146,8 +150,13 @@ object GUI extends SimpleSwingApplication {
 
   //add components to listener here
 
-  listenTo(session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
+  listenTo(session, session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
   reactions += {
+    case c : PTChanged => 
+      validPTval.text = c.valid.toString
+      if (c.valid) validPTval.foreground = new java.awt.Color(101,163,44)
+      else validPTval.foreground = new java.awt.Color(211,51,63)
+
     case KeyReleased(session.listView, Key.BackSpace, _, _) => session.removeAssms
     case KeyReleased(session.listView, Key.Delete, _, _) => session.removeAssms
     case KeyReleased(session.ptListView, Key.BackSpace, _, _) => session.removePTs
@@ -178,12 +187,12 @@ object GUI extends SimpleSwingApplication {
                 //display prooftree r in the PTPanel
                 ptPanel.update()
                 //log.text = "PT found!"
-                validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale, session.currentPT)
+                //validPT.text = "Valid PTwCut: " + isProofTree(session.currentLocale, session.currentPT)
                 //add pt to the list of found proofs
                 if(globalPrefs(AUTO_ADD_PT) == true){
                   session.addPT()
                   if(globalPrefs(AUTO_ADD_ASSM) == true) session.addAssm()
-                } else session.currentPTsel = None
+                } //else session.currentPTsel = None
                 case None => Dialog.showMessage(null, "No Prooftree could be found...", "Error")
             }
           }
@@ -374,6 +383,7 @@ object GUI extends SimpleSwingApplication {
     contents += Component.wrap(ptSearchHeightSpinner)
     //contents += log
     contents += validPT
+    contents += validPTval
     border = Swing.EmptyBorder(0,0,0,0)
   }
 
@@ -426,7 +436,7 @@ object GUI extends SimpleSwingApplication {
   }
 
   def top = new MainFrame {
-    title = "Min Calc Toolbox"
+    title = "Calculus Toolbox"
     contents = ui
     minimumSize = new Dimension(600,400)
 
@@ -435,27 +445,46 @@ object GUI extends SimpleSwingApplication {
     menuBar = new MenuBar {
       contents += new Menu("File") {
         contents += new MenuItem(swing.Action("Open..."){
-          val chooser = new FileChooser(new java.io.File(".")) {
+          /*val chooser = new FileChooser(new java.io.File(".")) {
             title = "Open Calc Session File"
             fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
           }
           val result = chooser.showOpenDialog(null)
           if (result == FileChooser.Result.Approve) openCSFile(chooser.selectedFile)
-          //println(res)
+          //println(res)*/
+          val fd = new FileDialog(null: java.awt.Dialog, "Open a session file", FileDialog.LOAD)
+          fd.setDirectory(".")
+          fd.setFilenameFilter(new CSFilter())
+          fd.setVisible(true)
+          val filename = fd.getFile()
+          if (filename != null) {
+            val file = new java.io.File(fd.getDirectory() + filename)
+            openCSFile(file)
+            saveFile = Some(file)
+          }
+          else
+            println("Cancelled");
         })
         contents += new MenuItem(swing.Action("Save") {
           println("Action '"+ title +"' invoked")
           if(saveFile == None){
-            val chooser = new FileChooser(new java.io.File(".")) {
+            /*val chooser = new FileChooser(new java.io.File(".")) {
               title = "Save Calc Session File"
               fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
             }
-            val result = chooser.showSaveDialog(null)
-            if (result == FileChooser.Result.Approve) {
-              val file = if (!chooser.selectedFile.toString.endsWith(".cs")) new java.io.File(chooser.selectedFile.toString+".cs") else chooser.selectedFile
+            val result = chooser.showSaveDialog(null)*/
+            val fd = new FileDialog(null: java.awt.Dialog, "Save a session file", FileDialog.SAVE)
+            fd.setDirectory(".")
+            fd.setFilenameFilter(new CSFilter())
+            fd.setVisible(true)
+            val filename = fd.getFile()
+            if (filename != null){
+              val file = if (!filename.endsWith(".cs")) new java.io.File(fd.getDirectory() + filename + ".cs") else new java.io.File(fd.getDirectory() + filename)
               saveFile = Some(file)
               saveCSFile(saveFile.get)
             }
+            else
+              println("Cancelled");
           } else saveCSFile(saveFile.get)
           
         })
@@ -464,7 +493,7 @@ object GUI extends SimpleSwingApplication {
         contents += new MenuItem(swing.Action("Save As...") {
           println("Action '"+ title +"' invoked")
           
-          val chooser = new FileChooser(new java.io.File(".")) {
+          /*val chooser = new FileChooser(new java.io.File(".")) {
             title = "Save Calc Session File"
             fileFilter = new FileNameExtensionFilter("Calculus session", "cs")
           }
@@ -473,8 +502,19 @@ object GUI extends SimpleSwingApplication {
               val file = if (!chooser.selectedFile.toString.endsWith(".cs")) new java.io.File(chooser.selectedFile.toString+".cs") else chooser.selectedFile
               saveFile = Some(file)
               saveCSFile(file)
+          }*/
+          val fd = new FileDialog(null: java.awt.Dialog, "Save a session file", FileDialog.SAVE)
+          fd.setDirectory(".")
+          fd.setFilenameFilter(new CSFilter())
+          fd.setVisible(true)
+          val filename = fd.getFile()
+          if (filename != null){
+            val file = if (!filename.endsWith(".cs")) new java.io.File(fd.getDirectory() + filename + ".cs") else new java.io.File(fd.getDirectory() + filename)
+            saveFile = Some(file)
+            saveCSFile(saveFile.get)
           }
-          
+          else
+            println("Cancelled");
         })
         contents += new Separator
         contents += new MenuItem(swing.Action("Quit") {
@@ -506,18 +546,25 @@ object GUI extends SimpleSwingApplication {
             globalPrefs += (AUTO_ADD_ASSM -> aaAssm.selected)
         }
 
-        contents += new Separator
+        /*contents += new Separator
         contents += new MenuItem(swing.Action("Generate LaTeX calc decription file") {
           Some(new PrintWriter("calc_description.tex")).foreach{p =>
-            val c_def = "" //printCalcDef()
+            val c_def = ""//printCalcDef()
             p.write( s"\\documentclass[12pt]{article}\n\\usepackage{bussproofs}\n\n\\begin{document}\n\n$c_def\n\n\\end{document}" )
             p.close
           }
           //accelerator = Some(KeyStroke.getKeyStroke("ctrl S"))
-        })
+        })*/
       }
       
     }
+  }
+}
+
+class CSFilter extends java.io.FilenameFilter {
+  def accept(directory: java.io.File, filename : String): Boolean = {
+    if (filename.endsWith(".cs")) return true
+    return false
   }
 }
 
