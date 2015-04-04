@@ -252,3 +252,49 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
 
 
 
+class MacroAddDialog(owner: Window = null, pt : Prooftree) extends Dialog(owner) {
+
+  var rule : Option[String] = None
+
+  val session = CalcSession()
+  session.currentPT = pt
+
+  val ptPanel = new ProofTreePanel(session){
+    preferredSize = new java.awt.Dimension(400, 300)
+    editable = false
+  }
+  ptPanel.build()
+
+  modal = true
+
+  val in = new TextField { 
+    text = ""
+    columns = 25
+    //horizontalAlignment = Alignment.Right
+  }
+
+  contents = new BorderPanel {
+
+    layout(new Label("Save selected PT as macro?")) = North
+
+    layout(ptPanel) = Center
+
+    layout(new BoxPanel(Orientation.Horizontal) {
+      border = Swing.EmptyBorder(5,5,5,5)
+      contents += new Label("Macro name:")
+      contents += in
+      contents += Button("Save") { rule = Some(in.text); close() } 
+      contents += Button("Cancel") { close() } 
+    }) = South
+
+    //layout(new FlowPanel(FlowPanel.Alignment.Right)( )) = South
+  }
+
+  centerOnScreen()
+
+  open()
+
+}
+
+
+

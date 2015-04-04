@@ -2,7 +2,6 @@ theory (*calc_name_core*)
 imports Main "~~/src/HOL/Library/Code_Char" "~~/src/HOL/Code_Numeral" (*always keep Code_char import last! its added for code generator to output Haskell strings instead of the isabelle nibble stuff *)
 begin
 
-
 (*calc_structure*)
 
 class Varmatch =
@@ -246,7 +245,7 @@ begin
 | "match_Structure (Structure_Agent_Structure op1 act1 struct1) x = (case x of (Structure_Agent_Structure op2 act2 struct2) \<Rightarrow> (if op1 = op2 then map (\<lambda>(x,y). (Structure_Formula (Formula_Agent x), Structure_Formula (Formula_Agent y))) (match act1 act2) @m (match struct1 struct2) else []) |  _ \<Rightarrow> [])"
 | "match_Structure (Structure_Phi act1) x = (case x of (Structure_Phi act2) \<Rightarrow> map (\<lambda>(x,y). (Structure_Formula (Formula_Action x), Structure_Formula (Formula_Action y))) (match act1 act2) |  _ \<Rightarrow> [])"
 | "match_Structure (Structure_Zer _) x = []"
-| "match_Structure (Structure_Bigcomma _) x = []"
+| "match_Structure (Structure_Bigcomma list) x = []"
 
 (*
   "match_Structure (Structure_Action_Structure op1 act1 struct1) (Structure_Action_Structure op2 act2 struct2) = (if op1 = op2 then map (\<lambda>(x,y). (Structure_Formula (Formula_Action x), Structure_Formula (Formula_Action y))) (match act1 act2) @m (match struct1 struct2) else [])" |
@@ -267,7 +266,7 @@ begin
 
   "freevars_Structure _ = {}"
 
-  primrec replace_Structure_aux :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure \<Rightarrow> Structure"
+  primrec replace_Structure_aux :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure \<Rightarrow> Structure" and replace_Structure_list_aux :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure list \<Rightarrow> Structure list"
   where
     "replace_Structure_aux x mtch (Structure_Formula f) = (case x of (Structure_Formula xf) \<Rightarrow> (case mtch of (Structure_Formula mtchf) \<Rightarrow> Structure_Formula (replace (xf, mtchf) f) | _ \<Rightarrow> (Structure_Formula f)) | _ \<Rightarrow> (Structure_Formula f))"
   | "replace_Structure_aux x mtch (Structure_Bin var1 op1 var2) = Structure_Bin (replace_Structure_aux x mtch var1) op1 (replace_Structure_aux x mtch var2)"
@@ -288,7 +287,9 @@ begin
         _ \<Rightarrow> (Structure_Phi act1) ) | 
       _ \<Rightarrow> (Structure_Phi act1) )"
   | "replace_Structure_aux x mtch (Structure_Zer z) = (Structure_Zer z)"
-  | "replace_Structure_aux x mtch (Structure_Bigcomma z) = (Structure_Bigcomma z)"
+  | "replace_Structure_aux x mtch (Structure_Bigcomma list) = Structure_Bigcomma (replace_Structure_list_aux x mtch list)"
+  | "replace_Structure_list_aux x mtch [] = []"
+  | "replace_Structure_list_aux x mtch (l#ist) = (replace_Structure_aux x mtch l)#(replace_Structure_list_aux x mtch ist)"
 
 primrec replace_Structure :: "(Structure * Structure) \<Rightarrow> Structure \<Rightarrow> Structure"
   where
@@ -680,7 +681,7 @@ lemma inv_Formula2: "replaceAll (match a a) a = (a::Formula)" by simp
 
 
 lemma freevars_replace_Structure_simp : "free \<notin> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
-proof (rule, induct a)
+proof (induct a)
   case (Structure_Formula f) thus ?case using freevars_replace_Formula_simp
     by (cases free, auto)
 next
@@ -706,8 +707,9 @@ next
     apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all)
     by (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
 next
-  show "replace (free, free) (Structure_Bigcomma []) = Structure_Bigcomma []" by simp
-  show "\<And>a list. (free \<notin> freevars a \<Longrightarrow> replace (free, free) a = a) \<Longrightarrow> replace (free, free) (Structure_Bigcomma list) = Structure_Bigcomma list \<Longrightarrow> replace (free, free) (Structure_Bigcomma (a # list)) = Structure_Bigcomma (a # list)" by simp
+  show "free \<notin> freevars (;;\<^sub>S []) \<longrightarrow> replace (free, free) (;;\<^sub>S []) = ;;\<^sub>S []" by simp
+  show "\<And>a list. free \<notin> freevars a \<longrightarrow> replace (free, free) a = a \<Longrightarrow>
+              free \<notin> freevars (;;\<^sub>S list) \<longrightarrow> replace (free, free) (;;\<^sub>S list) = ;;\<^sub>S list \<Longrightarrow> free \<notin> freevars (;;\<^sub>S (a # list)) \<longrightarrow> replace (free, free) (;;\<^sub>S (a # list)) = ;;\<^sub>S (a # list)" by simp
 qed
 
 lemma freevars_replace_Structure_simp2 : "free \<in> freevars (a::Structure) \<longrightarrow> replace (free,free) a = a"
@@ -777,10 +779,14 @@ next
       by (cases free, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all) (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
     with 2 show ?case by (metis Structure_Agent_Structure.prems)
 next
-  show "replace (free, free) (Structure_Bigcomma []) = Structure_Bigcomma []" by simp
-  show "\<And>a list. (free \<in> freevars a \<Longrightarrow> replace (free, free) a = a) \<Longrightarrow> replace (free, free) (Structure_Bigcomma list) = Structure_Bigcomma list \<Longrightarrow> replace (free, free) (Structure_Bigcomma (a # list)) = Structure_Bigcomma (a # list)" by simp
+  show "replace (free, free) (;;\<^sub>S []) = ;;\<^sub>S []" by simp
+  show "\<And>a list. (free \<in> freevars a \<Longrightarrow> replace (free, free) a = a) \<Longrightarrow> replace (free, free) (;;\<^sub>S list) = ;;\<^sub>S list \<Longrightarrow> replace (free, free) (;;\<^sub>S (a # list)) = ;;\<^sub>S (a # list)"
+  proof auto
+    fix a list
+    assume "(free \<in> freevars a \<Longrightarrow> replace_Structure_aux free free a = a)" and assm: "replace_Structure_list_aux free free list = list"
+    show "replace_Structure_aux free free a = a" by (metis `free \<in> freevars a \<Longrightarrow> replace_Structure_aux free free a = a` freevars_replace_Structure_simp replace_Structure.simps)
+  qed
 qed
-
 
 lemma match_Structure_simp : "\<forall>(x, y) \<in> set (match (a::Structure) a). x = y"
 proof (induct a)
@@ -825,9 +831,9 @@ next
       set ( map (\<lambda>(x,y). (Structure_Formula(Formula_Agent x), Structure_Formula(Formula_Agent y))) (match x x) ) \<union> set (match y y)" by simp
     with assms 0 show ?case by (metis Structure_Agent_Structure.hyps Un_iff a)
 next
-  show "\<forall>a\<in>set (match (Structure_Bigcomma []) (Structure_Bigcomma [])). case a of (x, y) \<Rightarrow> x = y" by simp
+  show "\<forall>a\<in>set (match (;;\<^sub>S []) (;;\<^sub>S [])). case a of (x, y) \<Rightarrow> x = y" by simp
   show "\<And>a list. \<forall>a\<in>set (match a a). case a of (x, y) \<Rightarrow> x = y \<Longrightarrow>
-        \<forall>a\<in>set (match (Structure_Bigcomma list) (Structure_Bigcomma list)). case a of (x, y) \<Rightarrow> x = y \<Longrightarrow> \<forall>a\<in>set (match (Structure_Bigcomma (a # list)) (Structure_Bigcomma (a # list))). case a of (x, y) \<Rightarrow> x = y" by simp
+              \<forall>a\<in>set (match (;;\<^sub>S list) (;;\<^sub>S list)). case a of (x, y) \<Rightarrow> x = y \<Longrightarrow> \<forall>a\<in>set (match (;;\<^sub>S (a # list)) (;;\<^sub>S (a # list))). case a of (x, y) \<Rightarrow> x = y" by simp
 qed
 
 lemma inv_Structure[simp]:

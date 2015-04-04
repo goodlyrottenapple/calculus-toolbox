@@ -329,7 +329,7 @@
 			"SingleCut" : {
 				"ascii" : "Cut",
 				"latex" : "Cut",
-				"locale" : "Cut_Formula f",
+				"locale" : "CutFormula f",
 				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
 			}
 		},
@@ -991,7 +991,7 @@
 		"RuleOpK" : {
 			"FdiamK_L" :		["fdiamK Ag?a F?A |- ?X",	"forwK Ag?a F?A |- ?X"],
 			"FdiamK_R" :		["forwK Ag?a ?X |- fdiamK Ag?a F?A",	"?X |- F?A"],
-			"FboxK_L" :			["fboxK Ag?a F?A |- forwK Ag?a ?X",		"?X |- F?A"],
+			"FboxK_L" :			["fboxK Ag?a F?A |- forwK Ag?a ?X",		"F?A |- ?X"],
 			"FboxK_R" :			["?X |- fboxK Ag?a F?A",	"?X |- forwK Ag?a F?A"]
 		},
 

@@ -161,8 +161,11 @@ class IsabelleBuilder:
 		lines = []
 		for c in sorted(rules.keys()):
 			if c.startswith("Rule"): lines.append( "{0} {0}".format(c) )
+		# new macro rule
+		lines.append( "RuleMacro string Prooftree" )
 		lines.append( "Fail" )
-		return ret + ("\n" + (" " * (len(ret)-2)) + "| ").join(lines)
+		space = (" " * (len(ret)-2))
+		return ret + ("\n" + space + "| ").join(lines) + "\n     and Prooftree = Prooftree Sequent Rule \"Prooftree list\" (\"_ \\<Longleftarrow> PT ( _ ) _\" [341,341] 350)"
 
 	def __calc_structure_rules_concl(self):
 		if "calc_structure_rules" in self.calc and "Prooftree" in self.calc["calc_structure_rules"]:

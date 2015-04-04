@@ -14,6 +14,7 @@ import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 import PrintCalc.{sequentToString, prooftreeToString}
 
 case class PTChanged(valid : Boolean) extends Event
+case class MacroAdded() extends Event
 
 case class CalcSession() extends Publisher {
 
@@ -49,13 +50,16 @@ case class CalcSession() extends Publisher {
 	def currentPT = _currentPT
 	def currentPT_= (value:Prooftree):Unit = {
 		_currentPT = value
-		publish(PTChanged(isProofTree(currentLocale, currentPT)))
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
 
-	var currentPTsel : Option[(Icon, Prooftree)] = None
+	var currentPTsel : Int = -1
 
 	val assmsBuffer = ListBuffer[(Icon, Sequent)]()
 	val ptBuffer = ListBuffer[(Icon, Prooftree)]()
+
+	val macroBuffer = ListBuffer[(String, Prooftree)]()
+
 
 	val listView = new ListView[(Icon, Sequent)]() {   
     	listData = assmsBuffer
@@ -107,57 +111,60 @@ case class CalcSession() extends Publisher {
 				listView.listData = assmsBuffer
 				//if (!removeAssmButton.enabled) removeAssmButton.enabled = true
 		}
-		publish(PTChanged(isProofTree(currentLocale, currentPT)))
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
 	def removeAssms() = {
 		for (i <- listView.selection.items) assmsBuffer -= i
 		listView.listData = assmsBuffer
-		publish(PTChanged(isProofTree(currentLocale, currentPT)))
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
 
 	def clearAssms() = {
 		assmsBuffer.clear()
-		publish(PTChanged(isProofTree(currentLocale, currentPT)))
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
 
     def addPT(pt: Prooftree = currentPT) = {
 		val newPt = (ptToIcon(pt), pt)
 		ptBuffer += newPt
 		ptListView.listData = ptBuffer
-		currentPTsel = Some(newPt)
+		currentPTsel = ptBuffer.indexOf(newPt)
 
 		//if (!removePTsButton.enabled) removePTsButton.enabled = true
 		//if (!loadPTButton.enabled) loadPTButton.enabled = true
 	}
 
-	def savePT(ptSel: Option[(Icon, Prooftree)] = currentPTsel, pt : Prooftree = currentPT) = ptSel match {
-		case Some(sel) =>
+	def savePT(ptSel: Int = currentPTsel, pt : Prooftree = currentPT) = {
+		if (ptSel >= 0) {
+			println("Saving")
+			val sel : (Icon, Prooftree) = ptBuffer(ptSel)
 			// if delete or add below was used, we want a new pt....
 			if (concl(sel._2) == concl(pt)){
 				val newPt = (sel._1, pt)
-				val index = ptBuffer.indexOf(sel)
-				if (index >= 0) ptBuffer.update(index, newPt)
+				ptBuffer.update(ptSel, newPt)
 				ptListView.listData = ptBuffer
 			} else {
 				addPT(pt)
 			}
-		case None => addPT(pt)
+		} else addPT(pt)
 		//if (!removePTsButton.enabled) removePTsButton.enabled = true
 		//if (!loadPTButton.enabled) loadPTButton.enabled = true
 	}
 
 	def loadPT() = {
 		var sel = ptListView.selection.items.head
-		currentPTsel = Some(sel)
+		currentPTsel = ptBuffer.indexOf(sel)
 		currentPT = sel._2
-		publish(PTChanged(isProofTree(currentLocale, currentPT)))
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
+
 	def removePTs() = {
+		val current = ptBuffer(currentPTsel)
 		for (i <- ptListView.selection.items) {
 			ptBuffer -= i
-			if(i == currentPTsel) currentPTsel = None
 		}
 		ptListView.listData = ptBuffer
+		currentPTsel = ptBuffer.indexOf(current)
 		/*if (ptListView.listData.isEmpty){
 			removePTsButton.enabled = false
 			loadPTButton.enabled = false
@@ -166,7 +173,7 @@ case class CalcSession() extends Publisher {
 
 	def clearPT() = {
 		ptBuffer.clear()
-		currentPTsel = None
+		currentPTsel = -1
 		ptListView.listData = ptBuffer
 	}
 
@@ -193,6 +200,22 @@ case class CalcSession() extends Publisher {
 
 	}
 
+	def rulifyPT() : Unit = {
+		var sel = ptListView.selection.items.head
+		val ptMacro = rulifyProoftree(sel._2)
+		new MacroAddDialog(pt=ptMacro).rule match {
+			case Some(str) => 
+				if(str != ""){
+					println(str)
+					macroBuffer += Tuple2(str, ptMacro)
+					publish(MacroAdded())
+				}
+			case _ => println("cancel")
+		}
+		//val pt = rulifyProoftree(sel._2)
+		//addPT(pt)
+	}
+
 	def ptToIcon(pt:Prooftree) : TeXIcon = {
 		new TeXFormula(sequentToString(concl(pt))).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
 	}
@@ -200,6 +223,11 @@ case class CalcSession() extends Publisher {
 	def findMatches(seq: Sequent) : List[Prooftree] = for {
 		(i, pt) <- ptBuffer.toList
 		if concl(pt) == seq
+	} yield pt
+
+	def findMatchesMacro(seq: Sequent) : List[Prooftree] = for {
+		(i, pt) <- ptBuffer.toList
+		if replaceAll(match_Sequent(concl(pt), seq), concl(pt)) == seq
 	} yield pt
 
 	def mergePTs(repPt: Prooftree, insertPoint:SequentInPt, root:SequentInPt, children: SequentInPt => Iterable[SequentInPt]) : Prooftree = {

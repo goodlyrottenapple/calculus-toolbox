@@ -141,6 +141,11 @@ object GUI extends SimpleSwingApplication {
   })
   popup.add(menuItem3);
 
+  val menuItem4 = new MenuItem(swing.Action("Create Rule Macro") {
+    session.rulifyPT()
+  })
+  popup.add(menuItem4);
+
   // ptPanel stuff here
   val ptPanel = new ProofTreePanel(session){
     preferredSize = new java.awt.Dimension(800, 600)
@@ -152,6 +157,7 @@ object GUI extends SimpleSwingApplication {
 
   listenTo(session, session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
   reactions += {
+    case c : MacroAdded => println("added macro")
     case c : PTChanged => 
       validPTval.text = c.valid.toString
       if (c.valid) validPTval.foreground = new java.awt.Color(101,163,44)
@@ -232,129 +238,7 @@ object GUI extends SimpleSwingApplication {
 
         }
       }
-
-/*    case ButtonClicked(`editButton`) => 
-      ptPanel.edit = !ptPanel.edit
-      if (ptPanel.edit) editButton.text = "Done"
-      else{
-        editButton.text = "Edit"
-        session.savePT()
-        //println(ptToString(session.currentPT))
-      }*/
-
-    /*case ButtonClicked(`cutButton`) => new FormulaInputDialog().formula match {
-      case Some(f) =>
-        val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
-        val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
-        val lSeq = Sequenta(ant(session.currentSequent), Structure_Formula(f))
-        val rSeq = Sequenta(Structure_Formula(f), consq(session.currentSequent))
-        derTree(currentValue, session.currentLocale++currentAssm, lSeq) match {
-          case Some(resL) =>
-            derTree(currentValue, session.currentLocale++currentAssm, rSeq) match {
-              case Some(resR) => 
-                session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
-                ptPanel.update()
-                session.addPT()
-              case None => 
-                val res = Dialog.showConfirmation(cutButton, 
-                  "Right Tree not found. Should I add an assumption?", 
-                  optionType=Dialog.Options.YesNo, title="Right tree not found")
-                if (res == Dialog.Result.Ok) {
-                  session.addAssm(rSeq)
-                  val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
-                  session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
-                  ptPanel.update()
-                  session.addPT()
-                }
-            }
-          case None =>
-            val res = Dialog.showConfirmation(cutButton, 
-              "Left Tree not found. Should I add an assumption?", 
-              optionType=Dialog.Options.YesNo, title="Left tree not found")
-            if (res == Dialog.Result.Ok) {
-              session.addAssm(lSeq)
-              val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
-              val resL = Prooftreea( lSeq, RuleZera(Prem()), List() )
-              derTree(currentValue, session.currentLocale++currentAssm, rSeq) match {
-                case Some(resR) => 
-                  session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
-                  ptPanel.update()
-                  session.addPT()
-                case None => 
-                  val res = Dialog.showConfirmation(cutButton, 
-                    "Right Tree not found. Should I add an assumption?", 
-                    optionType=Dialog.Options.YesNo, title="Right tree not found")
-                  if (res == Dialog.Result.Ok) {
-                    session.addAssm(rSeq)
-                    val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
-                    session.currentPT = Prooftreea(session.currentSequent, RuleCuta(SingleCut()), List(resL, resR))
-                    ptPanel.update()
-                    session.addPT()
-                  }
-              }
-            }
-        }
-      case None => Dialog.showMessage(cutButton, "Invalid formula!", "Formula Parse Error", Dialog.Message.Error)
-    }*/
   }
-
-  
-
-  //UI function definitions
-  /*def session.addPT(pt: Prooftree) = {
-    val newPt = (ptToIcon(pt), pt)
-    session.ptBuffer += newPt
-    session.ptListView.listData = session.ptBuffer
-    if (!session.session.removePTsButton.enabled) session.session.removePTsButton.enabled = true
-    if (!session.session.loadPTButton.enabled) session.session.loadPTButton.enabled = true
-  }
-
-  def session.addAssm(seq:Sequent) = {
-    val formula = new TeXFormula(sequentToString(seq))
-    val newAssm = (formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), seq)
-
-    session.assmsBuffer.find(_._2 ==seq) match {
-      case Some(r) => 
-      case None => 
-        session.assmsBuffer += newAssm
-        session.listView.listData = session.assmsBuffer
-        if (!session.removeAssmButton.enabled) session.removeAssmButton.enabled = true
-    }
-  }
-
-  def session.removeAssms() = {
-    for (i <- session.listView.selection.items) session.assmsBuffer -= i
-    session.listView.listData = session.assmsBuffer
-    if (session.listView.listData.isEmpty) session.removeAssmButton.enabled = false
-  }
-
-  def session.removePTs() = {
-    for (i <- session.ptListView.selection.items) session.ptBuffer -= i
-    session.ptListView.listData = session.ptBuffer
-    if (session.ptListView.listData.isEmpty){
-      session.session.removePTsButton.enabled = false
-      session.session.loadPTButton.enabled = false
-    }
-  }
-
-  def session.loadPT() : Unit = {
-    var sel = session.ptListView.selection.items.head
-    session.currentPT = sel._2
-    ptPanel.update()
-    //indicate if the pt is valid
-    validPT.text = "Valid PTwCut: " + isProofTreeWCut(session.currentPT)
-  }
-
-  def session.addAssmFromSelPT() : Unit = {
-    var sel = session.ptListView.selection.items.head
-    session.addAssm(concl(sel._2))
-  }
-
-  def ptToIcon(pt:Prooftree) : TeXIcon = {
-    val formula = new TeXFormula(sequentToString(concl(pt)))
-    formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
-  }
-*/
 
   //UI element spositioning in the main window 
   lazy val topPanel = new BorderPanel{

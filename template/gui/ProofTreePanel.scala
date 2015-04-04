@@ -25,6 +25,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	val configuration = new DefaultConfiguration[SequentInPt](gapBetweenLevels, gapBetweenNodes, org.abego.treelayout.Configuration.Location.Bottom)
 	val nodeExtentProvider = new SequentInPtNodeExtentProvider()
 
+	var editable = true
+
 	// create the layout
 	var treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
 
@@ -72,7 +74,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	listenTo(mouse.clicks)
 	reactions += {
-		case ButtonClicked(b) =>
+		case ButtonClicked(b) if editable =>
 
 			val pressed = b.asInstanceOf[SequentInPt]
 			/*println(b.text)
@@ -168,7 +170,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		selectedSequentInPt match {
 			case Some(selSeq) =>
 				if(tree.isLeaf(selSeq)) {
-					val list = derAll(session.currentLocale, selSeq.seq)
+					val list = derAll(session.currentLocale, selSeq.seq).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
 					new SequentListDialog(list=list).pair match {
 					/*new SequentInputDialog().sequent match {
 						case Some(s) =>
@@ -199,6 +201,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				else Dialog.showMessage(null, "The sequent is not a leaf please delete pt above to proceed", "Error")
 		}
 	}
+
+
 
 	val add1 = new MenuItem(new Action("Add above") {
 		accelerator = Some(getKeyStroke('a'))
@@ -341,6 +345,26 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
       	def apply = cut()
 	})
 	popup.add(cutt);
+
+	val replaceIntPT = new MenuItem(new Action("Replace into PT") {
+      	def apply = {
+      		selectedSequentInPt match {
+			case Some(selSeq) =>
+				session.findMatchesMacro(selSeq.seq) match {
+					case List() => 
+						Dialog.showMessage(null, "No matching pt found!", "Error")
+					case (x::xs) =>
+						session.currentPT = replaceIntoPT(selSeq.seq, x)
+						session.addPT()
+
+            			update()
+            			//session.addPT()
+				}
+				
+			}
+		}
+	})
+	popup.add(replaceIntPT);
 
 
 	def unselect(root:SequentInPt = tree.getRoot) : Unit = {

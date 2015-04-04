@@ -4,8 +4,6 @@ begin
 
 (*calc_structure_rules*)
 
-datatype Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ \<Longleftarrow> PT ( _ ) _" [341,341] 350)
-
 fun concl :: "Prooftree \<Rightarrow> Sequent" where
 "concl (a \<Longleftarrow> PT ( b ) c) = a"
 
@@ -127,9 +125,9 @@ value"swapout_L rel blist ( (?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S f
 *)
 
 
-datatype Locale = Cut_Formula Formula | 
+datatype Locale = CutFormula Formula | 
                   Premise Sequent |
-                  RelAKA "Action \<Rightarrow> Agent => Action list" |
+                  RelAKA "Action \<Rightarrow> Agent \<Rightarrow> Action list" |
                   Empty
 
 (*rules_rule_fun*)
@@ -166,8 +164,50 @@ where
 "der_cut _ _ _ = (Fail, [])"*)
 (*uncommentR?RuleCut*)*)
 
+primrec ant :: "Sequent \<Rightarrow> Structure" where
+"ant (Sequent x y) = x" |
+"ant (Sequent_Structure x) = x"
+primrec consq :: "Sequent \<Rightarrow> Structure" where
+"consq (Sequent x y) = y"|
+"consq (Sequent_Structure x) = x"
+
+fun replaceIntoPT_aux :: "(Sequent \<times> Sequent) list \<Rightarrow> Prooftree \<Rightarrow> Prooftree" and 
+  replaceIntoPT_list :: "(Sequent \<times> Sequent) list \<Rightarrow> Prooftree list \<Rightarrow> Prooftree list" where 
+"replaceIntoPT_aux list (Prooftree c (RuleMacro s pt) ptlist) = Prooftree (replaceAll list c) (RuleMacro s (replaceIntoPT_aux list pt)) (replaceIntoPT_list list ptlist)" |
+"replaceIntoPT_aux list (Prooftree c r ptlist) = Prooftree (replaceAll list c) r (replaceIntoPT_list list ptlist)" |
+"replaceIntoPT_list list [] = []" |
+"replaceIntoPT_list list (l#ist) = (replaceIntoPT_aux list l)#(replaceIntoPT_list list ist)"
+
+fun replaceIntoPT :: "Sequent \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
+"replaceIntoPT seq (Prooftree c r ptlist) = replaceIntoPT_aux (match c seq) (Prooftree c r ptlist)"
+
+
+fun collectPremises :: "Prooftree \<Rightarrow> Sequent list" where
+"collectPremises (Prooftree p (RuleZer Prem) []) = [p]" |
+"collectPremises (Prooftree _ _ list) = foldr append (map collectPremises list) []"
+
+fun collectPremisesToLocale :: "Prooftree \<Rightarrow> Locale list" where
+"collectPremisesToLocale pt = map Premise (collectPremises pt)"
+
+fun collectCutFormulas :: "Prooftree \<Rightarrow> Formula list" where
+"collectCutFormulas (Prooftree _ (RuleCut _) [l, r]) = (
+  (case (consq (concl l)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl r)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] else []) |  _ \<Rightarrow> []) |
+    _ \<Rightarrow> (case (consq (concl r)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl l)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] else []) |  _ \<Rightarrow> []))
+  )
+)" |
+"collectCutFormulas (Prooftree _ _ list) = foldr append (map collectCutFormulas list) []"
+
+fun collectCutFormulasToLocale :: "Prooftree \<Rightarrow> Locale list" where
+"collectCutFormulasToLocale pt = map CutFormula (collectCutFormulas pt)"
+
 
 fun isProofTree :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" where
+"isProofTree loc (s \<Longleftarrow> PT(RuleMacro n pt) ptlist) = (
+  s = (concl pt) \<and> 
+  isProofTree (append loc (collectPremisesToLocale pt)) pt \<and>
+  set (collectPremises pt) = set (map (\<lambda>x. concl x) ptlist) \<and>
+  foldr (op \<and>) (map (isProofTree loc) ptlist) True
+)"|
 "isProofTree loc (s \<Longleftarrow> PT(r) l) = ( 
   foldr (op \<and>) (map (isProofTree loc) l) True \<and>
   foldr (op \<or>) (map (\<lambda>x. (
@@ -175,6 +215,9 @@ fun isProofTree :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" wher
     Fail \<noteq> Product_Type.fst (der x r s)
   )) loc) False
 )"
+
+fun isProofTreeWithCut :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" where
+"isProofTreeWithCut loc pt = isProofTree (append loc (collectCutFormulasToLocale pt)) pt"
 
 (*"isProofTree loc (s \<Longleftarrow> B(r) l) = ( foldr (op \<and>) (map (isProofTree loc) l) True \<and> set (Product_Type.snd (der r s)) = set (map concl l) )"*)
 
@@ -247,13 +290,50 @@ fun replaceRPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" wh
 "replaceRPT (s \<Longleftarrow> B(r) t1 ; t2) rep = (s \<Longleftarrow> B(r) t1 ; rep)" |
 "replaceRPT pt rep = pt"
 *)
-primrec ant :: "Sequent \<Rightarrow> Structure" where
-"ant (Sequent x y) = x" |
-"ant (Sequent_Structure x) = x"
-primrec consq :: "Sequent \<Rightarrow> Structure" where
-"consq (Sequent x y) = y"|
-"consq (Sequent_Structure x) = x"
 
-export_code open der isProofTree ruleList ant consq in Scala
+primrec rulifyAgent :: "Agent \<Rightarrow> Agent" where
+"rulifyAgent (Agent a) = Agent_Freevar a" |
+"rulifyAgent (Agent_Freevar a) = Agent_Freevar a"
+
+primrec rulifyAction :: "Action \<Rightarrow> Action" where
+"rulifyAction (Action a) = Action_Freevar a" |
+"rulifyAction (Action_Freevar a) = Action_Freevar a"
+
+
+fun rulifyFormula :: "Formula \<Rightarrow> Formula" where
+"rulifyFormula (Formula_Atprop(Atprop (f#a))) = 
+(if CHR ''A'' < f \<and> f < CHR ''Z'' then (Formula_Freevar (f#a)) else (Formula_Atprop (Atprop_Freevar (f#a)))
+)" |
+"rulifyFormula (Formula_Bin x c y) = (Formula_Bin (rulifyFormula x) c (rulifyFormula y))" |
+"rulifyFormula (Formula_Agent_Formula c a x) = (Formula_Agent_Formula c (rulifyAgent a) (rulifyFormula x) )" |
+"rulifyFormula (Formula_Action_Formula c a x) = (Formula_Action_Formula c (rulifyAction a) (rulifyFormula x) )" |
+"rulifyFormula (Formula_Precondition a) = (Formula_Precondition (rulifyAction a))" |
+"rulifyFormula x = x"
+
+
+
+fun rulifyStructure :: "Structure \<Rightarrow> Structure" where
+"rulifyStructure (Structure_Formula (Formula_Atprop(Atprop (f#a)))) = 
+(if CHR ''A'' < f \<and> f < CHR ''Z'' then (
+  if f = CHR ''F'' then Structure_Formula (Formula_Freevar (f#a)) else Structure_Freevar (f#a)
+  ) else Structure_Formula (Formula_Atprop (Atprop_Freevar (f#a)))
+)" |
+"rulifyStructure (Structure_Formula x) = Structure_Formula (rulifyFormula x)" | 
+"rulifyStructure (Structure_Bin x c y) = (Structure_Bin (rulifyStructure x) c (rulifyStructure y))" |
+"rulifyStructure (Structure_Agent_Structure c a x) = (Structure_Agent_Structure c (rulifyAgent a) (rulifyStructure x) )" |
+"rulifyStructure (Structure_Action_Structure c a x) = (Structure_Action_Structure c (rulifyAction a) (rulifyStructure x) )" |
+"rulifyStructure (Structure_Bigcomma list) = (Structure_Bigcomma (map rulifyStructure list))" |
+"rulifyStructure (Structure_Phi a) = (Structure_Phi (rulifyAction a))" |
+"rulifyStructure x = x"
+
+primrec rulifySequent :: "Sequent \<Rightarrow> Sequent" where
+"rulifySequent (Sequent x y) = Sequent (rulifyStructure x) (rulifyStructure y)"|
+"rulifySequent (Sequent_Structure x) = (Sequent_Structure x)"
+
+fun rulifyProoftree :: "Prooftree \<Rightarrow> Prooftree" where
+"rulifyProoftree (Prooftree s r list) = (Prooftree (rulifySequent s) r (map rulifyProoftree list))"
+
+
+export_code open der isProofTree ruleList ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut in Scala
 module_name (*calc_name*) file (*export_path*)
 end

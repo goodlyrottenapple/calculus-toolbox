@@ -146,8 +146,10 @@ class ScalaBuilder:
 				#add_structure introduced for calc_structure_rules which call on calc_structure
 				if type and set(type) <= set(structure.keys()) | set(add_structure.keys()): flag = True
 
-		# add a bracketed case where (expr) is added for each expr that has at least two constructors
-		if len(datatype) > 1 and flag : list_of_parsers.append( "\"(\" ~> {0}Parser <~ \")\"".format(name.lower()) )
+		# DISABLED: add a bracketed case where (expr) is added for each expr that has at least two constructors
+		# if len(datatype) > 1 and flag :
+		# now always add a bracketed case
+		list_of_parsers.append( "\"(\" ~> {0}Parser <~ \")\"".format(name.lower()) )
 		ret += " | ".join(list_of_parsers) 
 
 		ret += "\n\n" + "\n\n".join(sub_parsers_list)
@@ -167,6 +169,7 @@ class ScalaBuilder:
 			if c.startswith("Rule"): 
 				parser = c.lower()+"Parser"
 				lines.append( "		{0} ^^ {{ case a => {1}(a) }}".format(parser, c+'a') )
+		lines.append( "		\"Macro\" ~> stringParser ~ prooftreeParser ^^ { case a ~ pt => RuleMacro(a, pt) }" )
 		lines.append( "		\"Fail\" ^^ { _ => Fail() }" )
 		ret += " |\n".join(lines)
 
@@ -356,10 +359,11 @@ class ScalaBuilder:
 
 	@staticmethod
 	def __calc_structure_all_rules(rules):
-		ret = "	def {0}ToString(in:{1}, format:String = LATEX) : String = in match {{\n".format("rule", "Rule")
+		ret = "	def ruleToString(in:Rule, format:String = LATEX) : String = in match {\n"
 		lines = []
 		for c in sorted(rules.keys()):
 			if c.startswith("Rule"): lines.append( "        case {0}a(a) => {1}ToString(a, format)".format(c, c.lower()) )
+		lines.append( "        case RuleMacro(a, pt) => rulemacroToString(a, pt, format)" )
 		return ret + "\n".join(lines) +"\n	}"
 
 	def print_calc_structure(self):
