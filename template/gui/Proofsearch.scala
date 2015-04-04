@@ -16,7 +16,7 @@ object Proofsearch{
 
 	def derAllM(loc:List[Locale], s:Sequent, macros : List[(String, Prooftree)] = List()) : List[(Rule, List[Sequent])] = 
 		macros.map{ case (n, pt) => (RuleMacro(n.toList, replaceIntoPT(s, pt)), replaceIntoPT(s, pt)) }
-			.filter{ case (r, pt) => isProofTree(loc++collectPremisesToLocale(pt), pt) }
+			.filter{ case (r, pt) => isProofTreeWithCut(loc++collectPremisesToLocale(pt), pt) }
 				.map{ case (r, pt) => (r, collectPremises(pt)) }
 
 	def cr[A](xs: List[A], zss: List[List[A]]): List[List[A]] = {

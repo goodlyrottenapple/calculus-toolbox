@@ -208,6 +208,14 @@ case class CalcSession() extends Publisher {
 				if(str != ""){
 					println(str)
 					macroBuffer += Tuple2(str, ptMacro)
+
+					println("Conclusion: "+sequentToString(concl(ptMacro), PrintCalc.ASCII))
+
+					for (c <- collectPremises(ptMacro)){
+						println("Prem: "+sequentToString(c, PrintCalc.ASCII))
+
+					}
+
 					publish(MacroAdded())
 				}
 			case _ => println("cancel")

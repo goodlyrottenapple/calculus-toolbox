@@ -183,7 +183,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 							}
 
 							pair match {*/
-								case None => Dialog.showMessage(null, "No rule found for the given sequent", "Error")
+								case None => ;
 								case Some((rule, derList)) =>
 									val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
 									val pt = rule match {
@@ -291,8 +291,10 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 							new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=lSeq).pt match {
 								case Some(resL) =>
 									new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=rSeq).pt match {
-									  case Some(resR) => 
-									    session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									  case Some(resR) =>
+									  	val mPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									    session.currentPT = session.mergePTs(mPT, selSeq, tree.getRoot(), children)
+									    //session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
 									    session.savePT()
 										update()
 									  case None => 
@@ -302,7 +304,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 									    if (res == Dialog.Result.Ok) {
 									      session.addAssm(rSeq)
 									      val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
-									      session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									      val mPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									      session.currentPT = session.mergePTs(mPT, selSeq, tree.getRoot(), children)
 									      session.savePT()
 										  update()
 									    }
@@ -315,8 +318,10 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 									  session.addAssm(lSeq)
 									  val resL = Prooftreea( lSeq, RuleZera(Prem()), List() )
 									  new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=rSeq).pt match {
-									    case Some(resR) => 
-									      session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									    case Some(resR) =>
+									      val mPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									      session.currentPT = session.mergePTs(mPT, selSeq, tree.getRoot(), children)
+									      //session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
 									      session.savePT()
 										  update()
 									    case None => 
@@ -326,7 +331,9 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 									      if (res == Dialog.Result.Ok) {
 									        session.addAssm(rSeq)
 									        val resR = Prooftreea( rSeq, RuleZera(Prem()), List() )
-									        session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									        val mPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
+									      	session.currentPT = session.mergePTs(mPT, selSeq, tree.getRoot(), children)
+									        //session.currentPT = Prooftreea(selSeq.seq, RuleCuta(SingleCut()), List(resL, resR))
 									        session.savePT()
 											update()
 									      }
