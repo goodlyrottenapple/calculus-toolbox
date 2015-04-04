@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import time, sys, getopt
+import time, sys, getopt, os
 from watchdog.observers import Observer  
 from watchdog.events import PatternMatchingEventHandler
 from tools import utils
@@ -46,7 +46,7 @@ class MyHandler(PatternMatchingEventHandler):
         print event.src_path, event.event_type  # print now only for degug
 
         for i in self.ignore:
-            if i in event.src_path :
+            if i in event.src_path or os.path.isdir(event.src_path):
                 print "Ignoring..."
                 return
 
@@ -83,7 +83,7 @@ def main(argv):
     SOURCE = "."
     DEST = ""
     RULES = [("scala/", ""), ("isabelle/", ""), ("DEAK_Core.thy", "Calc_Core.thy"), ("DEAK.thy", "Calc_Rules.thy")]
-    IGNORE = ["scala/DEAK.scala"]
+    IGNORE = ["scala/DEAK.scala", ".thy#", ".thy~"]
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
