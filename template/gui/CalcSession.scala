@@ -61,12 +61,20 @@ case class CalcSession() extends Publisher {
 	val macroBuffer = ListBuffer[(String, Prooftree)]()
 
 
-	val listView = new ListView[(Icon, Sequent)]() {   
+	val listView = new ListView[(Icon, Sequent)]() {
+		//maximumSize = new java.awt.Dimension(200, 300)
     	listData = assmsBuffer
     	renderer = ListView.Renderer(_._1)
   	}
-  	val ptListView = new ListView[(Icon, Prooftree)]() {   
+  	val ptListView = new ListView[(Icon, Prooftree)]() {  
+  		//maximumSize = new java.awt.Dimension(200, 300) 
     	listData = ptBuffer
+    	renderer = ListView.Renderer(_._1)
+    }
+
+    val macroListView = new ListView[(String, Prooftree)]() {  
+  		//maximumSize = new java.awt.Dimension(200, 300) 
+    	listData = macroBuffer
     	renderer = ListView.Renderer(_._1)
     }
 
@@ -215,8 +223,9 @@ case class CalcSession() extends Publisher {
 						println("Prem: "+sequentToString(c, PrintCalc.ASCII))
 
 					}
+					macroListView.listData = macroBuffer
 
-					publish(MacroAdded())
+					//publish(MacroAdded())
 				}
 			case _ => println("cancel")
 		}

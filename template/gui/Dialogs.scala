@@ -252,7 +252,7 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
 
 
 
-class MacroAddDialog(owner: Window = null, pt : Prooftree) extends Dialog(owner) {
+class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = true, macroName : String = "") extends Dialog(owner) {
 
   var rule : Option[String] = None
 
@@ -275,18 +275,19 @@ class MacroAddDialog(owner: Window = null, pt : Prooftree) extends Dialog(owner)
 
   contents = new BorderPanel {
 
-    layout(new Label("Save selected PT as macro?")) = North
-
+    if (adding) layout(new Label("Save selected PT as macro?")) = North
+    else layout(new Label("Macro " + macroName)) = North
     layout(ptPanel) = Center
 
-    layout(new BoxPanel(Orientation.Horizontal) {
-      border = Swing.EmptyBorder(5,5,5,5)
-      contents += new Label("Macro name:")
-      contents += in
-      contents += Button("Save") { rule = Some(in.text); close() } 
-      contents += Button("Cancel") { close() } 
-    }) = South
-
+    if (adding) {
+      layout(new BoxPanel(Orientation.Horizontal) {
+        border = Swing.EmptyBorder(5,5,5,5)
+        contents += new Label("Macro name:")
+        contents += in
+        contents += Button("Save") { rule = Some(in.text); close() } 
+        contents += Button("Cancel") { close() } 
+      }) = South
+    }
     //layout(new FlowPanel(FlowPanel.Alignment.Right)( )) = South
   }
 

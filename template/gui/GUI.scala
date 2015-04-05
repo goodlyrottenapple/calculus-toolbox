@@ -86,6 +86,10 @@ object GUI extends SimpleSwingApplication {
     text = "Reload relAKA"
   }
 
+  val loadLocButton = new Button {
+    text = "Load Locale"
+  }
+
 
   val numberModel = new SpinnerNumberModel(5, //initial value
     0, //min
@@ -146,18 +150,48 @@ object GUI extends SimpleSwingApplication {
   })
   popup.add(menuItem4);
 
-  // ptPanel stuff here
-  val ptPanel = new ProofTreePanel(session){
-    preferredSize = new java.awt.Dimension(800, 600)
-  }
-  ptPanel.build()
 
+
+  session.macroListView.listenTo(session.macroListView.mouse.clicks)
+  session.macroListView.reactions += {
+    case m : MouseClicked if !session.macroListView.selection.items.isEmpty && m.clicks == 2 => 
+      val sel = session.macroListView.selection.items.head
+      new MacroAddDialog(macroName = sel._1, pt=sel._2, adding=false)
+    case m : MouseClicked if m.peer.getButton == MouseEvent.BUTTON3 => 
+      val row = session.macroListView.peer.locationToIndex(m.peer.getPoint)
+      if(row != -1) session.macroListView.peer.setSelectedIndex(row)
+      if(!session.macroListView.selection.items.isEmpty) popupMacro.peer.show(m.peer.getComponent, m.peer.getX, m.peer.getY)
+  }
+//  }
+
+
+  val popupMacro = new PopupMenu
+  val macroItem = new MenuItem(swing.Action("Save Macros") {
+    val fd = new FileDialog(null: java.awt.Dialog, "Save a macro file", FileDialog.SAVE)
+    fd.setDirectory(".")
+    fd.setFilenameFilter(new CSFilter())
+    fd.setVisible(true)
+    val filename = fd.getFile()
+    if (filename != null){
+      val file = if (!filename.endsWith(".cs")) new java.io.File(fd.getDirectory() + filename + ".cs") else new java.io.File(fd.getDirectory() + filename)
+      saveFile = Some(file)
+      saveLocaleFile(saveFile.get)
+    }
+    else
+      println("Cancelled")
+  })
+  popupMacro.add(macroItem)
+  
+
+  // ptPanel stuff here
+  val ptPanel = new ProofTreePanel(session)
+  ptPanel.build()
 
   //add components to listener here
 
-  listenTo(session, session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
+  listenTo(loadLocButton, session, session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
   reactions += {
-    case c : MacroAdded => println("added macro")
+    //case c : MacroAdded => println("added macro")
     case c : PTChanged => 
       validPTval.text = c.valid.toString
       if (c.valid) validPTval.foreground = new java.awt.Color(101,163,44)
@@ -183,7 +217,7 @@ object GUI extends SimpleSwingApplication {
             println("ASCII: " + sequentToString(session.currentSequent, PrintCalc.ASCII))
             println("LATEX: " + sequentToString(session.currentSequent, PrintCalc.LATEX))
             println("ISABELLE: " + sequentToString(session.currentSequent, PrintCalc.ISABELLE))
-
+            println("RULE: " + sequentToString(rulifySequent(session.currentSequent), PrintCalc.ASCII))
             //val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
             //val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
             //derTree(currentValue, session.currentLocale++currentAssm, session.currentSequent) match {
@@ -210,6 +244,18 @@ object GUI extends SimpleSwingApplication {
     case ButtonClicked(`addPtButton`) => session.addPT()
     case ButtonClicked(`addAssmButton`) => session.addAssm()
 
+
+    case ButtonClicked(`loadLocButton`) =>
+      val fd = new FileDialog(null: java.awt.Dialog, "Open a macro file", FileDialog.LOAD)
+      fd.setDirectory(".")
+      fd.setFilenameFilter(new CSFilter())
+      fd.setVisible(true)
+      val filename = fd.getFile()
+      if (filename != null) {
+        val file = new java.io.File(fd.getDirectory() + filename)
+        openLocaleFile(file)
+      }
+
     case ButtonClicked(`reloadrelAKAButton`) =>
       val buff = scala.collection.mutable.Map[Tuple2[Action, Agent], List[Action]]()
       for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
@@ -223,6 +269,7 @@ object GUI extends SimpleSwingApplication {
             case Some(list) => buff += ((alpha, a) -> (list ++ List(beta)))
             case None => buff += ((alpha, a) -> List(beta))
           }
+          session.currentPT = session.currentPT
 
         }
       }
@@ -249,19 +296,22 @@ object GUI extends SimpleSwingApplication {
   }
 
   lazy val assmsPanel = new BoxPanel(Orientation.Vertical){
+    preferredSize = new java.awt.Dimension(250, 600)
     contents += new Label("Assms:")
-    contents += new ScrollPane(session.listView)
+    contents += new ScrollPane(session.listView) //{horizontalScrollBarPolicy = ScrollPane.BarPolicy.Always}
     contents += addAssmButton//new FlowPanel(session.addAssm)//,removeAssm)
     contents += new Label("PTs:")
-    contents += new ScrollPane(session.ptListView)
+    contents += new ScrollPane(session.ptListView) //{horizontalScrollBarPolicy = ScrollPane.BarPolicy.Always}
     contents += addPtButton//new FlowPanel(addPt,session.loadPT,session.removePTs)
 
+    contents += new Label("Macros:")
+    contents += new ScrollPane(session.macroListView) //{horizontalScrollBarPolicy = ScrollPane.BarPolicy.Always}
 
     border = Swing.EmptyBorder(0, 0, 0, 10)
   }
 
   lazy val bottomPanel = new FlowPanel {
-    //contents += editButton
+    contents += loadLocButton
     contents += reloadrelAKAButton
     contents += new Label("PT search depth:")
     contents += Component.wrap(ptSearchHeightSpinner)
@@ -307,6 +357,25 @@ object GUI extends SimpleSwingApplication {
     }
   }
 
+  def openLocaleFile(file:java.io.File) = {
+    val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
+    Some(JSON.parseFull(jsonStr)) match {
+      case Some(M(map))  =>
+        map.get("macros") match {
+          case MM(macros) =>
+            val mac = macros.map{case (k, v) => (k, parseProoftree(v))}
+            //session.clearAssms
+            for ((k, Some(m)) <- mac){
+              //println(m)
+              session.macroBuffer += Tuple2(k, m)
+            }
+            session.macroListView.listData = session.macroBuffer
+          case _ => ;
+        }
+      case _ => ;
+    }
+  }
+
   def saveCSFile(file:java.io.File) = {  
     Some(new PrintWriter(file)).foreach{p =>
       p.write(
@@ -315,6 +384,18 @@ object GUI extends SimpleSwingApplication {
             "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
             "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
           .toString())
+      p.close
+    }
+  }
+
+  def saveLocaleFile(file:java.io.File) = {  
+    Some(new PrintWriter(file)).foreach{p =>
+      p.write(
+        JSONObject( 
+          Map( 
+            "macros" -> JSONObject(session.macroBuffer.map{case (n, pt) => (n, prooftreeToString(pt, PrintCalc.ASCII))}.toMap)
+            //"pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   
+          ) ).toString())
       p.close
     }
   }
@@ -368,7 +449,7 @@ object GUI extends SimpleSwingApplication {
               saveCSFile(saveFile.get)
             }
             else
-              println("Cancelled");
+              println("Cancelled")
           } else saveCSFile(saveFile.get)
           
         })
@@ -453,3 +534,4 @@ class CSFilter extends java.io.FilenameFilter {
 }
 
 object M extends CC[Map[String, Any]]
+object MM extends CC[Map[String, String]]

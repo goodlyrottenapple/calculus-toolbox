@@ -184,6 +184,7 @@ fun replaceIntoPT :: "Sequent \<Rightarrow> Prooftree \<Rightarrow> Prooftree" w
 
 fun collectPremises :: "Prooftree \<Rightarrow> Sequent list" where
 "collectPremises (Prooftree p (RuleZer Prem) []) = [p]" |
+"collectPremises (Prooftree _ (RuleMacro _ pt) list) = foldr append (map collectPremises list) (collectPremises pt)" |
 "collectPremises (Prooftree _ _ list) = foldr append (map collectPremises list) []"
 
 fun collectPremisesToLocale :: "Prooftree \<Rightarrow> Locale list" where
@@ -195,6 +196,7 @@ fun collectCutFormulas :: "Prooftree \<Rightarrow> Formula list" where
     _ \<Rightarrow> (case (consq (concl r)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl l)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] else []) |  _ \<Rightarrow> []))
   )
 )" |
+"collectCutFormulas (Prooftree _ (RuleMacro _ pt) list) = foldr append (map collectCutFormulas list) (collectCutFormulas pt)" |
 "collectCutFormulas (Prooftree _ _ list) = foldr append (map collectCutFormulas list) []"
 
 fun collectCutFormulasToLocale :: "Prooftree \<Rightarrow> Locale list" where
@@ -205,7 +207,7 @@ fun isProofTree :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" wher
 "isProofTree loc (s \<Longleftarrow> PT(RuleMacro n pt) ptlist) = (
   s = (concl pt) \<and> 
   isProofTree (append loc (collectPremisesToLocale pt)) pt \<and>
-  set (collectPremises pt) = set (map (\<lambda>x. concl x) ptlist) \<and>
+  set (collectPremises pt) = set (map concl ptlist) \<and>
   foldr (op \<and>) (map (isProofTree loc) ptlist) True
 )"|
 "isProofTree loc (s \<Longleftarrow> PT(r) l) = ( 
@@ -302,7 +304,7 @@ primrec rulifyAction :: "Action \<Rightarrow> Action" where
 
 fun rulifyFormula :: "Formula \<Rightarrow> Formula" where
 "rulifyFormula (Formula_Atprop(Atprop (f#a))) = 
-(if CHR ''A'' < f \<and> f < CHR ''Z'' then (Formula_Freevar (f#a)) else (Formula_Atprop (Atprop_Freevar (f#a)))
+(if CHR ''A'' \<le> f \<and> f \<le> CHR ''Z'' then (Formula_Freevar (f#a)) else (Formula_Atprop (Atprop_Freevar (f#a)))
 )" |
 "rulifyFormula (Formula_Bin x c y) = (Formula_Bin (rulifyFormula x) c (rulifyFormula y))" |
 "rulifyFormula (Formula_Agent_Formula c a x) = (Formula_Agent_Formula c (rulifyAgent a) (rulifyFormula x) )" |
@@ -314,7 +316,7 @@ fun rulifyFormula :: "Formula \<Rightarrow> Formula" where
 
 fun rulifyStructure :: "Structure \<Rightarrow> Structure" where
 "rulifyStructure (Structure_Formula (Formula_Atprop(Atprop (f#a)))) = 
-(if CHR ''A'' < f \<and> f < CHR ''Z'' then (
+(if CHR ''A'' \<le> f \<and> f \<le> CHR ''Z'' then (
   if f = CHR ''F'' then Structure_Formula (Formula_Freevar (f#a)) else Structure_Freevar (f#a)
   ) else Structure_Formula (Formula_Atprop (Atprop_Freevar (f#a)))
 )" |

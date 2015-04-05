@@ -38,7 +38,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	var selectedSequentInPt : Option[SequentInPt] = None
 
-	preferredSize = treeLayout.getBounds().getBounds().getSize()
+	//preferredSize = treeLayout.getBounds().getBounds().getSize()
 
 	def tree = treeLayout.getTree()
 
@@ -390,6 +390,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		build()
 		peer.revalidate()
 		peer.repaint()
+		val s = treeLayout.getBounds().getBounds().getSize()
+		preferredSize = new java.awt.Dimension(s.width + OFFSET_X*8, s.height + OFFSET_Y*2)
 	}
 
 	def build() = {
