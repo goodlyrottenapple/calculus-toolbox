@@ -83,7 +83,7 @@ def main(argv):
     SOURCE = "."
     DEST = ""
     RULES = [("scala/", ""), ("isabelle/", ""), ("DEAK_Core.thy", "Calc_Core.thy"), ("DEAK.thy", "Calc_Rules.thy")]
-    IGNORE = ["scala/DEAK.scala", ".thy#", ".thy~"]
+    IGNORE = ["scala/DEAK.scala", ".thy#", ".thy~", "ROOT"]
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
