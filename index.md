@@ -3,16 +3,20 @@ layout: default
 title: "Calculus Toolbox Docs Home"
 ---
 
-### Get Started
+### Calculus Toolbox Docs
 
-Start by [creating a new post](http://jekyllrb.com/docs/posts/) one of the categories listed in `_config.yml`. It will appear in the navigation on the left once recompiled. Or use the supplied script to make creating pages easier:
+This is a docs page for the calculus toolbox. 
 
-```bash
-ruby bin/jekyll-page "Some Page Title" ref
-```
+#### Get started
 
-#### Don't Forget
+To get started head over to the [github page](https://github.com/goodlyrottenapple/calculus-toolbox) and fork the repository to get started.
 
-- Add your own content to this page (i.e. `index.md`) and change the `title`
-- Change `title` and `subtitle` defined in `config.yml` for your site
-- Set the `baseurl` in `_config.yml` for your repo if deploying to GitHub pages
+#### System requirements
+
+To run the tools in the Calculus Toolbox, you need the following:
+
+- Isabelle2014
+- Scala (preffered 2.10)
+- Python (2.7 or higher)
+- `watchdog` python module
+
