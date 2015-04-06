@@ -3,3 +3,5 @@
 
 # Isabelle temp files
 *.thy~
+
+_pages/
