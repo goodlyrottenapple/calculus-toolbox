@@ -3,15 +3,11 @@ layout: default
 title: "Calculus Toolbox Docs Home"
 ---
 
-### Calculus Toolbox Docs
-
-This is a docs page for the calculus toolbox. 
-
-#### Get started
+### Get started
 
 To get started head over to the [github page](https://github.com/goodlyrottenapple/calculus-toolbox) and fork the repository to get started.
 
-#### System requirements
+### System requirements
 
 To run the tools in the Calculus Toolbox, you need the following:
 
