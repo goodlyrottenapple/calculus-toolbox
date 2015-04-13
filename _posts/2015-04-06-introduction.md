@@ -20,5 +20,5 @@ Finally, the generated Scala and Isabelle files are documented in HERE.
 To get started quickly, this tutorial will guide you through the process of generating a custom calculus.
 
 1. First open the default calculus file template `default.json`
-2. ![F := ap ∈ AtProp | F ∧ F | F → F](https://github.com/goodlyrottenapple/calculus-toolbox/blob/gh-pages/_files/intro1.png)
+2. ![F := ap ∈ AtProp | F ∧ F | F → F](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/intro1.png)
  
