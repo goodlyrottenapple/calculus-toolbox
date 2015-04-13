@@ -30,6 +30,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 2. Next, let's have a look at the definition of the calculus structure, more specifically at the definiution of atomic propositions and formulas. The inductive definition for these is given below:
 
    ![F := ap ∈ AtProp | F ∧ F | F → F](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/intro1.png)
+   
    and here is the correspondin definition in the jsno file:
    
    ```js
