@@ -87,10 +87,10 @@ To get started quickly, this tutorial will guide you through the process of gene
    - term in the calculus a ``_Freevar`` term is added to the DE
    - n-ary connective, a ``_Zer/Un/Bin/..`` is added to the DE of the corresponding term and a separate definition of the following form is added :
 
-   ```js
-"<Term>_<Zer/Un/Bin>_Op" : {
-	"<Term>_<Connective>" : {
-		...
+   	```js
+	"<Term>_<Zer/Un/Bin>_Op" : {
+		"<Term>_<Connective>" : {
+			...
+		}
 	}
-}
-```
+	```
