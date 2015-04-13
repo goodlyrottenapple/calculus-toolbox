@@ -82,15 +82,21 @@ To get started quickly, this tutorial will guide you through the process of gene
 }
 ```
 
-   Note that this is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that for every:
+   Note that this is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that:
    
-   - term in the calculus a ``_Freevar`` term is added to the DE
-   - n-ary connective, a ``_Zer/Un/Bin/..`` is added to the DE of the corresponding term and a separate definition of the following form is added :
+   - for every term in the calculus a ``_Freevar`` term is added to the DE
+   - for every n-ary connective, a ``_Zer/Un/Bin/..`` is added to the DE of the corresponding term and a separate definition of the following form is added :
 
-   	```js
-	"<Term>_<Zer/Un/Bin>_Op" : {
-		"<Term>_<Connective>" : {
-			...
-		}
+   ```js
+"<Term>_<Zer/Un/Bin>_Op" : {
+	"<Term>_<Connective>" : {
+		...
 	}
-	```
+}
+   ```
+   - a term of one type can be added to te definition of another type through the constructor of the shape ``"<Term2>_<Term1>" : {
+		"type": "<Term1>",
+		...
+	}
+   
+   The terms are built inductively in ths definition by specifying the ``type`` parameter in the JSOn file. For example, a binary conncective for a 
