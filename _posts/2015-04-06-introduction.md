@@ -119,4 +119,6 @@ datatype Formula = Formula_Atprop Atprop ("_ \<^sub>F" [320] 330)
 		 | Formula_Freevar string ("?\<^sub>F _" [340] 330)
    ```
    
-   baaaaaa
+   It is easy to see that the parameter ``isabelle`` together with ``precedence`` (in the JSON file) specify the sugar syntax of the defined terms in Isabelle. Either/both of the parameters can be ommited as in the case of the constructor ``Atprop`` in the datatype ``Atprop``.
+   
+   aaaaaa
