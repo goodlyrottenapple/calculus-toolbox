@@ -34,17 +34,17 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    ```js
    "Atprop" : {
-		"Atprop" : {
-			"type":"string",
-			"ascii" : "_"
-		},
-		"Atprop_Freevar" : {
-			"type" : "string",
-			"isabelle" : "?\\<^sub>A _",
-			"ascii" : "A? _",
-			"latex" : "_",
-			"precedence": [320, 320]
-		}
+	"Atprop" : {
+		"type":"string",
+		"ascii" : "_"
+	},
+	"Atprop_Freevar" : {
+		"type" : "string",
+		"isabelle" : "?\\<^sub>A _",
+		"ascii" : "A? _",
+		"latex" : "_",
+		"precedence": [320, 320]
+	}
 },
 
 "Formula" : {
