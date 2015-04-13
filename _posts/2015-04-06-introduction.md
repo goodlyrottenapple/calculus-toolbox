@@ -32,70 +32,52 @@ To get started quickly, this tutorial will guide you through the process of gene
    ![F := ap ∈ AtProp | F ∧ F | F → F](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/intro1.png)
    and here is the correspondin definition in the jsno file:
    
-   ```js
-   "Atprop" : {
-			"Atprop" : {
-				"type":"string",
-				"ascii" : "_"
-			},
-			"Atprop_Freevar" : {
-				"type" : "string",
-				"isabelle" : "?\\<^sub>A _",
-				"ascii" : "A? _",
-				"latex" : "_",
-				"precedence": [320, 320]
-			}
-		},
+```js
+"Atprop" : {
+   	"Atprop" : {
+		"type":"string",
+		"ascii" : "_"
+	},
+	"Atprop_Freevar" : {
+		"type" : "string",
+		"isabelle" : "?\\<^sub>A _",
+		"ascii" : "A? _",
+		"latex" : "_",
+		"precedence": [320, 320]
+	}
+},
 
-		"Formula" : {
-			"Formula_Atprop" : {
-				"type": "Atprop",
-				"isabelle" : "_ \\<^sub>F",
-				"precedence": [320, 330]
-			},
-			"Formula_Freevar" : {
-				"type" : "string",
-				"isabelle" : "?\\<^sub>F _",
-				"ascii" : "F? _",
-				"latex" : "_",
-				"precedence": [340, 330]
-			},
-			"Formula_Un" : {
-				"type" : ["Formula_Un_Op", "Formula"],
-				"isabelle" : "U\\<^sub>F _",
-				"precedence": [330, 331]
-			},
-			"Formula_Bin" : {
-				"type" : ["Formula", "Formula_Bin_Op", "Formula"],
-				"isabelle" : "B\\<^sub>F _",
-				"precedence": [330,330,330, 331]
-			}
-		},
+"Formula" : {
+	"Formula_Atprop" : {
+		"type": "Atprop",
+		"isabelle" : "_ \\<^sub>F",
+		"precedence": [320, 330]
+	},
+	"Formula_Freevar" : {
+		"type" : "string",
+		"isabelle" : "?\\<^sub>F _",
+		"ascii" : "F? _",
+		"latex" : "_",
+		"precedence": [340, 330]
+	},
+	"Formula_Bin" : {
+		"type" : ["Formula", "Formula_Bin_Op", "Formula"],
+		"isabelle" : "B\\<^sub>F _",
+		"precedence": [330,330,330, 331]
+	}
+},
 
-		"Formula_Un_Op" : {
-			"Formula_Not" : {
-				"isabelle" : "\\<not>\\<^sub>F",
-				"ascii" : "not",
-				"latex" : "\\lnot"
-			}
-		},
-
-		"Formula_Bin_Op" : {
-			"Formula_And" : {
-				"isabelle" : "\\<and>\\<^sub>F",
-				"ascii" : "^",
-				"latex" : "\\wedge"
-			},
-			"Formula_Or" : {
-				"isabelle" : "\\<or>\\<^sub>F",
-				"ascii" : "\\/",
-				"latex" : "\\vee"
-			},
-			"Formula_ImpR" : {
-				"isabelle" : "\\<rightarrow>\\<^sub>F",
-				"ascii" : ">",
-				"latex" : "\\rightarrow"
-			}
-		}
-		```
+"Formula_Bin_Op" : {
+	"Formula_And" : {
+		"isabelle" : "\\<and>\\<^sub>F",
+		"ascii" : "^",
+		"latex" : "\\wedge"
+	},
+	"Formula_ImpR" : {
+		"isabelle" : "\\<rightarrow>\\<^sub>F",
+		"ascii" : ">",
+		"latex" : "\\rightarrow"
+	}
+}
+```
  
