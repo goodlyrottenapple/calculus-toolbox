@@ -5,13 +5,13 @@ category: doc
 date: 2015-04-06 20:09:04
 ---
 
-The calculus toolbox is a set of scripts and utilities for generating a custom set of Isabelle theory files and scala classes that provide a user interface for working with set calculi.
+The calculus toolbox is a set of scripts and utilities for generating a custom set of Isabelle theory files and Scala classes that provide a user interface for working with set calculi.
 
 ### System overview
 
-The specification of a calculus file is contained within a JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The specifics on the JSON file s6tructure can be found HERE.
+The specification of a calculus file is contained within a JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The specifics on the JSON file structure can be found HERE.
 
-The `utilities` folder contains the core scripts for generating the Isabelle theory files and the scala UI. Detailed description of these tools can be found HERE.
+The `utilities` folder contains the core scripts for generating the Isabelle theory files and the Scala UI. Detailed description of these tools can be found HERE.
 
 Finally, the generated Scala and Isabelle files are documented in HERE.
 
@@ -25,7 +25,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    "calc_name" : "EAKMin"
    ```
    
-   This name is used in all the Isabelle theory files and scala classes.
+   This name is used in all the Isabelle theory files and Scala classes.
    
 2. Next, let's have a look at the definition of the calculus structure, more specifically at the definition of atomic propositions and formulas. The inductive definition for these is given below:
 
@@ -103,7 +103,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 }
    ```
    
-   The terms are built inductively in ths definition by specifying the ``type`` parameter in the JSON file. For example, a binary connective for a formula is specified via the entry ``"type" : ["Formula", "Formula_Bin_Op", "Formula"]`` in the ``Formula`` declaration, with the corresponding declaration of the binary connective(s) in ``Formula_Bin_Op``
+   The terms are built inductively in this definition by specifying the ``type`` parameter in the JSON file. For example, a binary connective for a formula is specified via the entry ``"type" : ["Formula", "Formula_Bin_Op", "Formula"]`` in the ``Formula`` declaration, with the corresponding declaration of the binary connective(s) in ``Formula_Bin_Op``
    
    To get a better idea of what the other specified parameters in the definition of ``Atprop``, ``Formula`` and ``Formula_Bin_Op`` mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
    
