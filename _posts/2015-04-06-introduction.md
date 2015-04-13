@@ -105,7 +105,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    The terms are built inductively in ths definition by specifying the ``type`` parameter in the JSON file. For example, a binary connective for a formula is specified via the entry ``"type" : ["Formula", "Formula_Bin_Op", "Formula"]`` in the ``Formula`` declaration, with the corresponding declaration of the binary connective(s) in ``Formula_Bin_Op``
    
-   To have a better idea of what some of the other specified parameters mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
+   To get a better idea of what the other specified parameters in the definition of ``Atprop``, ``Formula`` and ``Formula_Bin_Op`` mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
    
    ```isabelle
 datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
@@ -118,4 +118,4 @@ datatype Formula = Formula_Atprop Atprop ("_ \<^sub>F" [320] 330)
 		 | Formula_Bin Formula Formula_Bin_Op Formula ("B\<^sub>F _ _ _" [330,330,330] 331)
 		 | Formula_Freevar string ("?\<^sub>F _" [340] 330)
    ```
-   Bla bla...
+   It is easy to see that the parameter ``isabelle`` together with ``precedence`` in the JSON file, specify the sugar syntax of the defined terms in Isabelle. Either/both of the parameters can be ommited as in the case of the constructor ``Atprop`` in the datatype ``Atprop``.
