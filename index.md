@@ -12,7 +12,7 @@ To get started head over to the [github page](https://github.com/goodlyrottenapp
 To run the tools in the Calculus Toolbox, you need the following:
 
 - Isabelle2014
-- Scala (preffered 2.10)
+- Scala (preferred 2.10 or higher)
 - Python (2.7 or higher)
 - `watchdog` python module
 
