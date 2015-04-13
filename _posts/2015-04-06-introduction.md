@@ -103,4 +103,4 @@ To get started quickly, this tutorial will guide you through the process of gene
 }
    ```
    
-   The terms are built inductively in ths definition by specifying the ``type`` parameter in the JSON file. For example, a binary connective for a Formula is specified with the entry ``"js type" : ["Formula", "Formula_Bin_Op", "Formula"]`` in the ``Formula`` declaration with the corresponding declaration of the binary connectives in ``Formula_Bin_Op``
+   The terms are built inductively in ths definition by specifying the ``type`` parameter in the JSON file. For example, a binary connective for a Formula is specified with the entry ``"type" : ["Formula", "Formula_Bin_Op", "Formula"]`` in the ``Formula`` declaration with the corresponding declaration of the binary connectives in ``Formula_Bin_Op``
