@@ -118,4 +118,4 @@ datatype Formula = Formula_Atprop Atprop ("_ \<^sub>F" [320] 330)
                  | Formula_Bin Formula Formula_Bin_Op Formula ("B\<^sub>F _ _ _" [330,330,330] 331)
                  | Formula_Freevar string ("?\<^sub>F _" [340] 330)
    ```
-
+   Bla bla...
