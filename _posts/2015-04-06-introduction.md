@@ -94,9 +94,12 @@ To get started quickly, this tutorial will guide you through the process of gene
 	}
 }
    ```
-   - a term of one type can be added to te definition of another type through the constructor of the shape ``"<Term2>_<Term1>" : {
+   - a term of one type can be added to te definition of another type through the constructor of the shape
+   ```
+	"<Term2>_<Term1>" : {
 		"type": "<Term1>",
 		...
 	}
+```
    
    The terms are built inductively in ths definition by specifying the ``type`` parameter in the JSOn file. For example, a binary conncective for a 
