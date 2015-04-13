@@ -31,7 +31,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    ![F := ap ∈ AtProp | F ∧ F | F → F](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/intro1.png)
    
-   and here is the correspondin definition in the jsno file:
+   And here is the corresponding definition in the JSON file:
    
    ```js
    "Atprop" : {
@@ -81,4 +81,14 @@ To get started quickly, this tutorial will guide you through the process of gene
 	}
 }
 ```
- 
+
+   Note that thuis is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that for every:
+   * term in the calculus a ``_Freevar`` term is added to the DE
+   * n-ary connective, a ``_Zer/Un/Bin/..`` is added to the DE of the corresponding term and a separate definition of the following form is added :
+   ```js
+"<Term>_<Zer/Un/Bin>_Op" : {
+	"<Term>_<Connective>" : {
+		...
+	}
+}
+```
