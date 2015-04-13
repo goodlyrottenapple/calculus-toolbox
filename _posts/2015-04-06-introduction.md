@@ -33,7 +33,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    and here is the correspondin definition in the jsno file:
    
    ```js
-"Atprop" : {
+   "Atprop" : {
    	"Atprop" : {
 		"type":"string",
 		"ascii" : "_"
