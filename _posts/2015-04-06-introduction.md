@@ -107,7 +107,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    To get a better idea of what the other specified parameters in the definition of ``Atprop``, ``Formula`` and ``Formula_Bin_Op`` mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
    
-   ```isabelle
+   ```
 datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
 			| Formula_ImpR ("\<rightarrow>\<^sub>F")
 
