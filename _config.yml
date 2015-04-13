@@ -53,5 +53,5 @@ redcarpet:
         'superscript',
         'with_toc_data',
         'tables',
-        'hardwrap'
+        'softwrap'
     ]
