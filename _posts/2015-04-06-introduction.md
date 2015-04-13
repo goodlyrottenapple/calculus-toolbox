@@ -32,7 +32,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    ![F := ap ∈ AtProp | F ∧ F | F → F](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/intro1.png)
    and here is the correspondin definition in the jsno file:
    
-```js
+   ```js
 "Atprop" : {
    	"Atprop" : {
 		"type":"string",
