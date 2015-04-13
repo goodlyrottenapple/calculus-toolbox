@@ -107,7 +107,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    To have a better idea of what some of the other specified parameters mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
    
-   ```isabelle
+   ```
 datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
                         | Formula_ImpR ("\<rightarrow>\<^sub>F")
 
