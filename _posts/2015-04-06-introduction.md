@@ -35,7 +35,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    And here is the corresponding definition in the JSON file:
    
-   ```js
+   {% highlight ruby %}
    "Atprop" : {
       "Atprop" : {
          "type" : "string",
@@ -82,7 +82,7 @@ To get started quickly, this tutorial will guide you through the process of gene
          "latex" : "\\rightarrow"
       }
    }
-   ```
+   {% endhighlight %}
 
    Note that this is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that:
    
