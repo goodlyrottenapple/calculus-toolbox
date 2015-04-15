@@ -82,29 +82,29 @@ To get started quickly, this tutorial will guide you through the process of gene
    }
    ~~~
 
-   Note that this is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that...
+   Note that this is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that:
 
-   ...for every type in the calculus a _Freevar term is added to the DE
+   -  for every type in the calculus a ``_Freevar`` term is added to the DE
       
-   ...for every n-ary connective, a _Zer/Un/Bin/.. term is added to the DE of the corresponding type and a separate type of the following form is added:
+   -  for every n-ary connective, a ``_Zer/Un/Bin/..`` term is added to the DE of the corresponding type and a separate type of the following form is added:
 
 
-   ~~~json
-   "<Type>_<Zer/Un/Bin>_Op" : {
-         "<Type>_<Connective>" : {
-            ...
+      ~~~json
+      "<Type>_<Zer/Un/Bin>_Op" : {
+            "<Type>_<Connective>" : {
+               ...
+            }
          }
+      ~~~
+
+   -  a type can be promoted into another type through a constructor of the following shape:
+
+      ~~~json
+      "<Type>_<Type>" : {
+         "type": "<Type1>",
+         ...
       }
-   ~~~
-
-   ...a type can be promoted into another type through a constructor of the following shape:
-
-   ~~~json
-   "<Type>_<Type>" : {
-      "type": "<Type1>",
-      ...
-   }
-   ~~~
+      ~~~
 
    The terms are built inductively in this definition by specifying the ``type`` parameter in the JSON file. For example, a binary connective for a formula is specified via the entry ``"type" : ["Formula", "Formula_Bin_Op", "Formula"]`` in the ``Formula`` declaration, with the corresponding declaration of the binary connective(s) in ``Formula_Bin_Op``
 
@@ -142,7 +142,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    --------------------------|---------------------------------------------------------------------------------------------------------------------
    No sugar:                 | ``Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))``
    Isabelle:                 | ``((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S``
-   ASCII:                    | ```p |- p```
+   ASCII:                    | ``p |- p``
    LATEX:                    | ``p \vdash p``
 
    aa
