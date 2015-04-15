@@ -39,10 +39,12 @@ future: true
 # Exclude non-site files
 exclude: ['bin', 'README.md']
 
+# Syntax highlighting
+highlighter: pygments
+
 # Use the redcarpet Markdown renderer
 markdown: redcarpet
 redcarpet:
-    input: GFM
     extensions: [
         'fenced_code_blocks',
         'autolink',
@@ -52,6 +54,4 @@ redcarpet:
         'tables',
         'hardwrap'
     ]
-# Syntax highlighting
-highlighter: pygments
 
