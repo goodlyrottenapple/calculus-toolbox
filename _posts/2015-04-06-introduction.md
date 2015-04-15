@@ -144,3 +144,5 @@ To get started quickly, this tutorial will guide you through the process of gene
    Isabelle:                 | ``((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S``
    ASCII:                    | ```p |- p```
    LATEX:                    | ``p \vdash p``
+
+   aaa
