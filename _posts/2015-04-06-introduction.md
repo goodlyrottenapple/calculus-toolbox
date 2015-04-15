@@ -145,4 +145,4 @@ To get started quickly, this tutorial will guide you through the process of gene
    ASCII:                    | ```p |- p```
    LATEX:                    | ``p \vdash p``
 
-   aaa
+   aa
