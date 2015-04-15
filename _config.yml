@@ -28,8 +28,7 @@ sections: [
 
 # Keep as an empty string if served up at the root. If served up at a specific
 # path (e.g. on GitHub pages) leave off the trailing slash, e.g. /my-project
-# baseurl: 'https://goodlyrottenapple.github.io/calculus-toolbox'
-baseurl: ''
+baseurl: 'https://goodlyrottenapple.github.io/calculus-toolbox'
 
 # Dates are not included in permalinks
 permalink: none
@@ -44,11 +43,6 @@ exclude: ['bin', 'README.md']
 markdown: redcarpet
 redcarpet:
     input: GFM
-    # auto_ids: true
-    # footnote_nr: 1
-    # entity_output: as_char
-    # toc_levels: 1..6
-    # smart_quotes: lsquo,rsquo,ldquo,rdquo
     extensions: [
         'fenced_code_blocks',
         'autolink',
