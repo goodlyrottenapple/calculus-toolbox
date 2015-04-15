@@ -5,3 +5,5 @@
 *.thy~
 
 _pages/
+
+_config.yml
