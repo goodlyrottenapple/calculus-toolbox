@@ -35,7 +35,7 @@ baseurl: ''
 permalink: none
 
 # Syntax highlighting
-# highlighter: pygments
+highlighter: pygments
 
 # Since these are pages, it doesn't really matter
 future: true
@@ -44,7 +44,7 @@ future: true
 exclude: ['bin', 'README.md']
 
 # Use the redcarpet Markdown renderer
-markdown: kramdown
+markdown: KramdownPygments
 kramdown:
     input: GFM
     auto_ids: true
@@ -52,7 +52,7 @@ kramdown:
     entity_output: as_char
     toc_levels: 1..6
     smart_quotes: lsquo,rsquo,ldquo,rdquo
-    syntax_highlighter: rouge
+    # syntax_highlighter: rouge
 
     # extensions: [
     #     'no_intra_emphasis',
