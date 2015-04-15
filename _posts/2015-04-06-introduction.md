@@ -130,7 +130,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    and sequents:
 
-   `\\( S \vdash S \\)`
+   \\( S \vdash S \\)
 
    To see the corresponding JSON entries for these types, check ``default.json``
       
