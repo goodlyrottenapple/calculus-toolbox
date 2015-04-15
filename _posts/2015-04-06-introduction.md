@@ -89,13 +89,13 @@ To get started quickly, this tutorial will guide you through the process of gene
    - for every type in the calculus a ``_Freevar`` term is added to the DE
    - for every n-ary connective, a ``_Zer/Un/Bin/..`` term is added to the DE of the corresponding type and a separate type of the following form is added:
 
-      ```json
+   ```json
       "<Type>_<Zer/Un/Bin>_Op" : {
          "<Type>_<Connective>" : {
             ...
          }
       }
-      ```
+   ```
    - a type can be promoted into another type as through a constructor of the following shape
 
    ```json
