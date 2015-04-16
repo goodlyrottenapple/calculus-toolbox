@@ -37,7 +37,8 @@ To get started quickly, this tutorial will guide you through the process of gene
    "Atprop" : {
       "Atprop" : {
          "type" : "string",
-         "ascii" : "_"
+         "ascii" : "_",
+         "latex" : "_"
       },
       "Atprop_Freevar" : {
          "type" : "string",
@@ -122,15 +123,13 @@ To get started quickly, this tutorial will guide you through the process of gene
                     | Formula_Freevar string ("?\<^sub>F _" [340] 330)
    ~~~
 
-   The parameter ``isabelle`` together with ``precedence`` (in the JSON file) specify the sugar syntax of the defined terms in Isabelle. Either/both of the parameters can be ommited as in the case of the constructor/term ``Atprop`` in the datatype/type ``Atprop``.
+   The parameter ``isabelle`` together with ``precedence`` (in the JSON file) specify the sugar syntax of the defined terms in Isabelle. Either/both of the parameters can be omitted as in the case of the constructor/term ``Atprop`` in the datatype/type ``Atprop``.
 
    We similarly define structural terms:
 
    \\( S:= F \mid Id \mid S \,; S \mid S > S \\)
 
-   and sequents:
-
-   \\( S \vdash S \\)
+   and sequents: \\( S \vdash S \\)
 
    To see the corresponding JSON entries for these types, check ``default.json``
       
@@ -138,11 +137,70 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    To demonstrate, here is a look at the different encodings of a simple sequent \\( p \vdash p \\):
 
-   Notation/Sugar:           | Code:
+   Notation/Sugar:           | Code generated:
    --------------------------|---------------------------------------------------------------------------------------------------------------------
    No sugar:                 | ``Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))``
    Isabelle:                 | ``((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S``
    ASCII:                    | ``p |- p``
-   LATEX:                    | ``p \vdash p``
+   LaTeX:                    | ``p \vdash p``
 
-   aa
+   If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the "No sugar" entry of the table. 
+
+   However, note the ASCII/LaTeX sugar for the term Atprop, namely ``"ascii" : "_"``. This notation means that only the parameter/argument of Atprop, namely the string identifier, should be kept (the underscore acts as a placeholder for the variable in the sugar notation and is therefore a reserved character). Thus, ``Atprop <string>`` is abbreviated to just ``<string>`` in the ASCII/LaTeX sugar (also note that strings in Isabelle are enclosed in two single quotes, so the string ``abc`` is written as ``''abc''``).
+
+   The encoding of the rules is split up into two parts, first, similarly to the encoding of the terms of the calculus, the rules are defined in the ``calc_structure_rules`` section of the JSON file. The actual rule is then encoded in a separate section.
+
+   To demonstrate this, let us have a look at the identity rule in the calculus:
+
+   \\[Id \frac{}{p \vdash p}\\]
+
+   The following entries have to be added to the JSON file for the Id rule:
+
+   ~~~json
+   "calc_structure_rules" : {
+      "RuleZer" : {
+         "Id" : {
+            "ascii" : "Id",
+            "latex" : "Id"
+         },
+         ...
+      },
+      ...
+   }
+   ~~~
+
+   and
+
+   ~~~json
+   "rules" : {
+      "RuleZer" : {
+         "Id" : ["A?p |- A?p", ""],
+         ...
+      },
+      ...
+   }
+   ~~~
+
+   The first code snippet generates the Isabelle definition of the form ``datatype RuleZer = Id``, whilst the second code snippet is the actual encoding of the rule (in ASCII), which is parsed and translated into Isabelle.
+
+   All the rules in the JSON file are encoded as lists of sequents, where the first sequent is the rule conclusion (the bottom part), and all the subsequent sequents are the premises (the list must contain a premise and at least one conclusion). For example, the binary rule for an implication in the antecedent of a sequent is the following:
+
+   \\[\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}\\]
+
+   And the corresponding JSON encoding:
+
+   ~~~json
+   "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
+   ~~~
+
+   Even though the Id rule is an axiom and it has no conclusions, the empty string needs to be added to the list. (maybe remove that restriction??)
+
+   Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the shallow embedding of the calculus (link HERE maybe??) and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed any sequent with free variables within a concrete proof tree will automatically be invalid.
+
+4. After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the project folder and run:
+   
+   ~~~sh
+   ./build.py -c <path_to_JSON_calculus_description_file>
+   ~~~
+
+   For a list of optional flags and arguments run ``./build.py -h``. If you get compilation errors, please refer to the troubleshooting page HERE.
