@@ -143,7 +143,8 @@ To get started quickly, this tutorial will guide you through the process of gene
    Isabelle:                 | ``((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S``
    ASCII:                    | ``p |- p``
    LaTeX:                    | ``p \vdash p``
-
+   
+   <br>
    If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the "No sugar" entry of the table. 
 
    However, note the ASCII/LaTeX sugar for the term Atprop, namely ``"ascii" : "_"``. This notation means that only the parameter/argument of Atprop, namely the string identifier, should be kept (the underscore acts as a placeholder for the variable in the sugar notation and is therefore a reserved character). Thus, ``Atprop <string>`` is abbreviated to just ``<string>`` in the ASCII/LaTeX sugar (also note that strings in Isabelle are enclosed in two single quotes, so the string ``abc`` is written as ``''abc''``).
