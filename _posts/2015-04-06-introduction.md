@@ -157,6 +157,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    The following entries have to be added to the JSON file for the Id rule:
 
+
    ~~~json
    "calc_structure_rules" : {
       "RuleZer" : {
