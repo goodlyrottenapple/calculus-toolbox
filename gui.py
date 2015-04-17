@@ -10,7 +10,7 @@ class MyTestApp(npyscreen.NPSAppManaged):
         # These two forms are persistent between each edit.
         self.addForm("MAIN",       MainForm, name="Calculus Toolbox v0.2", color="IMPORTANT",)
         self.addForm("Build Calculus",     BuildForm, name="Build Calculus", color="IMPORTANT",  )
-        self.addForm("Debug",     DebugForm, name="Debug", color="WARNING",  )
+        self.addForm("Debug Tools",     DebugForm, name="Debug Tools", color="WARNING",  )
         # This one will be re-created each time it is edited.
         #self.addFormClass("THIRD", MainForm, name="Screen 3", color="CRITICAL",)
         
@@ -29,7 +29,7 @@ class MainForm(npyscreen.ActionFormMinimal):
     def create(self):
         self.add(npyscreen.FixedText, value = "Select operation:")
         # self.add(MyButton, name = 'Build Calculus', relx = 2,rely= 5)
-        self.add(MyButton, name = 'Debug Tools', relx = 20,rely= 5)
+        self.add(MyButton, name = 'Debug Tools', relx = 2,rely= 5)
 
     def on_ok(self):
         # Exit the application if the OK button is pressed.
