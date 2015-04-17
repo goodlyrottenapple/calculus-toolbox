@@ -2,7 +2,7 @@
 layout: page
 title: "Introduction"
 category: doc
-date: 2015-04-06 20:09:04
+date: 2015-04-17 09:09:25
 ---
 
 The calculus toolbox is a set of scripts and utilities for generating a custom set of Isabelle theory files and Scala classes that provide a user interface for working with set calculi.
@@ -157,7 +157,6 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    The following entries have to be added to the JSON file for the Id rule:
 
-
    ~~~json
    "calc_structure_rules" : {
       "RuleZer" : {
@@ -205,4 +204,4 @@ To get started quickly, this tutorial will guide you through the process of gene
    ./build.py -c <path_to_JSON_calculus_description_file>
    ~~~
 
-   For a list of optional flags and arguments run ``./build.py -h``. If you get compilation errors, please refer to the troubleshooting page HERE.
+   For a list of optional flags and arguments run ``./build.py -h``. If you get compilation errors, please refer to the [troubleshooting page]({{ site.baseurl }}/doc/troubleshooting.html).
