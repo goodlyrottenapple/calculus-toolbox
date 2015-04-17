@@ -194,7 +194,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
    ~~~
 
-   Even though the Id rule is an axiom and it has no conclusions, the empty string needs to be added to the list. (maybe remove that restriction??)
+   Even though the *Id* rule is an axiom and it has no conclusions, the empty string needs to be added to the list. **(maybe remove that restriction??)**
 
    Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the shallow embedding of the calculus (link HERE maybe??) and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed any sequent with free variables within a concrete proof tree will automatically be invalid.
 
