@@ -7,6 +7,8 @@ date: 2015-04-17 09:09:25
 
 The calculus toolbox is a set of scripts and utilities for generating a custom set of Isabelle theory files and Scala classes that provide a user interface for working with set calculi.
 
+
+
 ### Overview
 
 The specification of a calculus is contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found HERE.
