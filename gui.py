@@ -28,8 +28,8 @@ class MyTestApp(npyscreen.NPSAppManaged):
 class MainForm(npyscreen.ActionFormMinimal):
     def create(self):
         self.add(npyscreen.FixedText, value = "Select operation:")
-        self.add(MyButton, name = 'Build Calculus', relx = 2,rely= 5)
-        self.add(MyButton, name = 'Debug', relx = 20,rely= 5)
+        # self.add(MyButton, name = 'Build Calculus', relx = 2,rely= 5)
+        self.add(MyButton, name = 'Debug Tools', relx = 20,rely= 5)
 
     def on_ok(self):
         # Exit the application if the OK button is pressed.
