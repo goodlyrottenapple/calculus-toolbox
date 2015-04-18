@@ -16,6 +16,20 @@ pre {
 
 code {
     color: inherit;
+    white-space: normal;
+}
+
+.hljs{
+    background: none
+}
+
+.noborder td {
+    border: 0px;
+    width: 50%
+}
+
+.centering td {
+    text-align:center
 }
 
 #header {

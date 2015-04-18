@@ -14,5 +14,5 @@ To run the tools in the Calculus Toolbox, you need the following:
 - Isabelle2014
 - Scala (preferred 2.10 or higher)
 - Python (2.7 or higher)
-- (optional) `npyscreen` and `watchdog` python module
+- (optional) `npyscreen` and `watchdog` python modules
 

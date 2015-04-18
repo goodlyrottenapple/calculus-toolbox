@@ -51,3 +51,5 @@ Generates the Scala UI from [`template/gui/`](https://github.com/goodlyrottenapp
 <br>Any libraries inside the `libs` folder will be copied to the calculus folder.
 
 ### [gui.py](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/gui.py)
+
+requires the `npyscreen` python module

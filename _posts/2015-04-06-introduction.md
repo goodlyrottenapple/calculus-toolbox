@@ -5,7 +5,7 @@ category: doc
 date: 2015-04-17 09:09:25
 ---
 
-The calculus toolbox is a set of scripts and utilities for generating a custom set of Isabelle theory files and Scala classes that provide a user interface for working with set calculi.
+The calculus toolbox is a set of scripts and utilities for generating customized Isabelle theory files for user defined [display calculi]({{ site.baseurl }}/doc/calculi.html) and Scala classes that provide a user interface for working with set calculi.
 
 
 
@@ -31,7 +31,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    
 2. Next, let's have a look at the definition of the calculus structure, more specifically at the definition of atomic propositions and formulas. The inductive definition for these is given below:
 
-   \\( F:= ap \in AtProp \mid F \land F \mid F \rightarrow F \\)
+   \\( F:= ap \in \mathsf{AtProp} \mid F \land F \mid F \rightarrow F \\)
 
    And here is the corresponding definition in the JSON file:
 
@@ -85,7 +85,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    }
    ~~~
 
-   Note that this is a deep embedding (abbreviated DE) of the calculus in Isabelle, which means that:
+   Note that this is a [deep embedding]({{ site.baseurl }}/doc/calculi.html#deep-embedding) (abbreviated DE) of the calculus in Isabelle, which means that:
 
    -  for every type in the calculus a `_Freevar` term is added to the DE
       
@@ -113,7 +113,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    To get a better idea of what the other specified parameters in the definition of `Atprop`, `Formula` and `Formula_Bin_Op` mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
 
-   ~~~coq
+   ~~~json
    datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
                            | Formula_ImpR ("\<rightarrow>\<^sub>F")
 
@@ -129,7 +129,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    We similarly define structural terms:
 
-   \\( S:= F \mid Id \mid S \,; S \mid S > S \\)
+   \\( S:= F \mid \mathsf{Id} \mid S \,; S \mid S > S \\)
 
    and sequents: \\( S \vdash S \\)
 
@@ -139,20 +139,24 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    To demonstrate, here is a look at the different encodings of a simple sequent \\( p \vdash p \\):
 
-   Notation/Sugar:           | Code generated:
-   --------------------------|----------------------------------------
-   No sugar:                 | `Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))`
-   Isabelle:                 | `((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S`
-   ASCII:                    | `p |- p`
-   LaTeX:                    | `p \vdash p`
+   {:.table}
+   Notation           | Code generated
+   :------------------|:---------------------------------------
+   No sugar           | `Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))`
+   Isabelle (raw)     | `((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S`
+   ASCII              | `p |- p`
+   LaTeX              | `p \vdash p`
    
    <br>
    If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the "No sugar" entry of the table. 
 
+      - - -
+
    However, note the ASCII/LaTeX sugar for the term Atprop, namely `"ascii" : "_"`. This notation means that only the parameter/argument of Atprop, namely the string identifier, should be kept (the underscore acts as a placeholder for the variable in the sugar notation and is therefore a reserved character). Thus, `Atprop <string>` is abbreviated to just `<string>` in the ASCII/LaTeX sugar (also note that strings in Isabelle are enclosed in two single quotes, so the string `abc` is written as `''abc''`).
+  
+      - - -
 
-   The encoding of the rules is split up into two parts, first, similarly to the encoding of the terms of the calculus, the rules are defined in the `calc_structure_rules` section of the JSON file. The actual rule is then encoded in a separate section.
-
+   The encoding of the rules is split up into two parts, first, similarly to the encoding of the terms of the calculus, the rules are defined in the `calc_structure_rules` section of the JSON file. The actual rule is then encoded in a separate section.  
    To demonstrate this, let us have a look at the identity rule in the calculus:
 
    \\[Id \frac{}{p \vdash p}\\]
@@ -198,11 +202,11 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    Even though the _Id_ rule is an axiom and it has no conclusions, the empty string needs to be added to the list. __(maybe remove that restriction??)__
 
-   Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the shallow embedding of the calculus (link HERE maybe??) and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed any sequent with free variables within a concrete proof tree will automatically be invalid.
+   Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the [shallow embedding]({{ site.baseurl }}/doc/calculi.html#shallow-embedding) of the calculus and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed, any sequent with free variables within a concrete proof tree will automatically be invalid.
 
 4. After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the project folder and run:
    
-   ~~~sh
+   ~~~bash
    ./build.py -c <path_to_JSON_calculus_description_file>
    ~~~
 
