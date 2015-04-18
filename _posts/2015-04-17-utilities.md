@@ -10,7 +10,8 @@ This section will outline the core functionality of this toolbox generator, name
 ### [build.py](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/build.py)
 This is the main build script, which ties in all the utilities into a single script for easy calculus generation. The script takes the following set of parameters:
 
-Flag:         |     |Arguments:                                                  |Description:
+{:.table}
+Flag          |     |Arguments                                                   |Description
 :-------------|-----|:-----------------------------------------------------------|:-------------------------------------------
 `--path`      |`-p` |                                                            |Specify an output path for the calculus.
 `--template`  |`-t` |                                                            |Specify a templates folder to be used.
