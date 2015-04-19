@@ -8,7 +8,7 @@
         <title>{{ site.title }}{% if page.title %} : {{ page.title }}{% endif %}</title>
         <meta name="description" content="{{ site.subtitle }}">
 
-        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="{{ site.baseurl }}/css/syntax.css">
         <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
         <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css">
@@ -16,6 +16,22 @@
         <script type="text/javascript"
             src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
         </script>
+
+
+        <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          jax: ["input/TeX", "output/HTML-CSS"],
+          tex2jax: {
+            inlineMath: [ ['$', '$'] ],
+            displayMath: [ ['$$', '$$']],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+          },
+          messageStyle: "none",
+          "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+        });
+        </script>
+        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
 
         <script src="//cdn.jsdelivr.net/highlight.js/8.5/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script>
@@ -25,7 +41,7 @@
 
         <div class="container">
             <div class=row-fluid>
-                <div id=header class=span12>
+                <div id=header class=col-md-12>
                     {% include header.html %}
                 </div>
             </div>
@@ -33,15 +49,15 @@
             <div class=row-fluid>
                 {% assign post_count = site.posts|size %}
                 {% if site.navigation != 0 and site.navigation == 1 or post_count > 0 %}
-                    <div id=navigation class=span2>
+                    <div id=navigation class=col-md-2>
                         {% include navigation.html %}
                     </div>
 
-                    <div id=content class=span10>
+                    <div id=content class=col-md-10>
                         {{ content }}
                     </div>
                 {% else %}
-                    <div id=content class=span12>
+                    <div id=content class=10>
                         {{ content }}
                     </div>
                 {% endif %}
@@ -50,12 +66,12 @@
             {% if page.disqus == 1 %}
             <div class=row-fluid>
               {% if site.navigation == 1 or post_count > 0 %}
-                <div id=navigation class=span2></div>
-                <div id=disqus class=span10>
+                <div id=navigation class=col-md-2></div>
+                <div id=disqus class=col-md-10>
                     {% include disqus.html %}
                 </div>
               {% else %}
-                <div id=disqus class=span12>
+                <div id=disqus class=col-md-12>
                     {% include disqus.html %}
                 </div>
               {% endif %}
@@ -63,7 +79,7 @@
             {% endif %}
 
             <div class=row-fluid>
-                <div id=footer class=span12>
+                <div id=footer class=col-md-12>
                     {% include footer.html %}
                 </div>
             </div>

@@ -28,8 +28,8 @@ The calculus toolbox is compiled from the calculus description file in several s
 The core calculus theory file is generated from [`template/Calc_Core.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy). 
 
 ##### Scala
-The parsers for the terms of the calculus are generated using [`template/Parser.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Parser.scala)
-<br>The print class for terms of the calculus is generated using [`template/Print.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Print.scala)
+The parsers for the terms of the calculus are generated using [`template/Parser.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Parser.scala)  
+The print class for terms of the calculus is generated using [`template/Print.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Print.scala)
 
 ### `calc_compile`
 
@@ -42,14 +42,14 @@ This stage simply compiles all the Scala classes in `<calculus_output_path>/src/
 The rules of the calculus encoded in the JSON file are parsed and encoded in the main Isabelle theory file ([`template/Calc_Rules.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy)). 
 
 ##### Scala
-The parser class is rebuilt, now including parsers for proof trees and rule datatype constructors
-<br>The print class is rebuilt, adding printing for proof trees and rule datatype constructors
+The parser class is rebuilt, now including parsers for proof trees and rule datatype constructors  
+The print class is rebuilt, adding printing for proof trees and rule datatype constructors
 
 ### `add_gui`
 
 ##### Scala
-Generates the Scala UI from [`template/gui/`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/gui/) adding a separate compile script and a make file for the built calculus. 
-<br>Any libraries inside the `libs` folder will be copied to the calculus folder.
+Generates the Scala UI from [`template/gui/`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/gui/) adding a separate compile script and a make file for the built calculus.  
+Any libraries inside the `libs` folder will be copied to the calculus folder.
 
 ### [gui.py](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/gui.py)
 

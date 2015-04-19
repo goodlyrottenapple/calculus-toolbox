@@ -31,7 +31,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    
 2. Next, let's have a look at the definition of the calculus structure, more specifically at the definition of atomic propositions and formulas. The inductive definition for these is given below:
 
-   \\( F:= ap \in \mathsf{AtProp} \mid F \land F \mid F \rightarrow F \\)
+   $F:= ap \in \mathsf{AtProp} \mid F \land F \mid F \rightarrow F$
 
    And here is the corresponding definition in the JSON file:
 
@@ -85,6 +85,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    }
    ~~~
 
+      - - -
    Note that this is a [deep embedding]({{ site.baseurl }}/doc/calculi.html#deep-embedding) (abbreviated DE) of the calculus in Isabelle, which means that:
 
    -  for every type in the calculus a `_Freevar` term is added to the DE
@@ -108,6 +109,8 @@ To get started quickly, this tutorial will guide you through the process of gene
          ...
       }
       ~~~
+   
+      - - -
 
    The terms are built inductively in this definition by specifying the `type` parameter in the JSON file. For example, a binary connective for a formula is specified via the entry `"type" : ["Formula", "Formula_Bin_Op", "Formula"]` in the `Formula` declaration, with the corresponding declaration of the binary connective(s) in `Formula_Bin_Op`
 
@@ -129,15 +132,17 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    We similarly define structural terms:
 
-   \\( S:= F \mid \mathsf{Id} \mid S \,; S \mid S > S \\)
+   $S:= F \mid \mathsf{Id} \mid S \,; S \mid S > S$
 
-   and sequents: \\( S \vdash S \\)
+   and sequents: 
 
-   To see the corresponding JSON entries for these types, check `default.json`
+   $S \vdash S$
+
+   (To see the corresponding JSON entries for these types, check [`default.json`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json))
       
 3. The next part of the JSON file contains the encoded rules of the calculus. The encoding of the rules is tied to the definition of the calculus, more specifically to the ASCII sugar defined in the previous step.
    
-   To demonstrate, here is a look at the different encodings of a simple sequent \\( p \vdash p \\):
+   To demonstrate, here is a look at the different encodings of a simple sequent $p \vdash p$:
 
    {:.table}
    Notation           | Code generated
@@ -147,7 +152,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    ASCII              | `p |- p`
    LaTeX              | `p \vdash p`
    
-   <br>
+     
    If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the "No sugar" entry of the table. 
 
       - - -
@@ -159,7 +164,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    The encoding of the rules is split up into two parts, first, similarly to the encoding of the terms of the calculus, the rules are defined in the `calc_structure_rules` section of the JSON file. The actual rule is then encoded in a separate section.  
    To demonstrate this, let us have a look at the identity rule in the calculus:
 
-   \\[Id \frac{}{p \vdash p}\\]
+   $$Id \frac{}{p \vdash p}$$
 
    The following entries have to be added to the JSON file for the Id rule:
 
@@ -192,7 +197,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    All the rules in the JSON file are encoded as lists of sequents, where the first sequent is the rule conclusion (the bottom part), and all the subsequent sequents are the premises (the list must contain a premise and at least one conclusion). For example, the binary rule for an implication in the antecedent of a sequent is the following:
 
-   \\[\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}\\]
+   $$\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}$$
 
    And the corresponding JSON encoding:
 
@@ -200,11 +205,12 @@ To get started quickly, this tutorial will guide you through the process of gene
    "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
    ~~~
 
-   Even though the _Id_ rule is an axiom and it has no conclusions, the empty string needs to be added to the list. __(maybe remove that restriction??)__
+   {:.table}
+   <span class="glyphicon glyphicon-exclamation-sign"></span> | Even though the _Id_ rule is an axiom and it has no conclusions, the empty string needs to be added to the list. __(maybe remove that restriction??)__
 
    Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the [shallow embedding]({{ site.baseurl }}/doc/calculi.html#shallow-embedding) of the calculus and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed, any sequent with free variables within a concrete proof tree will automatically be invalid.
 
-4. After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the project folder and run:
+4. After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the toolbox folder and run:
    
    ~~~bash
    ./build.py -c <path_to_JSON_calculus_description_file>

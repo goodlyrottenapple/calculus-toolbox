@@ -20,11 +20,15 @@ code {
 }
 
 .hljs{
+    font-size: 0.85em;
     background: none
 }
 
-.noborder td {
+.noborder tbody>tr>td {
     border: 0px;
+}
+
+.equal-cols-2 td {
     width: 50%
 }
 
