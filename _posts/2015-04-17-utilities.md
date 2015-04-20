@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Utilities"
-category: doc
+category: ref
 date: 2015-04-15 09:24:45
 ---
 
@@ -22,35 +22,36 @@ Flag          |     |Arguments                                                  
 #### Build Stages
 The calculus toolbox is compiled from the calculus description file in several stages, which include compiling the core calculus Isabelle theory files, generating the ASCII parser and print classes in Scala, parsing and translating the encoded rules into Isabelle, generating the rule theory files and finally adding the UI Scala classes. Bellow is a short overview of these stages (you can manually call any stage of the build via the `--stage` flag) .
 
-### `core_calc_gen`
++   #### `core_calc_gen`
 
-##### Isabelle
-The core calculus theory file is generated from [`template/Calc_Core.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy). 
+    ##### Isabelle
+    The core calculus theory file is generated from [`template/Calc_Core.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy). 
 
-##### Scala
-The parsers for the terms of the calculus are generated using [`template/Parser.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Parser.scala)  
-The print class for terms of the calculus is generated using [`template/Print.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Print.scala)
+    ##### Scala
+    The parsers for the terms of the calculus are generated using [`template/Parser.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Parser.scala)  
+    The print class for terms of the calculus is generated using [`template/Print.scala`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Print.scala)
 
-### `calc_compile`
++   #### `calc_compile`
 
-##### Scala
-This stage simply compiles all the Scala classes in `<calculus_output_path>/src/scala`
+    ##### Scala
+    This stage simply compiles all the Scala classes in `<calculus_output_path>/src/scala`
 
-### `rule_calc_gen`
++   #### `rule_calc_gen`
 
-##### Isabelle
-The rules of the calculus encoded in the JSON file are parsed and encoded in the main Isabelle theory file ([`template/Calc_Rules.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy)). 
+    ##### Isabelle
+    The rules of the calculus encoded in the JSON file are parsed and encoded in the main Isabelle theory file ([`template/Calc_Rules.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy)). 
 
-##### Scala
-The parser class is rebuilt, now including parsers for proof trees and rule datatype constructors  
-The print class is rebuilt, adding printing for proof trees and rule datatype constructors
+    ##### Scala
+    The parser class is rebuilt, now including parsers for proof trees and rule datatype constructors  
+    The print class is rebuilt, adding printing for proof trees and rule datatype constructors
 
-### `add_gui`
++   #### `add_gui`
 
-##### Scala
-Generates the Scala UI from [`template/gui/`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/gui/) adding a separate compile script and a make file for the built calculus.  
-Any libraries inside the `libs` folder will be copied to the calculus folder.
+    ##### Scala
+    Generates the Scala UI from [`template/gui/`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/gui/) adding a separate compile script and a make file for the built calculus.  
+    Any libraries inside the `libs` folder will be copied to the calculus folder.
 
 ### [gui.py](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/gui.py)
 
-requires the `npyscreen` python module
+{:.table}
+<span class="glyphicon glyphicon-info-sign"></span> | this utility requires the `npyscreen` python module (install using pip)
