@@ -40,6 +40,11 @@ code {
   font-weight: 800;
 }
 
+.nav>li>a {
+  padding-top: 5px;
+  padding-bottom: 5px
+}
+
 #header {
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;

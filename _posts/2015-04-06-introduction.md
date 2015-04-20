@@ -2,7 +2,7 @@
 layout: page
 title: "Introduction"
 category: doc
-date: 2015-04-17 09:09:25
+date: 2015-04-20 16:33:26
 ---
 
 The calculus toolbox is a set of scripts and utilities for generating customized Isabelle theory files for user defined [display calculi]({{ site.baseurl }}/doc/calculi.html) and Scala classes that provide a user interface for working with set calculi.
