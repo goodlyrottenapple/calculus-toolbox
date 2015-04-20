@@ -11,7 +11,7 @@ def usage():
     usage = ["Usage:"]
     usage.append( "-s  --source    Specify a source folder to be watched" )
     usage.append( "-d  --dest      Specify an output path for decompiled files" )
-    usage.append( "-e  --ext       Specify file extensions to be monitored. The default are *.scala and *.thy".format(TEMPLATE_FILES_PATH) )
+    usage.append( "-e  --ext       Specify file extensions to be monitored. The default are *.scala and *.thy" )
     usage.append( "-r  --rules     Specify path rewrite rules (currently only hard coded strings, no regex)" )
     usage.append( "-i  --ignore    Specify paths (or substrings of a path) from the source folder to be ignored (currently only hard coded strings, no regex)" )
 
