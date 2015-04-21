@@ -9,6 +9,8 @@ To make modifications to the [calculi]({{ site.baseurl }}/doc/calculi.html) (suc
 
 ### The build process
 
-To build process goes through several stages of generating and compiling all the Isabelle theories and Scala classes. It is briefly outlined in the following diagram:
+The full build process (invoked by `build.py`) goes through several stages of generating and compiling all the Isabelle theories and Scala classes. It is briefly outlined in the following diagram and expanded upon in detail in this section.
 
 <img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg">
+
+#### Load calculus description file
