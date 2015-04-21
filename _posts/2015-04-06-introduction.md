@@ -217,3 +217,20 @@ To get started quickly, this tutorial will guide you through the process of gene
    ~~~
 
    For a list of optional flags and arguments run `./build.py -h`. If you get compilation errors, please refer to the [troubleshooting page]({{ site.baseurl }}/doc/troubleshooting.html).
+
+5. If the build was successful, navigate to the output folder (if not specified, defaults to `gen_calc`) and run:
+   
+   ~~~bash
+   ./build.py 
+   ~~~
+
+   This build command is different to the previous one and it does not generate any new code (it simply recompiles everything, now with the addition of the Scala UI __maybe simplify this??__). Once eveything has been compiled without errors, run:
+     
+   ~~~bash
+   make gui
+   ~~~
+
+   You should see the following screen:
+
+   ![scala gui screenshot](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/scala_gui_screen1.png)
+
