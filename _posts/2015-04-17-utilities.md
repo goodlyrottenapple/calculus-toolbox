@@ -42,8 +42,8 @@ The calculus toolbox is compiled from the calculus description file in several s
     The rules of the calculus encoded in the JSON file are parsed and encoded in the main Isabelle theory file ([`template/Calc_Rules.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy)). 
 
     ##### Scala
-    The parser class is rebuilt, now including parsers for proof trees and rule datatype constructors  
-    The print class is rebuilt, adding printing for proof trees and rule datatype constructors
+    The parser class is rebuilt, now including parsers for proof trees and rule datatype definitions  
+    The print class is rebuilt, adding printing for proof trees and rule datatype definitions
 
 +   #### `add_gui`
 
@@ -81,7 +81,7 @@ Flag          |     |Description
 `--source`    |`-s` |Specify the folder to be watched
 `--dest`      |`-d` |Specify the output folder
 `--ext`       |`-e` |Specify file extensions to be monitored. The default are '`*.scala`' and `*.thy`
-`--rules`     |`-r` |Specify path rewrite rules (currently just a dictionary of hard coded strings, there is no regular expression matching). The comand uses bash-like redirect syntax `"<old1> > <new1>, <old2> > <new2>, ..."`
+`--rules`     |`-r` |Specify path rewrite rules (currently just a dictionary of hard coded strings, there is no regular expression matching). The command uses bash-like redirect syntax `"<old1> > <new1>, <old2> > <new2>, ..."`
 `--ignore`    |`-i` |Specify paths (or substrings of a path) from the source folder to be ignored (currently no regular expressions matching)
 
 To run, use the following command:
@@ -132,7 +132,7 @@ The `-r` flag introduces some path rewrite rules, specific to the structure of t
     
     - - -
 
-+   Arguments can be passed to the defined python functions by appending them to the identifier in the comments with a question mark: `(*<identifier>?<arg1>?<arg2>?<arg3>?...*)`. The corresponding python function must take an extra list parameter, where the arguments are stored in the order they were written (ie. `[arg1, arg2, arg3, ...]`).
++   Arguments can be passed to the defined python functions by appending them to the identifier in the comments with a question mark: `(*<identifier>?<arg1>?<arg2>?<arg3>?...*)`. The corresponding python function must take an extra list parameter, where the arguments are stored in the order they were written (i.e. `[arg1, arg2, arg3, ...]`):
     
     ~~~python
     def <identifier>(self, list):
@@ -144,5 +144,5 @@ The `-r` flag introduces some path rewrite rules, specific to the structure of t
     {:.table}
     <span class="glyphicon glyphicon-exclamation-sign"></span> | Care should be taken not to override any data in `self.calc`. Even though the code generator tools do not write any changes to the JSON file, data may be reused by different functions at different times and any modification of the `self.calc` dictionary can lead to unexpected behavior.
 
-+   To create an internal/hidden function which cannot be called directly through its identifier, prepend two underscoresto the function name: `def __<fun>(self): ...`
++   To create an internal/hidden function which cannot be called directly through its identifier, prepend two underscores to the function name: `def __<fun>(self): ...`
 +   To create a static function use the `@staticmethod` flag before function declaration
