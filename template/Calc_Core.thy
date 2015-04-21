@@ -1000,8 +1000,6 @@ by (induct list a rule:replaceAll.induct, simp) (metis insert_subset inv_Sequent
 
 lemma inv_Sequent2: "replaceAll (match a a) a = (a::Sequent)" by simp
 
-definition "export = (Atprop ''A'')\<^sub>F\<^sub>S \<turnstile>\<^sub>S (Atprop ''A'')\<^sub>F\<^sub>S"
-
-export_code open export in Scala
+export_code open Sequent in Scala
 module_name (*calc_name*) file (*export_path*)
 end
