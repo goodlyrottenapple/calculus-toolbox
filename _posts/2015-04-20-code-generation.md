@@ -11,4 +11,4 @@ To make modifications to the [calculi]({{ site.baseurl }}/doc/calculi.html) (suc
 
 To build process goes through several stages of generating and compiling all the Isabelle theories and Scala classes. It is briefly outlined in the following diagram:
 
-![code generation diagram](https://cdn.rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg)
+<img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg">
