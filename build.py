@@ -221,7 +221,7 @@ def add_gui(flags):
         if not doBuild(builder,paths[list.index(l)], OUTPUT_PATH+SCALA_SRC_PATH+"gui/"+l+".scala"): return False
 
     if os.path.exists(TEMPLATE_FILES_PATH+"build.py"):
-        print "Copying build.py scrtipt ..."
+        print "Copying build.py script ..."
         shutil.copyfile(TEMPLATE_FILES_PATH+"build.py", OUTPUT_PATH+"build.py")
         cmd = "chmod +x " + OUTPUT_PATH+"build.py"
         response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
