@@ -11,7 +11,7 @@ To get started, fork the [github repository](https://github.com/goodlyrottenappl
 
 To run the tools in the Calculus Toolbox, you need the following:
 
-- Isabelle2014
+- Isabelle2014 (`isabelle` needs to be added to bash PATH)
 - Scala (preferred 2.10 or higher)
 - Python (2.7 or higher)
 - (optional) `npyscreen` and `watchdog` python modules

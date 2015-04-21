@@ -56,5 +56,18 @@ The print class can generate the string representation of the calculus terms in 
 +   uncommentL
 +   uncommentR
 
-*_This function is not actually called at this stage. For more information have a look at the reference page for this method_
+
+#### Export Scala version of core calculus
+
+The Isabelle theory file, generated in the previous step, is compiled in Isabelle and if it does not contain errors, will generate a Scala version/encoding of the calculus. The exported code includes the `datatype` definitions of the calculus terms.
+
+{:.table}
+   <span class="glyphicon glyphicon-exclamation-sign"></span> | `export_code`, the code export function in Isabelle, requires the explicit listing of all functions and definitions to be exported. This means that the top most type of the calculus (top most in the D.EAK and minimal calculus means the `Sequent` type, as it is the top most / biggest construction in the calculus) must be explicit given to the function. If `Sequent` is no longer the top/biggest term in the calculus, the `export_code` parameter must be manually amended in the [template file](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy).
+
+
+#### Compile Scala classes
+
+This stage simply compiles all the Scala classes in the calculus source folder. `-J-Xmx1024m` flag is passed to the Scala compiler, because the auto generated calculus files (from Isabelle theory files) can get quite long and thus require more heap space. If compilation fails with these settings, the code generation might need to be optimized (or the generated code will have to be manually shortened). This should not be a problem, as some optimization has already been done and there is no problem in compiling the full D.EAK calculus at the moment.
+
+*_This function is not called at this stage. For more information have a look at the reference page for this method_
 

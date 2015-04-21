@@ -28,3 +28,9 @@ To get rid of most errors without modifying the Isabelle files, try the ``--dirt
 
 #### `ERROR : Compiling core calculus classes failed!`
 There was an error in compiling the generated Scala files. Re-run with ``-v`` to get a detailed output form the Scala compiler.
+
+<br>
+
+#### `[Errno 2] No such file or directory`
+
+If this error occurs right after the line `Compiling Isabelle source files in ...`, try running `isabelle` in a terminal window. If you get an error, please add `isabelle` to your bash PATH variable.

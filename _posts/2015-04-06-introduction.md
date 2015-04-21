@@ -13,7 +13,7 @@ The calculus toolbox is a set of scripts and utilities for generating customized
 
 The calculus toolbox can roughly be split into two categories. The first one is the code generation, which includes utilities for generating Isabelle theories and Scala code from a specification of a calculus, contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found HERE.
 
-The `utilities` folder contains the core scripts for generating the Isabelle theory files and the Scala UI. Detailed description of these tools can be found in the [Utilities]({{ site.baseurl }}/doc/utilities.html) section.
+The [`tools`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/) folder contains the core scripts used for generating the Isabelle theory files and the Scala UI. Detailed description of these tools can be found in the [Utilities]({{ site.baseurl }}/doc/utilities.html) section.
 
 The second category of the calculus toolbox functionality is the Scala UI, which provides a graphical way of manipulating sequents and proof trees of the generated calculus. The UI provides the following functionality:
 
