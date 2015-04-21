@@ -1,11 +1,71 @@
 \documentclass[crop,tikz,convert={outext=.svg,command=\unexpanded{pdf2svg \infile\space\outfile}},multi=false]{standalone}[2012/04/13]
 %\usetikzlibrary{...}% tikz package already loaded by 'tikz' option
-\makeatletter
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
 \begin{document}
-\begin{tikzpicture}
-  \draw (0,0) -- (10,10); % ...
-  \draw (10,0) -- (0,10); % ...
-  \draw (5,0) -- (0,10); % ...
-  \node at (5,5) {Lorem ipsum at domine standalonus};
+\pagestyle{empty}
+
+
+% Define block styles
+\tikzstyle{block} = [rectangle, draw,
+    text width=5em, text centered, rounded corners, minimum height=3em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
+    
+\begin{tikzpicture}[node distance = 2cm, auto]
+    % Place nodes
+    \node [block] (json) {Load calculus description file};
+
+    \node [block, below of=json, node distance=3cm] (parse1) {Generate parser class for core calculus};
+    \node [block, left of=parse1, node distance=3cm] (isa1) {Generate core calculus Isabelle theory};
+    \node [block, right of=parse1, node distance=3cm] (print1) {Generate print class for core calculus};
+
+    \node [block, below of=isa1, node distance=3cm] (scala1) {Export Scala version of core calculus};
+
+    \node [block, right of=scala1, node distance=3cm] (comp1) {Comile Scala classes};
+
+    \node [block, below of=scala1, node distance=3cm] (rule) {Parse calculus rules and print for Isabelle};
+
+    \node [block, below of=rule, node distance=3cm] (isa2) {Generate calculus rules Isabelle theory};
+
+    \node [block, right of=isa2, node distance=3cm] (parse2) {Rebuild parser class for full calculus};
+    \node [block, right of=parse2, node distance=3cm] (print2) {Rebuild print class for full calculus};
+
+    \node [block, below of=isa2, node distance=3cm] (scala2) {Export Scala version of full calculus};
+
+    \node [block, right of=scala2, node distance=3cm] (comp2) {Comile Scala classes};
+
+    % \node [block, left of=evaluate, node distance=3cm] (update) {update model};
+    % \node [block, below of=decide, node distance=3cm] (stop) {stop};
+    % Draw edges
+    \path [line] (json) -- (isa1);
+    \path [line] (json) -- (parse1);
+    \path [line] (json) -- (print1);
+
+    \path [line] (isa1) -- (scala1);
+
+    \path [line] (scala1) -- (comp1);
+    \path [line] (parse1) -- (comp1);
+    \path [line] (print1) -- (comp1);
+
+    \path [line] (comp1) -- (rule);
+
+    \path [line] (rule) -- (isa2);
+
+    \path [line] (isa2) -- (scala2);
+
+    \path [line] (scala2) -- (comp2);
+    \path [line] (parse2) -- (comp2);
+    \path [line] (print2) -- (comp2);
+
+
+    % \path [line] (identify) -- (evaluate);
+    % \path [line] (evaluate) -- (decide);
+    % \path [line] (decide) -| node [near start] {yes} (update);
+    % \path [line] (update) |- (identify);
+    % \path [line] (decide) -- node {no}(stop);
+
 \end{tikzpicture}
 \end{document}
