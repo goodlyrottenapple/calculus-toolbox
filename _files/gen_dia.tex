@@ -11,8 +11,6 @@
 \tikzstyle{block} = [rectangle, draw,
     text width=10em, text centered, rounded corners, minimum height=3em]
 \tikzstyle{line} = [draw, -latex']
-\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
-    minimum height=2em]
     
 \begin{tikzpicture}[node distance =2cm and 6mm, auto]
     % Place nodes
@@ -39,8 +37,6 @@
 
     \node [block, below of=comp2] (gui) {Generate Scala UI classes};
 
-    % \node [block, left of=evaluate, node distance=3cm] (update) {update model};
-    % \node [block, below of=decide, node distance=3cm] (stop) {stop};
     % Draw edges
     \path [line] (json) -- (isa1);
     \path [line] (json) -- (parse1);

@@ -13,9 +13,13 @@ The full build process (invoked by `build.py`) goes through several stages of ge
 
 <img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg">
 
+<br>
+
 #### Load calculus description file
 
 The JSON file passed to the build script is parsed and stored
+
+<br>
 
 #### Generate core calculus Isabelle theory
 
@@ -29,6 +33,7 @@ At this stage, the file [`template/Calc_Core.thy`](https://github.com/goodlyrott
 +   uncommentL
 +   uncommentR
 
+<br>
 
 #### Generate parser class for core calculus
 
@@ -42,7 +47,7 @@ Parsers for the data types defined in `calc_structure` are generated. The parser
 +   uncommentL
 +   uncommentR
 
-
+<br>
 
 #### Generate print class for core calculus
 
@@ -56,6 +61,7 @@ The print class can generate the string representation of the calculus terms in 
 +   uncommentL
 +   uncommentR
 
+<br>
 
 #### Export Scala version of core calculus
 
@@ -64,10 +70,37 @@ The Isabelle theory file, generated in the previous step, is compiled in Isabell
 {:.table}
    <span class="glyphicon glyphicon-exclamation-sign"></span> | `export_code`, the code export function in Isabelle, requires the explicit listing of all functions and definitions to be exported. This means that the top most type of the calculus (top most in the D.EAK and minimal calculus means the `Sequent` type, as it is the top most / biggest construction in the calculus) must be explicit given to the function. If `Sequent` is no longer the top/biggest term in the calculus, the `export_code` parameter must be manually amended in the [template file](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy).
 
+<br>
 
 #### Compile Scala classes
 
 This stage simply compiles all the Scala classes in the calculus source folder. `-J-Xmx1024m` flag is passed to the Scala compiler, because the auto generated calculus files (from Isabelle theory files) can get quite long and thus require more heap space. If compilation fails with these settings, the code generation might need to be optimized (or the generated code will have to be manually shortened). This should not be a problem, as some optimization has already been done and there is no problem in compiling the full D.EAK calculus at the moment.
+
+<br>
+
+#### Parse calculus rules and print for Isabelle
+
+Since the rules of the calculus are encoded using the user defined ASCII sugar, they have to be parsed and then returned back in Isabelle format (the print class is used for this purpose). Whilst this may look complicated, and it is indeed the main reason why the calculus is generated in two stages and two separate Isabelle theory files, the reason for this decision was to make the encoding of the rules in the JSON file as easily readable as possible. As shown in the [calculi]({{ site.baseurl }}/doc/calculi.html) section, the Isabelle notation for DE (deep encoding) can become quite verbose and even unreadable. Another disadvantage of the Isabelle syntax with sugar is the need for the jEdit environment, if one wants to see the sugar notation. For example, in the Isabelle IDE, $p \vdash p$ shows up as:
+
+<pre><code>(Atprop ''p'')<sub>FS</sub> ⊢ (Atprop ''p'')<sub>FS</sub></code></pre>
+
+However, the underlying `.thy` file encodes the snippet in the following way:
+
+~~~isabelle
+(Atprop ''p'') \<^sub>F \<^sub>S \<turnstile> (Atprop ''p'') \<^sub>F \<^sub>S
+~~~
+
+The ASCII notation, if specified well, can thus greatly improve the readability and allow for sugar syntax without the need for the Isabelle IDE and Unicode symbols.
+
+The parsing of the rules is done through the [Scala parser class](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Parser.scala), which contains a main method that can be run from the terminal via `scala -classpath <path_to_bin> Parser <JSON_rule_list>`. Where `<JSON_rule_list>` is a list of Sequents in ASCII notation.
+
+<br>
+
+#### Generate calculus rules Isabelle theory
+
+
+
+
 
 *_This function is not called at this stage. For more information have a look at the reference page for this method_
 
