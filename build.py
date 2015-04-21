@@ -121,9 +121,12 @@ def core_calc_gen(flags):
               cmd = "isabelle build -D " + OUTPUT_PATH + ISABELLE_SRC_PATH + " -c"
             else:
               cmd = "isabelle build -D " + OUTPUT_PATH + ISABELLE_SRC_PATH
-            #print cmd
-            response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
-            if cmd_output_throws_error(flags, response, err, "Generating calculus .scala file failed!"): return False
+            try:
+                response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
+                if cmd_output_throws_error(flags, response, err, "Generating calculus scala file failed!"): return False
+            except Exception, e:
+                print e
+                return False
 
     return True
     
