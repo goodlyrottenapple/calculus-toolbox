@@ -14,3 +14,47 @@ The full build process (invoked by `build.py`) goes through several stages of ge
 <img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg">
 
 #### Load calculus description file
+
+The JSON file passed to the build script is parsed and stored
+
+#### Generate core calculus Isabelle theory
+
+At this stage, the file [`template/Calc_Core.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy) is filled in with the definitions of the calculus specified in the `calc_structure` portion of the JSON file.
+
+##### Functions used
+
++   calc_name_core
++   calc_structure
++   export_path
++   uncommentL
++   uncommentR
+
+
+#### Generate parser class for core calculus
+
+Parsers for the data types defined in `calc_structure` are generated. The parsers are used to parse terms in the ASCII sugar notation, as this is the notation the user uses to input terms of the calculus into the UI. The ASCII notation is also used for saving the proof trees generated through the UI (unless the user specifically choses to export to Isabelle or LaTeX).
+
+##### Functions used
+
++   calc_import
++   parser_calc_structure
++   parser_calc_structure_rules*
++   uncommentL
++   uncommentR
+
+
+
+#### Generate print class for core calculus
+
+The print class can generate the string representation of the calculus terms in Isabelle syntax, ASCII and as LaTeX. This allows the user to work with terms of the calculus within the toolbox UI and then typeset the resulting terms in LaTeX, export them back into Isabelle or save them in ASCII format for later manipulation within the UI.
+
+##### Functions used
+
++   calc_import
++   print_calc_structure
++   print_calc_structure_rules*
++   uncommentL
++   uncommentR
+
+*_This function is not actually called at this stage. For more information have a look at the reference page for this method_
+

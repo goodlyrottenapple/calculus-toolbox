@@ -11,11 +11,20 @@ The calculus toolbox is a set of scripts and utilities for generating customized
 
 ### Overview
 
-The specification of a calculus is contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found HERE.
+The calculus toolbox can roughly be split into two categories. The first one is the code generation, which includes utilities for generating Isabelle theories and Scala code from a specification of a calculus, contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found HERE.
 
 The `utilities` folder contains the core scripts for generating the Isabelle theory files and the Scala UI. Detailed description of these tools can be found in the [Utilities]({{ site.baseurl }}/doc/utilities.html) section.
 
-Finally, the generated Scala and Isabelle files are documented in HERE.
+The second category of the calculus toolbox functionality is the Scala UI, which provides a graphical way of manipulating sequents and proof trees of the generated calculus. The UI provides the following functionality:
+
++  Graphical representation of proof trees in the UI
++  LaTeX typesetting of the terms of the calculus, with user specified sugar syntax
++  Automatic proof search
++  Manual proof tree creation and modification, including merging proof trees, deleting portions of pt's, applying rules to the leaves of a pt (if applicable) and other
++  Automatic typesetting of proof trees in LaTeX
++  Exporting proof trees back to Isabelle __not implemented yet!!__
+
+The UI is further documented HERE.
 
 ### Start guide
 
