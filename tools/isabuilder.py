@@ -49,6 +49,7 @@ class IsabelleBuilder:
 			return "\"{0}{1}.scala\"".format(self.calc["export_path"], self.calc["calc_name"])
 		return ""
 	
+	# given a calculus dictionary, recursively returns all the keys of the dictionary and any subdictionaries
 	@staticmethod
 	def __keywords(calc):
 		ret = []
@@ -154,7 +155,7 @@ class IsabelleBuilder:
 				else : done.append(k)
 		return "\n" + "\n\n".join(list) + "\n"
 
-
+	# generates the definition of datatype Rules
 	@staticmethod
 	def __calc_structure_all_rules(rules):
 		ret = "datatype Rule = "
@@ -166,7 +167,8 @@ class IsabelleBuilder:
 		lines.append( "Fail" )
 		space = (" " * (len(ret)-2))
 		return ret + ("\n" + space + "| ").join(lines) + "\n     and Prooftree = Prooftree Sequent Rule \"Prooftree list\" (\"_ \\<Longleftarrow> PT ( _ ) _\" [341,341] 350)"
-
+	
+	# deprecated
 	def __calc_structure_rules_concl(self):
 		if "calc_structure_rules" in self.calc and "Prooftree" in self.calc["calc_structure_rules"]:
 			ret = "fun concl :: \"Prooftree \<Rightarrow> Sequent\" where\n"
@@ -216,7 +218,8 @@ class IsabelleBuilder:
 		# list.append ( self.__calc_structure_rules_concl() )
 
 		return "\n" + "\n\n".join(list) + "\n"
-
+	# given a parser command, will pass a list of ASCII rule encodings and expect a JSON list of Isabelle encoded rules
+	# generates "primrec ruleBin/Op/etc"
 	@staticmethod
 	def __calc_structure_rules_rule_list_aux(name, rules, rule_def, parser_command):
 		import shlex
@@ -261,7 +264,7 @@ class IsabelleBuilder:
 				else: ret.append( "\"rule{0} x {0}.{1} = ((?\\<^sub>S''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S''Y'')) \\<Longrightarrow>RD (\\<lambda>x. None)\"".format(name, r) )
 			return "primrec rule{0} :: \"Locale \<Rightarrow> {0} \<Rightarrow> ruleder\" where\n".format(name) + " |\n".join(ret) + '\n'
 		else: return ""
-		
+	# generates a universal rule function that brings all the separate ruleBin/Op/etc functions under one call...	
 	def rules_rule_fun(self):
 		if "parser_command" in self.calc and "rules" in self.calc:
 			ret = []
@@ -274,7 +277,7 @@ class IsabelleBuilder:
 
 			return '\n' + "\n".join(ret) + "\nfun rule :: \"Locale \<Rightarrow> Rule \<Rightarrow> ruleder\" where\n" + " |\n".join(rules) + '\n'  
 		return ""
-
+	# generates the ruleList definition (used for proofsearch in scala, as any rules not in this list will be ommited from the search)
 	def rules_rule_list(self):
 		if "parser_command" in self.calc and "calc_structure_rules" in self.calc:
 			ret = []
