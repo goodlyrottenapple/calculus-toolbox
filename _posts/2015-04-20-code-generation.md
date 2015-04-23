@@ -11,6 +11,8 @@ To make modifications to the [calculi]({{ site.baseurl }}/doc/calculi.html) (suc
 
 The full build process (invoked by `build.py`) goes through several stages of generating and compiling all the Isabelle theories and Scala classes. It is briefly outlined in the following diagram and expanded upon in detail in this section.
 
+<br>
+
 <img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg">
 
 <br>
@@ -27,11 +29,11 @@ At this stage, the file [`template/Calc_Core.thy`](https://github.com/goodlyrott
 
 ##### Functions used
 
-+   calc_name_core
-+   calc_structure
-+   export_path
-+   uncommentL
-+   uncommentR
++   [calc_name_core]({{ site.baseurl }}/ref/isabellebuilder.html#calc_name_core)
++   [calc_structure]({{ site.baseurl }}/ref/isabellebuilder.html#calc_structure)
++   [export_path]({{ site.baseurl }}/ref/isabellebuilder.html#export_path)
++   [uncommentL]({{ site.baseurl }}/ref/isabellebuilder.html#uncomment)
++   [uncommentR]({{ site.baseurl }}/ref/isabellebuilder.html#uncomment)
 
 <br>
 
@@ -98,9 +100,39 @@ The parsing of the rules is done through the [Scala parser class](https://github
 
 #### Generate calculus rules Isabelle theory
 
+After the rules have been translated into Isabelle syntax, the rule encoding theory file for the calculus is generated from the [`Calc_Rules.thy`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy) template.
+
+##### Functions used
+
++   [calc_name]({{ site.baseurl }}/ref/isabellebuilder.html#calc_name)
++   [calc_structure_rules]({{ site.baseurl }}/ref/isabellebuilder.html#calc_structure_rules)
++   [export_path]({{ site.baseurl }}/ref/isabellebuilder.html#export_path)
+
+<br>
+
+#### Export Scala version of full calculus
+
+Once the rule encoding theory file is successfully compiled by Isabelle, the Scala version of the full calculus (now including the encoded rules and proof trees)
+is re-exported (even though there are two theory files in Isabelle, the resulting Scala code is exported into a single class).
+
+<br>
+
+#### Rebuild parser/print class for full calculus
+
+The parser and print classes are rebuilt, now including the parsers and print functions for the full calculus.
+
+<br>
+
+#### Generate Scala UI classes
+
+Builds the UI classes found in [`template/gui`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/gui/)
+
+##### Functions used
+
++   calc_import
 
 
-
+<br>
 
 *_This function is not called at this stage. For more information have a look at the reference page for this method_
 

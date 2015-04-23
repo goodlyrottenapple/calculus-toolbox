@@ -133,5 +133,12 @@
         {% if site.google_analytics_id != "" %}
         {% include google_analytics.html %}
         {% endif %}
+
+        <script>
+            var aCodes = document.getElementsByClassName('code');
+            for (var i=0; i < aCodes.length; i++) {
+                hljs.highlightBlock(aCodes[i]);
+            }
+        </script>
     </body>
 </html>

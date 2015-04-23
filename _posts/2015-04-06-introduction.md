@@ -153,15 +153,16 @@ To get started quickly, this tutorial will guide you through the process of gene
    
    To demonstrate, here is a look at the different encodings of a simple sequent $p \vdash p$:
 
-   {:.table}
+   {: .table .table-responsive}
    Notation           | Code generated
    :------------------|:---------------------------------------
    No sugar           | `Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))`
-   Isabelle (raw)     | `((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S`
+   Isabelle (raw*)    | `((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S`
    ASCII              | `p |- p`
    LaTeX              | `p \vdash p`
    
-     
+   *_In Isabelle IDE (jEdit), the rendered term would look like this:_ <code>(Atprop ''p'')<sub>FS</sub> ⊢ (Atprop ''p'')<sub>FS</sub></code>
+
    If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the "No sugar" entry of the table. 
 
       - - -

@@ -40,6 +40,51 @@ code {
   font-weight: 800;
 }
 
+table{
+    background-color:transparent
+}
+
+caption{
+    padding-top:8px;
+    padding-bottom:8px;
+    color:#777;
+    text-align:left
+}
+
+th{
+    text-align:left
+}
+
+.code{
+    max-width:100%;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+    font-size: 1em;
+    padding: 0em;
+}
+
+.code .hljs-keyword{
+    font-style: italic;
+    color: #337AB7;
+}
+
+.code .hljs-params{
+    font-style: italic;
+    color: #337AB7;
+}
+
+.code .hljs-title{
+    font-weight: 800;
+    color: black;
+}
+
+.code>tbody>tr>td,.code>tbody>tr>th{
+    padding:8px;
+    line-height:1.42857143;
+    vertical-align:top;
+    border-top:1px solid #ddd;
+    color: #337AB7;
+}
+
 .nav>li>a {
   padding-top: 5px;
   padding-bottom: 5px

@@ -10,7 +10,7 @@ This section will outline the core functionality of this toolbox generator, name
 ### [build.py](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/build.py)
 This is the main build script, which ties in all the utilities into a single script for easy calculus generation. The script takes the following set of parameters:
 
-{:.table}
+{: .table .table-responsive}
 Flag          |     |Arguments                                                   |Description
 :-------------|-----|:-----------------------------------------------------------|:-------------------------------------------
 `--path`      |`-p` |                                                            |Specify an output path for the calculus.
@@ -75,7 +75,7 @@ This utility provides some debugging tools when extending the calculus functiona
 
 The watcher utility is useful when rewriting code within the generated calculus and wanting to propagate the changes back to the template files automatically. As mentioned, the [`gui.py`](#guipyhttpsgithubcomgoodlyrottenapplecalculus-toolboxblobmasterguipy) utility provides a way to strip down generated classes back into templates. However, the watcher utility does this automatically whenever a file is changed. The following table lists the arguments that can be passed to the utility:
 
-{:.table}
+{: .table .table-responsive}
 Flag          |     |Description
 :-------------|-----|:-------------------------------------------
 `--source`    |`-s` |Specify the folder to be watched
