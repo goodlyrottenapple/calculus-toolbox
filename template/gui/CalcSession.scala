@@ -18,6 +18,8 @@ case class MacroAdded() extends Event
 
 case class CalcSession() extends Publisher {
 
+	/*/*uncommentL?Action?Agent*/
+
 	var relAKAMap : Map[Tuple2[Action, Agent], List[Action]] = Map()
 
 	/*def relAKAOld(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
@@ -42,6 +44,8 @@ case class CalcSession() extends Publisher {
 		else h::list
 		case None => List(alpha)
 	}
+
+	/*uncommentR?Action?Agent*/*/
 
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
 
@@ -79,9 +83,8 @@ case class CalcSession() extends Publisher {
     }
 
     def currentLocale() : List[Locale] = List(
-		Empty(), 
-		RelAKA(relAKA)//, 
-		//Swapout(relAKA, List(Actiona(List('e','p','a'))) )
+		Empty() 
+		/*/*uncommentL?Action?Agent*/ , RelAKA(relAKA) /*uncommentR?Action?Agent*/*/
 	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)})
 
 
@@ -121,6 +124,7 @@ case class CalcSession() extends Publisher {
 		}
 		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
+	
 	def removeAssms() = {
 		for (i <- listView.selection.items) assmsBuffer -= i
 		listView.listData = assmsBuffer

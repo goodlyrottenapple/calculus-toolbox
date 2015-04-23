@@ -85,9 +85,11 @@ object GUI extends SimpleSwingApplication {
     enabled = false
   }
 */
+  /*/*uncommentL?Action?Agent*/
   val reloadrelAKAButton = new Button {
     text = "Reload relAKA"
   }
+  /*uncommentR?Action?Agent*/*/
 
   val loadLocButton = new Button {
     text = "Load Locale"
@@ -206,7 +208,7 @@ object GUI extends SimpleSwingApplication {
 
   //add components to listener here
 
-  listenTo(loadLocButton, session, session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton, reloadrelAKAButton) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
+  listenTo(loadLocButton, session, session.listView.keys, session.ptListView.keys, inStr.keys, addAssmButton, addPtButton /*/*uncommentL?Action?Agent*/,reloadrelAKAButton /*uncommentR?Action?Agent*/*/ ) //session.addAssmButton, session.removeAssmButton, session.removePTsButton, session.loadPTButton, session.addPtButton, 
   reactions += {
     //case c : MacroAdded => println("added macro")
     case c : PTChanged => 
@@ -273,6 +275,7 @@ object GUI extends SimpleSwingApplication {
         openLocaleFile(file)
       }
 
+    /*/*uncommentL?Action?Agent*/
     case ButtonClicked(`reloadrelAKAButton`) =>
       val buff = scala.collection.mutable.Map[Tuple2[Action, Agent], List[Action]]()
       for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
@@ -302,6 +305,7 @@ object GUI extends SimpleSwingApplication {
 
         }
       }
+    /*uncommentR?Action?Agent*/*/ 
   }
 
   //UI element spositioning in the main window 
@@ -329,7 +333,7 @@ object GUI extends SimpleSwingApplication {
 
   lazy val bottomPanel = new FlowPanel {
     contents += loadLocButton
-    contents += reloadrelAKAButton
+    /*/*uncommentL?Action?Agent*/contents += reloadrelAKAButton /*uncommentR?Action?Agent*/*/
     contents += new Label("PT search depth:")
     contents += Component.wrap(ptSearchHeightSpinner)
     //contents += log

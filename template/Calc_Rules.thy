@@ -11,6 +11,7 @@ datatype ruleder = ruleder      Sequent "Sequent \<Rightarrow> Sequent list opti
                    ruleder_cond "Sequent \<Rightarrow> bool" Sequent "Sequent \<Rightarrow> Sequent list option" ("_ \<Longrightarrow>C _ \<Longrightarrow>RD _" 300)
 
 
+(*(*uncommentL?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)
 fun is_epmod :: "Formula \<Rightarrow> Atprop option" where
 "is_epmod (Formula_Atprop p) = Some p"|
 "is_epmod (Formula_Action_Formula _ _ f) = is_epmod f"|
@@ -19,7 +20,9 @@ fun is_epmod :: "Formula \<Rightarrow> Atprop option" where
 fun atom :: "Sequent \<Rightarrow> bool" where
 "atom ((l)\<^sub>S \<turnstile>\<^sub>S (r)\<^sub>S) = ( (is_epmod l) \<noteq> None \<and> (is_epmod l) = (is_epmod r) )"|
 "atom _ = False"
+(*uncommentR?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)*)
 
+(*(*uncommentL?Action?Action_Freevar?Agent?Agent_Freevar?Formula_Action?Formula_Agent?Sequent_Structure?Sequent*)
 fun relAKACheck :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> ((Sequent \<times> Sequent) list) \<Rightarrow> bool" where
 "relAKACheck fun mlist = (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''alpha'') \<^sub>S) ) mlist of 
                    Some (_, Sequent_Structure (Formula_Action alpha \<^sub>S)) \<Rightarrow> 
@@ -41,8 +44,9 @@ fun betaList :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> ((Seq
 
 fun swapin :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> bool" where
 "swapin fun m s = relAKACheck fun (match m s)"
+(*uncommentR?Action?Action_Freevar?Agent?Agent_Freevar?Formula_Action?Formula_Agent?Sequent_Structure?Sequent*)*)
 
-
+(*(*uncommentL?Structure_Bigcomma*)
 fun bigcomma_cons_L :: "Sequent \<Rightarrow> Sequent list option" where
 "bigcomma_cons_L ( (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)) \<turnstile>\<^sub>S Y ) = Some [(;;\<^sub>S (X#Xs) \<turnstile>\<^sub>S Y)]"|
 "bigcomma_cons_L _ = None"
@@ -59,6 +63,7 @@ fun bigcomma_cons_R :: "Sequent \<Rightarrow> Sequent list option" where
 fun bigcomma_cons_R2 :: "Sequent \<Rightarrow> Sequent list option" where
 "bigcomma_cons_R2 ( Y \<turnstile>\<^sub>S ;;\<^sub>S (X#Xs) ) = Some [(Y \<turnstile>\<^sub>S (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)))]"|
 "bigcomma_cons_R2 _ = None"
+(*uncommentR?Structure_Bigcomma*)*)
 
 (*
 value"replaceAll (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#(match (ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')) X))) (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))"
@@ -66,6 +71,8 @@ value"(AgS\<^sub>S (forwK\<^sub>S) (Agent ''a'') (ActS\<^sub>S (forwA\<^sub>S) (
 value"match (ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X''))) (ActS\<^sub>S (forwA\<^sub>S) (Action ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''a'') (((Atprop ''X'') \<^sub>F) \<^sub>S)))"
 value"(ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))"
 *)
+
+(*(*uncommentL?RuleSwapout*)
 fun swapout_L_aux :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> (Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
 "swapout_L_aux relAKA [] seq ( X \<turnstile>\<^sub>S ;;\<^sub>S [] ) = Some []" |
 "swapout_L_aux relAKA (b#list) seq ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) = (
@@ -99,6 +106,7 @@ fun swapout_R :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequ
 "swapout_R relAKA seq ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) = 
     swapout_R_aux relAKA (betaList relAKA (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X))) seq ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) " |
 "swapout_R _ _ _ = None"
+(*uncommentR?RuleSwapout*)*)
 
 
 
@@ -125,9 +133,15 @@ value"swapout_L rel blist ( (?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S f
 *)
 
 
-datatype Locale = CutFormula Formula | 
+datatype Locale = (*(*uncommentL?Formula?RuleCut*)
+                  CutFormula Formula |
+                  (*uncommentR?Formula?RuleCut*)*)
+                  (*(*uncommentL?Sequent*)
                   Premise Sequent |
-                  RelAKA "Action \<Rightarrow> Agent \<Rightarrow> Action list" |
+                  (*uncommentR?Sequent*)*)
+                  (*(*uncommentL?Action?Agent*)
+                  RelAKA "Action \<Rightarrow> Agent \<Rightarrow> Action list" | 
+                  (*uncommentR?RuleSwapoutAction?Agent*)*)
                   Empty
 
 (*rules_rule_fun*)
@@ -293,44 +307,75 @@ fun replaceRPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" wh
 "replaceRPT pt rep = pt"
 *)
 
+(*(*uncommentL?Agent?Agent_Freevar*)
 primrec rulifyAgent :: "Agent \<Rightarrow> Agent" where
 "rulifyAgent (Agent a) = Agent_Freevar a" |
 "rulifyAgent (Agent_Freevar a) = Agent_Freevar a"
+(*uncommentR?Agent?Agent_Freevar*)*)
 
+(*(*uncommentL?Action?Action_Freevar*)
 primrec rulifyAction :: "Action \<Rightarrow> Action" where
 "rulifyAction (Action a) = Action_Freevar a" |
 "rulifyAction (Action_Freevar a) = Action_Freevar a"
+(*uncommentR?Action?Action_Freevar*)*)
 
-
+(*(*uncommentL?Formula*)
 fun rulifyFormula :: "Formula \<Rightarrow> Formula" where
+(*(*uncommentL?Formula_Atprop*)
 "rulifyFormula (Formula_Atprop(Atprop (f#a))) = 
 (if CHR ''A'' \<le> f \<and> f \<le> CHR ''Z'' then (Formula_Freevar (f#a)) else (Formula_Atprop (Atprop_Freevar (f#a)))
 )" |
+(*uncommentR?Formula_Atprop*)*)
+(*(*uncommentL?Formula_Bin*)
 "rulifyFormula (Formula_Bin x c y) = (Formula_Bin (rulifyFormula x) c (rulifyFormula y))" |
+(*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Agent_Formula*)
 "rulifyFormula (Formula_Agent_Formula c a x) = (Formula_Agent_Formula c (rulifyAgent a) (rulifyFormula x) )" |
+(*uncommentR?Formula_Agent_Formula*)*)
+(*(*uncommentL?Formula_Action_Formula*)
 "rulifyFormula (Formula_Action_Formula c a x) = (Formula_Action_Formula c (rulifyAction a) (rulifyFormula x) )" |
+(*uncommentR?Formula_Action_Formula*)*)
+(*(*uncommentL?Formula_Precondition*)
 "rulifyFormula (Formula_Precondition a) = (Formula_Precondition (rulifyAction a))" |
+(*uncommentR?Formula_Precondition*)*)
 "rulifyFormula x = x"
+(*uncommentR?Formula*)*)
 
-
-
+(*(*uncommentL?Structure*)
 fun rulifyStructure :: "Structure \<Rightarrow> Structure" where
+(*(*uncommentL?Structure_Formula?Formula_Atprop*)
 "rulifyStructure (Structure_Formula (Formula_Atprop(Atprop (f#a)))) = 
 (if CHR ''A'' \<le> f \<and> f \<le> CHR ''Z'' then (
   if f = CHR ''F'' then Structure_Formula (Formula_Freevar (f#a)) else Structure_Freevar (f#a)
   ) else Structure_Formula (Formula_Atprop (Atprop_Freevar (f#a)))
 )" |
+(*uncommentR?Structure_Formula?Formula_Atprop*)*)
+(*(*uncommentL?Structure_Formula*)
 "rulifyStructure (Structure_Formula x) = Structure_Formula (rulifyFormula x)" | 
+(*uncommentR?Structure_Formula*)*)
+(*(*uncommentL?Structure_Bin*)
 "rulifyStructure (Structure_Bin x c y) = (Structure_Bin (rulifyStructure x) c (rulifyStructure y))" |
+(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Agent_Structure*)
 "rulifyStructure (Structure_Agent_Structure c a x) = (Structure_Agent_Structure c (rulifyAgent a) (rulifyStructure x) )" |
+(*uncommentR?Structure_Agent_Structure*)*)
+(*(*uncommentL?Structure_Action_Structure*)
 "rulifyStructure (Structure_Action_Structure c a x) = (Structure_Action_Structure c (rulifyAction a) (rulifyStructure x) )" |
+(*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Bigcomma*)
 "rulifyStructure (Structure_Bigcomma list) = (Structure_Bigcomma (map rulifyStructure list))" |
+(*uncommentR?Structure_Bigcomma*)*)
+(*(*uncommentL?Structure_Phi*)
 "rulifyStructure (Structure_Phi a) = (Structure_Phi (rulifyAction a))" |
+(*uncommentR?Structure_Phi*)*)
 "rulifyStructure x = x"
+(*uncommentR?Structure*)*)
 
+(*(*uncommentL?Sequent*)
 primrec rulifySequent :: "Sequent \<Rightarrow> Sequent" where
 "rulifySequent (Sequent x y) = Sequent (rulifyStructure x) (rulifyStructure y)"|
 "rulifySequent (Sequent_Structure x) = (Sequent_Structure x)"
+(*uncommentR?Sequent*)*)
 
 fun rulifyProoftree :: "Prooftree \<Rightarrow> Prooftree" where
 "rulifyProoftree (Prooftree s r list) = (Prooftree (rulifySequent s) r (map rulifyProoftree list))"

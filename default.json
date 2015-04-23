@@ -29,23 +29,11 @@
 				"latex" : "_",
 				"precedence": [340, 330]
 			},
-			"Formula_Un" : {
-				"type" : ["Formula_Un_Op", "Formula"],
-				"isabelle" : "U\\<^sub>F _",
-				"precedence": [330, 331]
-			},
+
 			"Formula_Bin" : {
 				"type" : ["Formula", "Formula_Bin_Op", "Formula"],
 				"isabelle" : "B\\<^sub>F _",
 				"precedence": [330,330,330, 331]
-			}
-		},
-
-		"Formula_Un_Op" : {
-			"Formula_Not" : {
-				"isabelle" : "\\<not>\\<^sub>F",
-				"ascii" : "not",
-				"latex" : "\\lnot"
 			}
 		},
 
@@ -147,7 +135,9 @@
 		"RuleCut" : {
 			"SingleCut" : {
 				"ascii" : "Cut",
-				"latex" : "Cut"
+				"latex" : "Cut",
+				"locale" : "CutFormula f",
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
 			}
 		},
 
@@ -269,52 +259,7 @@
 				"ascii" : "ImpR_L",
 				"latex" : "\\rightarrow_L"
 			}
-		},
-
-		"Prooftree" : {
-			"Zer" : {
-				"type" : ["Sequent", "RuleZer"],
-				"isabelle" : "_ \\<Longleftarrow> Z _",
-				"ascii" : "_ <==Z _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Unary" : {
-				"type" : ["Sequent", "RuleU", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> U ( _ ) _",
-				"ascii" : "_ <==U _ _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Display" : {
-				"type" : ["Sequent", "RuleDisp", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> D ( _ ) _",
-				"ascii" : "_ <==D _ _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Operational" : {
-				"type" : ["Sequent", "RuleOp", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> O ( _ ) _",
-				"ascii" : "_ <==O _ _",
-				"precedence" : [341,341, 350]
-			},
-
-			"Binary" : {
-				"type" : ["Sequent", "RuleBin", "Prooftree", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> B ( _ ) _ ; _",
-				"ascii" : "_ <==B _ _ _",
-				"precedence" : [341,341,341, 350]
-			},
-
-			"Cut" : {
-				"type" : ["Sequent", "Formula", "Prooftree", "Prooftree"],
-				"isabelle" : "_ \\<Longleftarrow> C ( _ ) _ ; _",
-				"ascii" : "_ <==C _ _ _",
-				"precedence" : [341,341,341, 350]
-			}
 		}
-		
 	},
 
 	"rules" : {
@@ -354,6 +299,9 @@
 			"And_R" :			["?X ; ?Y |- F?A ^ F?B",	"?X |- F?A", "?Y |- F?B"],
 			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
 			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", "?Y |- F?B"]
+		},
+		"RuleCut" : {
+			"SingleCut" :		["?X |- ?Y",	""]
 		}
 	}
 }
