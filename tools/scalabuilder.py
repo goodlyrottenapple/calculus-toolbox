@@ -359,12 +359,23 @@ class ScalaBuilder:
 
 	@staticmethod
 	def __calc_structure_all_rules(rules):
-		ret = "	def ruleToString(in:Rule, format:String = LATEX) : String = in match {\n"
+		ret = "	def ruleToString(in:Rule, format:String = LATEX) : String = format match {\n"
 		lines = []
+		linesIsa = []
 		for c in sorted(rules.keys()):
-			if c.startswith("Rule"): lines.append( "        case {0}a(a) => {1}ToString(a, format)".format(c, c.lower()) )
-		lines.append( "        case RuleMacro(a, pt) => rulemacroToString(a, pt, format)" )
-		return ret + "\n".join(lines) +"\n	}"
+			if c.startswith("Rule"): 
+				lines.append( "             case {0}a(a) => {1}ToString(a, format)".format(c, c.lower()) )
+				linesIsa.append( "             case {0}a(a) => \"(\" + \"{0}\" + \" \" + {1}ToString(a, format) + \")\"".format(c, c.lower()) )
+		lines.append( "             case RuleMacro(a, pt) => rulemacroToString(a, pt, format)" )
+		linesIsa.append( "             case RuleMacro(a, pt) => rulemacroToString(a, pt, format)" )
+		ret += "		case ASCII =>\n			in match {\n"
+		ret += "\n".join(lines)
+		ret += "\n			}\n		case LATEX =>\n			in match {\n"
+		ret += "\n".join(lines)
+		ret += "\n			}\n		case ISABELLE =>\n			in match {\n"
+		ret += "\n".join(linesIsa)
+		ret += "\n			}\n	}\n"
+		return ret
 
 	def print_calc_structure(self):
 		ret = ""

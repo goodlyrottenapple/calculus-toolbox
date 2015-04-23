@@ -22,14 +22,16 @@ object PrintCalc{
 
 /*/*uncommentL?core_compiled*/
 	def rulemacroToString(a : List[Char], pt : Prooftree, format : String = LATEX) : String = format match { 
-		case ASCII | ISABELLE => "Macro " + stringToString(a, format) + prooftreeToString(pt, format)
+		case ASCII => "Macro " + stringToString(a, format) + prooftreeToString(pt, format)
+		case ISABELLE => "(RuleMacro " + stringToString(a, format) + prooftreeToString(pt, format) + ")"
 		case LATEX => "Macro/" + stringToString(a, format)
 	}
+
 	def prooftreeListToString(in:List[Prooftree], format:String = LATEX) : String = format match {
 		case ASCII | ISABELLE => "[" + in.map(x => prooftreeToString(x, format)).mkString(", ") + "]"
 		case LATEX => in.map(x => prooftreeToString(x, format)).mkString("\n")
 	}
-	// add print pt!!!!
+
 	def prooftreeToString(in:Prooftree, format:String = LATEX) : String = format match {
 		case ASCII =>
 			in match {
