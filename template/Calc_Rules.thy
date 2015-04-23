@@ -141,7 +141,7 @@ datatype Locale = (*(*uncommentL?Formula?RuleCut*)
                   (*uncommentR?Sequent*)*)
                   (*(*uncommentL?Action?Agent*)
                   RelAKA "Action \<Rightarrow> Agent \<Rightarrow> Action list" | 
-                  (*uncommentR?RuleSwapoutAction?Agent*)*)
+                  (*uncommentR?Action?Agent*)*)
                   Empty
 
 (*rules_rule_fun*)
