@@ -2,7 +2,6 @@
 TODO:
 
 -- reimplement printCalcDef
--- reenable Cut
 
 */
 
@@ -22,6 +21,10 @@ import java.awt.event.MouseEvent
 import javax.swing.{Icon, SpinnerNumberModel, JSpinner}
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.event.{ChangeListener, ChangeEvent}
+
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 
 import java.io.PrintWriter
 
@@ -145,10 +148,24 @@ object GUI extends SimpleSwingApplication {
   })
   popup.add(menuItem3);
 
-  val menuItem4 = new MenuItem(swing.Action("Create Rule Macro") {
-    session.rulifyPT()
+  val menuItem4 = new MenuItem(swing.Action("Copy as Isabelle") {
+    session.ptListView.selection.items.head  match {
+      case (icn, pt) => 
+        // adapted from http://www.avajava.com/tutorials/lessons/how-do-i-copy-a-string-to-the-clipboard.html
+        val str = prooftreeToString(pt, PrintCalc.ISABELLE)
+        val toolkit = Toolkit.getDefaultToolkit()
+        val clipboard = toolkit.getSystemClipboard()
+        val strSel = new StringSelection(str)
+        clipboard.setContents(strSel, null)
+    }
+
   })
   popup.add(menuItem4);
+
+  val menuItem5 = new MenuItem(swing.Action("Create Rule Macro") {
+    session.rulifyPT()
+  })
+  popup.add(menuItem5);
 
 
 
