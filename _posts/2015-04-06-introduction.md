@@ -18,7 +18,7 @@ The [`tools`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/
 The second category of the calculus toolbox functionality is the Scala UI, which provides a graphical way of manipulating sequents and proof trees of the generated calculus. The UI provides the following functionality:
 
 +  Graphical representation of proof trees in the UI
-+  LaTeX typesetting of the terms of the calculus, with user specified sugar syntax
++  LaTeX typesetting of the terms of the calculus, with user specified syntactic sugar
 +  Automatic proof search
 +  Interactive proof tree creation and modification, including merging proof trees, deleting portions of pt's, applying rules to the leaves of a pt (if applicable) and other
 +  Automatic typesetting of proof trees in LaTeX
@@ -137,7 +137,7 @@ To get started quickly, this tutorial will guide you through the process of gene
                     | Formula_Freevar string ("?\<^sub>F _" [340] 330)
    ~~~
 
-   The parameter `isabelle` together with `precedence` (in the JSON file) specify the sugar syntax of the defined terms in Isabelle. Either/both of the parameters can be omitted as in the case of the constructor/term `Atprop` in the datatype/type `Atprop`.
+   The parameter `isabelle` together with `precedence` (in the JSON file) specify the syntactic sugar of the defined terms in Isabelle. Either/both of the parameters can be omitted as in the case of the constructor/term `Atprop` in the datatype/type `Atprop`.
 
    We similarly define structural terms:
 
@@ -149,7 +149,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
    (To see the corresponding JSON entries for these types, check [`default.json`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json))
       
-3. The next part of the JSON file contains the encoded rules of the calculus. The encoding of the rules is tied to the definition of the calculus, more specifically to the ASCII sugar defined in the previous step.
+3. The next part of the JSON file contains the encoded rules of the calculus. The encoding of the rules is tied to the definition of the calculus, more specifically to the ASCII syntactic sugar defined in the previous step.
    
    To demonstrate, here is a look at the different encodings of a simple sequent $p \vdash p$:
 
@@ -168,7 +168,7 @@ To get started quickly, this tutorial will guide you through the process of gene
 
       - - -
 
-   However, note the ASCII/LaTeX sugar for the term Atprop, namely `"ascii" : "_"`. This notation means that only the parameter/argument of Atprop, namely the string identifier, should be kept (the underscore acts as a placeholder for the variable in the sugar notation and is therefore a reserved character). Thus, `Atprop <string>` is abbreviated to just `<string>` in the ASCII/LaTeX sugar (also note that strings in Isabelle are enclosed in two single quotes, so the string `abc` is written as `''abc''`).
+   However, note the ASCII/LaTeX sugar for the term Atprop, namely `"ascii" : "_"`. This notation means that only the parameter/argument of Atprop, namely the string identifier, should be kept (the underscore acts as a placeholder for the variable in the syntactic sugar encoding and is therefore a reserved character). Thus, `Atprop <string>` is abbreviated to just `<string>` in the ASCII/LaTeX sugar (also note that strings in Isabelle are enclosed in two single quotes, so the string `abc` is written as `''abc''`).
   
       - - -
 
@@ -211,7 +211,7 @@ To get started quickly, this tutorial will guide you through the process of gene
    $$\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}$$
 
    And the corresponding JSON encoding:
-   
+
 
    ~~~json
    "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
