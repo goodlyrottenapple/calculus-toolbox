@@ -39,7 +39,7 @@ At this stage, the file [`template/Calc_Core.thy`](https://github.com/goodlyrott
 
 #### Generate parser class for core calculus
 
-Parsers for the data types defined in `calc_structure` are generated. The parsers are used to parse terms in the ASCII sugar notation, as this is the notation the user uses to input terms of the calculus into the UI. The ASCII notation is also used for saving the proof trees generated through the UI (unless the user specifically choses to export to Isabelle or LaTeX).
+Parsers for the data types defined in `calc_structure` are generated. The parsers are used to parse terms in the ASCII syntactic sugar, as this is the notation the user uses to input terms of the calculus into the UI. The ASCII notation is also used for saving the proof trees generated through the UI (unless the user specifically choses to export to Isabelle or LaTeX).
 
 ##### Functions used
 
@@ -82,7 +82,7 @@ This stage simply compiles all the Scala classes in the calculus source folder. 
 
 #### Parse calculus rules and print for Isabelle
 
-Since the rules of the calculus are encoded using the user defined ASCII sugar, they have to be parsed and then returned back in Isabelle format (the print class is used for this purpose). Whilst this may look complicated, and it is indeed the main reason why the calculus is generated in two stages and two separate Isabelle theory files, the reason for this decision was to make the encoding of the rules in the JSON file as easily readable as possible. As shown in the [calculi]({{ site.baseurl }}/doc/calculi.html) section, the Isabelle notation for DE (deep encoding) can become quite verbose and even unreadable. Another disadvantage of the Isabelle syntax with sugar is the need for the jEdit environment, if one wants to see the sugar notation. For example, in the Isabelle IDE, $p \vdash p$ shows up as:
+Since the rules of the calculus are encoded using the user defined ASCII sugar, they have to be parsed and then returned back in Isabelle format (the print class is used for this purpose). Whilst this may look complicated, and it is indeed the main reason why the calculus is generated in two stages and two separate Isabelle theory files, the reason for this decision was to make the encoding of the rules in the JSON file as easily readable as possible. As shown in the [calculi]({{ site.baseurl }}/doc/calculi.html) section, the Isabelle notation for DE (deep encoding) can become quite verbose and even unreadable. Another disadvantage of the Isabelle syntax with syntactic sugar is the need for the jEdit environment, if one wants to see the sugar. For example, in the Isabelle IDE, $p \vdash p$ shows up as:
 
 <pre><code>(Atprop ''p'')<sub>FS</sub> ⊢ (Atprop ''p'')<sub>FS</sub></code></pre>
 

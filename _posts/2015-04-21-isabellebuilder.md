@@ -104,7 +104,7 @@ Used in [calc_structure](#calc_structure) and [calc_structure_rules](#calc_struc
 {: .code .python #calc_structure_datatype}
 | def __calc_structure_datatype(name, datatype) |
 
-Returns a definition of a `datatype` in Isabelle with sugar notation (if defined).
+Returns a definition of a `datatype` in Isabelle with syntactic sugar (if defined).
 For example, the following entry in the JSON file:
 
 ~~~json
