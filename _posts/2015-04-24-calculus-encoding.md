@@ -5,7 +5,7 @@ category: doc
 date: 2015-04-20 16:13:26
 ---
 
-The generator tools in the calculus toolbox use a single JSON file that holds the full description of a display calulus to generate all the Isabelle and Scala code. The JSON format was chosen because it is simple to use as has parsers in many languages, including Python and Scala. Using JSON files allows storing and passing data between different systems/languages. In Python, which is used for all the code generation, importing a JSON file is a one line command:
+The generator tools in the calculus toolbox use a single JSON file, which holds the full description of a display calculus, to generate all the Isabelle and Scala code. The JSON format was chosen because it is simple to use as has parsers in many languages, including Python and Scala. Using JSON files also allows storing data easily and passing data between different systems/languages. In Python, which is used for all the code generation, importing a JSON file is a one line command:
 
 ~~~python
 imported_json = json.loads(json_file.read())
@@ -13,7 +13,7 @@ imported_json = json.loads(json_file.read())
 
 ### Calculus file structure
 
-A valid calculus description file is a JSON file with these four basic key-value pairs:
+A valid calculus description file is a JSON file with these four basic key-value pairs, the structure of which is documented below:
 
 ~~~json
 {
@@ -33,7 +33,6 @@ A valid calculus description file is a JSON file with these four basic key-value
 }
 ~~~
 
-These contain further structure documented below:
 
 #### calc_name
 
@@ -48,6 +47,8 @@ The encoding of a type and its terms in Isabelle is transformed into the JSON fi
 datatype <Term> = <Term_Constructor> <type> (<isabelle> [ [<p_1>, <p_2>,...<p_n>] <p_m> ]
 ~~~
 
+The generic `datatype` definition above is 'disassembled' into the JSON file below.
+
 ~~~json
 "<Term>" : {
     "<Term_Constructor>" : {
@@ -60,7 +61,7 @@ datatype <Term> = <Term_Constructor> <type> (<isabelle> [ [<p_1>, <p_2>,...<p_n>
 }
 ~~~
 
-Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are compulsory and can be omitted. Further details on the parameters currently processed by the calculus toolbox generator tools are detailed here:
+Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are compulsory and can be omitted. Further details on the parameters used by the calculus toolbox generator tools are detailed here:
 
 {: .table}
 | Field      | JSON Data Type | Description |
@@ -69,6 +70,6 @@ Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are 
 | isabelle   | String         | Defines the sugar syntax for the constructor |
 | ascii      | String         | Defines the ASCII encoding, used to build the ASCII parser in Scala. If left undefined, will use the basic constructor syntax. |
 | latex      | String         | Defines the LaTeX encoding, used to build the UI LaTeX typesetting and export functionality. If left undefined uses the basic constructor syntax. |
-| precedence | Integer Array  | Defines the term biding for the syntactic sugar. __(Only implemented for Isabelle at this time)__ |
+| precedence | Integer Array  | Defines the term biding for the syntactic sugar. __(Only implemented for Isabelle syntactic sugar at the moment)__ |
 
 #### calc_structure_rules
