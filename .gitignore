@@ -5,5 +5,7 @@
 *.thy~
 
 _pages/
+_posts/latex
+_config.yml
 
 _config.yml
