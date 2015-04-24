@@ -20,9 +20,9 @@ The second category of the calculus toolbox functionality is the Scala UI, which
 +  Graphical representation of proof trees in the UI
 +  LaTeX typesetting of the terms of the calculus, with user specified sugar syntax
 +  Automatic proof search
-+  Manual proof tree creation and modification, including merging proof trees, deleting portions of pt's, applying rules to the leaves of a pt (if applicable) and other
++  Interactive proof tree creation and modification, including merging proof trees, deleting portions of pt's, applying rules to the leaves of a pt (if applicable) and other
 +  Automatic typesetting of proof trees in LaTeX
-+  Exporting proof trees back to Isabelle __not implemented yet!!__
++  Exporting proof trees back to Isabelle
 
 The UI is further documented HERE.
 
@@ -95,9 +95,9 @@ To get started quickly, this tutorial will guide you through the process of gene
    ~~~
 
       - - -
-   Note that this is a [deep embedding]({{ site.baseurl }}/doc/calculi.html#deep-embedding) (abbreviated DE) of the calculus in Isabelle, which means that:
+   Note that the calculus toolbox is set up for a [deep embedding]({{ site.baseurl }}/doc/calculi.html#deep-embedding) (abbreviated DE) of a calculus in Isabelle, which, for this section, means that:
 
-   -  for every type in the calculus a `_Freevar` term is added to the DE
+   -  for every type in the calculus a `_Freevar` term is added to the DE (for more information why free variables need to be added expilicitly refer to the section [Calculi]({{ site.baseurl }}/doc/calculi.html) )
       
    -  for every n-ary connective, a `_Zer/Un/Bin/..` term is added to the DE of the corresponding type and a separate type of the following form is added:
 
@@ -157,11 +157,12 @@ To get started quickly, this tutorial will guide you through the process of gene
    Notation           | Code generated
    :------------------|:---------------------------------------
    No sugar           | `Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))`
-   Isabelle (raw*)    | `((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S`
+   Isabelle (raw)     | `((Atprop ''p'') \<^sub>F) \<^sub>S \<turnstile> ((Atprop ''p'') \<^sub>F) \<^sub>S`
+   Isabelle&nbsp;(jEdit*)  | <code>(Atprop ''p'')<sub>FS</sub> ⊢ (Atprop ''p'')<sub>FS</sub></code>
    ASCII              | `p |- p`
    LaTeX              | `p \vdash p`
    
-   *_In Isabelle IDE (jEdit), the rendered term would look like this:_ <code>(Atprop ''p'')<sub>FS</sub> ⊢ (Atprop ''p'')<sub>FS</sub></code>
+   *_In the Isabelle IDE (jEdit), the raw term would be rendered and shown like this_ 
 
    If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the "No sugar" entry of the table. 
 
@@ -210,13 +211,14 @@ To get started quickly, this tutorial will guide you through the process of gene
    $$\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}$$
 
    And the corresponding JSON encoding:
+   
 
    ~~~json
    "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
    ~~~
 
    {:.table}
-   <span class="glyphicon glyphicon-exclamation-sign"></span> | Even though the _Id_ rule is an axiom and it has no conclusions, the empty string needs to be added to the list. __(maybe remove that restriction??)__
+   <span class="glyphicon glyphicon-exclamation-sign"></span> | Even though the _Id_ rule is an axiom and it has no premises, the empty string needs to be added to the list, even though it is redundant. __(maybe remove that restriction??)__
 
    Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the [shallow embedding]({{ site.baseurl }}/doc/calculi.html#shallow-embedding) of the calculus and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed, any sequent with free variables within a concrete proof tree will automatically be invalid.
 

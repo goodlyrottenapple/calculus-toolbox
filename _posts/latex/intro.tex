@@ -1,0 +1,311 @@
+\paragraph{\href{/}{Calculus Toolbox}}
+
+
+\subsection{Introduction}
+
+The calculus toolbox is a set of scripts and utilities for generating
+customized Isabelle theory files for user defined
+\href{/doc/calculi.html}{display calculi} and Scala classes that provide
+a user interface for working with set calculi.
+
+\subsubsection{Overview}\label{overview}
+
+The specification of a calculus is contained within a single JSON file.
+This file contains the full specification of the structure of the
+calculus, as well as the encoding of the rules of the calculus. The full
+description of the specification of the JSON file structure can be found
+HERE.
+
+The \texttt{utilities} folder contains the core scripts for generating
+the Isabelle theory files and the Scala UI. Detailed description of
+these tools can be found in the \href{/doc/utilities.html}{Utilities}
+section.
+
+Finally, the generated Scala and Isabelle files are documented in HERE.
+
+\subsubsection{Start guide}\label{start-guide}
+
+To get started quickly, this tutorial will guide you through the process
+of generating a custom calculus.
+
+\begin{enumerate}
+\item
+  First open the default calculus template \texttt{default.json} and
+  edit the calculus name:
+
+\begin{verbatim}
+"calc_name" : "EAKMin"
+\end{verbatim}
+
+  This name is used in all the Isabelle theory files and Scala classes.
+\item
+  Next, let's have a look at the definition of the calculus structure,
+  more specifically at the definition of atomic propositions and
+  formulas. The inductive definition for these is given below:
+
+  \$F:= ap \textbackslash{}in \textbackslash{}mathsf\{AtProp\}
+  \textbackslash{}mid F \textbackslash{}land F \textbackslash{}mid F
+  \textbackslash{}rightarrow F\$
+
+  And here is the corresponding definition in the JSON file:
+
+\begin{verbatim}
+"Atprop" : {
+   "Atprop" : {
+      "type" : "string",
+      "ascii" : "_",
+      "latex" : "_"
+   },
+   "Atprop_Freevar" : {
+      "type" : "string",
+      "isabelle" : "?\\<^sub>A _",
+      "ascii" : "A? _",
+      "latex" : "_",
+      "precedence": [320, 320]
+   }
+},
+
+"Formula" : {
+   "Formula_Atprop" : {
+      "type": "Atprop",
+      "isabelle" : "_ \\<^sub>F",
+      "precedence": [320, 330]
+   },
+   "Formula_Freevar" : {
+      "type" : "string",
+      "isabelle" : "?\\<^sub>F _",
+      "ascii" : "F? _",
+      "latex" : "_",
+      "precedence": [340, 330]
+   },
+   "Formula_Bin" : {
+      "type" : ["Formula", "Formula_Bin_Op", "Formula"],
+      "isabelle" : "B\\<^sub>F _",
+      "precedence": [330,330,330, 331]
+   }
+},
+
+"Formula_Bin_Op" : {
+   "Formula_And" : {
+      "isabelle" : "\\<and>\\<^sub>F",
+      "ascii" : "^",
+      "latex" : "\\wedge"
+   },
+   "Formula_ImpR" : {
+      "isabelle" : "\\<rightarrow>\\<^sub>F",
+      "ascii" : ">",
+      "latex" : "\\rightarrow"
+   }
+}
+\end{verbatim}
+
+  \begin{center}\rule{3in}{0.4pt}\end{center}
+
+  Note that this is a \href{/doc/calculi.html\#deep-embedding}{deep
+  embedding} (abbreviated DE) of the calculus in Isabelle, which means
+  that:
+
+  \begin{itemize}
+  \item
+    for every type in the calculus a \texttt{\_Freevar} term is added to
+    the DE
+  \item
+    for every n-ary connective, a \texttt{\_Zer/Un/Bin/..} term is added
+    to the DE of the corresponding type and a separate type of the
+    following form is added:
+
+\begin{verbatim}
+"<Type>_<Zer/Un/Bin>_Op" : {
+      "<Type>_<Connective>" : {
+         ...
+      }
+   }
+\end{verbatim}
+  \item
+    a type can be promoted into another type through a constructor of
+    the following shape:
+
+\begin{verbatim}
+"<Type>_<Type>" : {
+   "type": "<Type1>",
+   ...
+}
+\end{verbatim}
+  \end{itemize}
+
+  \begin{center}\rule{3in}{0.4pt}\end{center}
+
+  The terms are built inductively in this definition by specifying the
+  \texttt{type} parameter in the JSON file. For example, a binary
+  connective for a formula is specified via the entry
+  \texttt{"type" : {[}"Formula", "Formula\_Bin\_Op", "Formula"{]}} in
+  the \texttt{Formula} declaration, with the corresponding declaration
+  of the binary connective(s) in \texttt{Formula\_Bin\_Op}
+
+  To get a better idea of what the other specified parameters in the
+  definition of \texttt{Atprop}, \texttt{Formula} and
+  \texttt{Formula\_Bin\_Op} mean, let's have a look at the the Isabelle
+  definitions, generated from the JSON snippet above.
+
+\begin{verbatim}
+datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
+                        | Formula_ImpR ("\<rightarrow>\<^sub>F")
+
+datatype Atprop = Atprop string
+                | Atprop_Freevar string ("?\<^sub>A _" [320] 320)
+
+datatype Formula = Formula_Atprop Atprop ("_ \<^sub>F" [320] 330)
+                 | Formula_Bin Formula Formula_Bin_Op Formula ("B\<^sub>F _ _ _" [330,330,330] 331)
+                 | Formula_Freevar string ("?\<^sub>F _" [340] 330)
+\end{verbatim}
+
+  The parameter \texttt{isabelle} together with \texttt{precedence} (in
+  the JSON file) specify the sugar syntax of the defined terms in
+  Isabelle. Either/both of the parameters can be omitted as in the case
+  of the constructor/term \texttt{Atprop} in the datatype/type
+  \texttt{Atprop}.
+
+  We similarly define structural terms:
+
+  \$S:= F \textbackslash{}mid \textbackslash{}mathsf\{Id\}
+  \textbackslash{}mid S \textbackslash{},; S \textbackslash{}mid S
+  \textgreater{} S\$
+
+  and sequents:
+
+  \$S \textbackslash{}vdash S\$
+
+  (To see the corresponding JSON entries for these types, check
+  \href{https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json}{\texttt{default.json}})
+\item
+  The next part of the JSON file contains the encoded rules of the
+  calculus. The encoding of the rules is tied to the definition of the
+  calculus, more specifically to the ASCII sugar defined in the previous
+  step.
+
+  To demonstrate, here is a look at the different encodings of a simple
+  sequent \$p \textbackslash{}vdash p\$:
+
+  \begin{longtable}[c]{@{}ll@{}}
+  \toprule\addlinespace
+  \begin{minipage}[b]{0.47\columnwidth}\raggedright
+  Notation
+
+  Code generated
+  \end{minipage}
+  \\\addlinespace
+  \midrule\endhead
+  \begin{minipage}[t]{0.47\columnwidth}\raggedright
+  No sugar
+
+  \texttt{Sequent (Structure\_Formula (Formula\_Atprop (Atprop ''p''))) (Structure\_Formula (Formula\_Atprop (Atprop ''p'')))}
+  \end{minipage} & \begin{minipage}[t]{0.47\columnwidth}\raggedright
+  Isabelle (raw)
+
+  \texttt{((Atprop ''p'') \textbackslash{}\textless{}\^{}sub\textgreater{}F) \textbackslash{}\textless{}\^{}sub\textgreater{}S \textbackslash{}\textless{}turnstile\textgreater{} ((Atprop ''p'') \textbackslash{}\textless{}\^{}sub\textgreater{}F) \textbackslash{}\textless{}\^{}sub\textgreater{}S}
+  \end{minipage}
+  \\\addlinespace
+  \bottomrule
+  \end{longtable}
+
+  If no sugar is defined, the Isabelle, ASCII and LaTeX representation
+  of the terms of the calculus will correspond to the datatype
+  declaration syntax seen above in the ``No sugar'' entry of the table.
+
+  \begin{center}\rule{3in}{0.4pt}\end{center}
+
+  However, note the ASCII/LaTeX sugar for the term Atprop, namely
+  \texttt{"ascii" : "\_"}. This notation means that only the
+  parameter/argument of Atprop, namely the string identifier, should be
+  kept (the underscore acts as a placeholder for the variable in the
+  sugar notation and is therefore a reserved character). Thus,
+  \texttt{Atprop \textless{}string\textgreater{}} is abbreviated to just
+  \texttt{\textless{}string\textgreater{}} in the ASCII/LaTeX sugar
+  (also note that strings in Isabelle are enclosed in two single quotes,
+  so the string \texttt{abc} is written as \texttt{''abc''}).
+
+  \begin{center}\rule{3in}{0.4pt}\end{center}
+
+  The encoding of the rules is split up into two parts, first, similarly
+  to the encoding of the terms of the calculus, the rules are defined in
+  the \texttt{calc\_structure\_rules} section of the JSON file. The
+  actual rule is then encoded in a separate section.\\ To demonstrate
+  this, let us have a look at the identity rule in the calculus:
+
+  The following entries have to be added to the JSON file for the Id
+  rule:
+
+\begin{verbatim}
+"calc_structure_rules" : {
+   "RuleZer" : {
+      "Id" : {
+         "ascii" : "Id",
+         "latex" : "Id"
+      },
+      ...
+   },
+   ...
+}
+\end{verbatim}
+
+  and
+
+\begin{verbatim}
+"rules" : {
+   "RuleZer" : {
+      "Id" : ["A?p |- A?p", ""],
+      ...
+   },
+   ...
+}
+\end{verbatim}
+
+  The first code snippet generates the Isabelle definition of the form
+  \texttt{datatype RuleZer = Id}, whilst the second code snippet is the
+  actual encoding of the rule (in ASCII), which is parsed and translated
+  into Isabelle.
+
+  All the rules in the JSON file are encoded as lists of sequents, where
+  the first sequent is the rule conclusion (the bottom part), and all
+  the subsequent sequents are the premises (the list must contain a
+  premise and at least one conclusion). For example, the binary rule for
+  an implication in the antecedent of a sequent is the following:
+
+  And the corresponding JSON encoding:
+
+\begin{verbatim}
+"ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
+\end{verbatim}
+
+  \begin{longtable}[c]{@{}l@{}}
+  \toprule\addlinespace
+  Even though the \emph{Id} rule is an axiom and it has no conclusions,
+  the empty string needs to be added to the list. \textbf{(maybe remove
+  that restriction??)}
+  \\\addlinespace
+  \bottomrule
+  \end{longtable}
+
+  Lastly, notice that all the rules are encoded with the free variable
+  constructors that we defined in the previous step. The free variables
+  stand as placeholders for concrete terms. They can be thought of as
+  equivalent to the Isabelle meta-variables in the
+  \href{/doc/calculi.html\#shallow-embedding}{shallow embedding} of the
+  calculus and even though they are part of the calculus, they are not
+  used for anything besides pattern matching and transforming sequent in
+  rule application. Indeed, any sequent with free variables within a
+  concrete proof tree will automatically be invalid.
+\item
+  After defining the terms and the rules of the calculus, we can turn
+  the calculus description file into the corresponding Isabelle theories
+  and Scala code. To run the build script, navigate to the root of the
+  toolbox folder and run:
+
+\begin{verbatim}
+./build.py -c <path_to_JSON_calculus_description_file>
+\end{verbatim}
+
+  For a list of optional flags and arguments run \texttt{./build.py -h}.
+  If you get compilation errors, please refer to the
+  \href{/doc/troubleshooting.html}{troubleshooting page}.
+\end{enumerate}

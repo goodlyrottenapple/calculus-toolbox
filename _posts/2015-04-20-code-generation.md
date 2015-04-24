@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Code generation"
+title: "Code Generation"
 category: doc
 date: 2015-04-20 16:33:24
 ---
@@ -130,9 +130,10 @@ Builds the UI classes found in [`template/gui`](https://github.com/goodlyrottena
 ##### Functions used
 
 +   calc_import
-
++   uncommentL
++   uncommentR
 
 <br>
 
-*_This function is not called at this stage. For more information have a look at the reference page for this method_
+*_The function is not called at this stage. For more information have a look at the reference page for this method_
 

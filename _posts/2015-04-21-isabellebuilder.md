@@ -63,7 +63,7 @@ __Requires `calc_name` and `export_path` to be defined__
 {: .code .python #keywords}
 | def __keywords(calc) |
 
-Given a dictionary, this function returns all the keys of the dictionary and recursively returns keys of any subd-ictionaries
+Given a dictionary, this function returns all the keys of the dictionary and recursively returns keys of any sub-dictionaries
 
 <br>
 
@@ -76,13 +76,13 @@ Given a dictionary, this function returns all the keys of the dictionary and rec
 These functions in pair uncomment a section enclosed in:
 
 ~~~
-(*(*uncommentL?{ident}*) ... (*uncommentR?{ident}*)*)
+(*(*uncommentL?ident1?ident2?ident3?...*) ... (*uncommentR?ident1?ident2?ident3?...*)*)
 ~~~
 
-if `ident` is defined in `calc_structure`, by turning into:
+if `ident1,ident2,ident3,...` is defined in `calc_structure` (that is $\\{ ident1,ident2,ident3,... \\} \subseteq set( \text{__keywords(self.calc)})$), by turning into:
 
 ~~~
-(*(*uncommentL?{ident}-BEGIN*)*)(*uncommentL?{ident}-END*) ... (*uncommentR?{ident}-BEGIN*)(*(*uncommentR?{ident}-END*)*)
+(*(*uncommentL?ident1?ident2?ident3?...-BEGIN*)*)(*uncommentL?ident1?ident2?ident3?...-END*) ... (*uncommentR?ident1?ident2?ident3?...-BEGIN*)(*(*uncommentR?ident1?ident2?ident3?...-END*)*)
 ~~~
 
 Otherwise they remain unchanged.
@@ -94,8 +94,8 @@ Otherwise they remain unchanged.
 {: .code .python #calc_structure_dependencies}
 | def __calc_structure_dependencies(structure) |
 
-Returns a dictionary of all the data types declared under `calc_structure` along with their dependencies on the other data types.  
-Used in [calc_structure_rules](#calc_structure_rules)
+Given a dictionary (`structure`) of a calculus structure, returns a new dictionary of all the data types declared in the `structure` dictionary, along with their dependencies on any other data types.  
+Used in [calc_structure](#calc_structure) and [calc_structure_rules](#calc_structure_rules)
 
 <br>
 
@@ -135,7 +135,7 @@ datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
 {: .code .python #calc_structure}
 | def calc_structure(self) |
 
-Called from the [core calculus template](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy).  
+Called from the [core calculus template](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy). Generates Isabelle `datatype` definitions declared under `calc_structure` in the JSON calculus file.  
 Uses [__calc_structure_datatype](#calc_structure_datatype) and [__calc_structure_dependencies](#calc_structure_dependencies)
 
 <br>
@@ -145,7 +145,7 @@ Uses [__calc_structure_datatype](#calc_structure_datatype) and [__calc_structure
 {: .code .python #calc_structure_all_rules}
 | def __calc_structure_all_rules(rules) |
 
-Given a dictionary of (rule groups)<-HERE defined in `calc_structure_rules` generates the `datatype` `Rules` and `Prooftree`.
+Given a dictionary of (rule groups)<-HERE (defined in `calc_structure_rules`) generates the `datatype Rules` and `Prooftree`.
 
 Given the rule groups defined in the [default JSON file](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json), this function will produce:
 
@@ -158,18 +158,23 @@ datatype Rule = RuleZer RuleZer
               | RuleBin RuleBin
               | RuleMacro string Prooftree
               | Fail
-and Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ \<Longleftarrow> PT ( _ ) _" [341,341] 350)
+     and Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ \<Longleftarrow> PT ( _ ) _" [341,341] 350)
 ~~~
 
 <br>
 
 {: .code .python #calc_structure_rules_concl}
-| def __calc_structure_rules_concl(self) |
+| def __calc_structure_rules_concl(self)
+
+__Deprecated__
 
 <br>
 
 {: .code .python #calc_structure_rules}
 | def calc_structure_rules(self) |
+
+Called from the [calculus rules template](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy). Generates Isabelle `datatype` definitions declared under `calc_structure_rules` in the JSON calculus file.    
+Uses [__calc_structure_datatype](#calc_structure_datatype), [__calc_structure_dependencies](#calc_structure_dependencies) and [__calc_structure_all_rules](#calc_structure_all_rules)
 
 <br>
 
@@ -177,6 +182,15 @@ and Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ \<Longleftarrow> PT 
 
 {: .code .python #calc_structure_rules_rule_list_aux}
 | def __calc_structure_rules_rule_list_aux(name, rules, rule_def, parser_command) |
+
+This function takes in the `parser_command` string, which it uses to parse the rules encoded in the `rules` dictionary and generate function of the following form:
+
+~~~json
+primrec rule{name} :: "Locale \<Rightarrow> {name} \<Rightarrow> ruleder" where
+"rule{name} x {name}.{rule} = ..."
+~~~
+
+Since the rule encoding in the JSON file is split into two parts, the declaration of the rule in `calc_structure_rules` and the ASCII encoding in `rules`, these two corresponding dictionaries are passed in as `rules` and `rule_def`.
 
 <br>
 

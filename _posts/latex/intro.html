@@ -1,0 +1,244 @@
+<hr />
+<p>layout: page
+title: “Introduction”
+category: doc
+date: 2015-04-17 09:09:25
+—</p>
+
+<p>The calculus toolbox is a set of scripts and utilities for generating customized Isabelle theory files for user defined <a href="{{ site.baseurl }}/doc/calculi.html">display calculi</a> and Scala classes that provide a user interface for working with set calculi.</p>
+
+<h3 id="overview">Overview</h3>
+
+<p>The specification of a calculus is contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found HERE.</p>
+
+<p>The <code>utilities</code> folder contains the core scripts for generating the Isabelle theory files and the Scala UI. Detailed description of these tools can be found in the <a href="{{ site.baseurl }}/doc/utilities.html">Utilities</a> section.</p>
+
+<p>Finally, the generated Scala and Isabelle files are documented in HERE.</p>
+
+<h3 id="start-guide">Start guide</h3>
+
+<p>To get started quickly, this tutorial will guide you through the process of generating a custom calculus.</p>
+
+<ol>
+  <li>
+    <p>First open the default calculus template <code>default.json</code> and edit the calculus name:</p>
+
+    <pre><code class="language-json">"calc_name" : "EAKMin"
+</code></pre>
+
+    <p>This name is used in all the Isabelle theory files and Scala classes.</p>
+  </li>
+  <li>
+    <p>Next, let’s have a look at the definition of the calculus structure, more specifically at the definition of atomic propositions and formulas. The inductive definition for these is given below:</p>
+
+    <p>$F:= ap \in \mathsf{AtProp} \mid F \land F \mid F \rightarrow F$</p>
+
+    <p>And here is the corresponding definition in the JSON file:</p>
+
+    <pre><code class="language-json">"Atprop" : {
+   "Atprop" : {
+      "type" : "string",
+      "ascii" : "_",
+      "latex" : "_"
+   },
+   "Atprop_Freevar" : {
+      "type" : "string",
+      "isabelle" : "?\\&lt;^sub&gt;A _",
+      "ascii" : "A? _",
+      "latex" : "_",
+      "precedence": [320, 320]
+   }
+},
+
+"Formula" : {
+   "Formula_Atprop" : {
+      "type": "Atprop",
+      "isabelle" : "_ \\&lt;^sub&gt;F",
+      "precedence": [320, 330]
+   },
+   "Formula_Freevar" : {
+      "type" : "string",
+      "isabelle" : "?\\&lt;^sub&gt;F _",
+      "ascii" : "F? _",
+      "latex" : "_",
+      "precedence": [340, 330]
+   },
+   "Formula_Bin" : {
+      "type" : ["Formula", "Formula_Bin_Op", "Formula"],
+      "isabelle" : "B\\&lt;^sub&gt;F _",
+      "precedence": [330,330,330, 331]
+   }
+},
+
+"Formula_Bin_Op" : {
+   "Formula_And" : {
+      "isabelle" : "\\&lt;and&gt;\\&lt;^sub&gt;F",
+      "ascii" : "^",
+      "latex" : "\\wedge"
+   },
+   "Formula_ImpR" : {
+      "isabelle" : "\\&lt;rightarrow&gt;\\&lt;^sub&gt;F",
+      "ascii" : "&gt;",
+      "latex" : "\\rightarrow"
+   }
+}
+</code></pre>
+
+    <hr />
+    <p>Note that this is a <a href="{{ site.baseurl }}/doc/calculi.html#deep-embedding">deep embedding</a> (abbreviated DE) of the calculus in Isabelle, which means that:</p>
+
+    <ul>
+      <li>
+        <p>for every type in the calculus a <code>_Freevar</code> term is added to the DE</p>
+      </li>
+      <li>
+        <p>for every n-ary connective, a <code>_Zer/Un/Bin/..</code> term is added to the DE of the corresponding type and a separate type of the following form is added:</p>
+
+        <pre><code class="language-json">"&lt;Type&gt;_&lt;Zer/Un/Bin&gt;_Op" : {
+      "&lt;Type&gt;_&lt;Connective&gt;" : {
+         ...
+      }
+   }
+</code></pre>
+      </li>
+      <li>
+        <p>a type can be promoted into another type through a constructor of the following shape:</p>
+
+        <pre><code class="language-json">"&lt;Type&gt;_&lt;Type&gt;" : {
+   "type": "&lt;Type1&gt;",
+   ...
+}
+</code></pre>
+      </li>
+    </ul>
+
+    <hr />
+
+    <p>The terms are built inductively in this definition by specifying the <code>type</code> parameter in the JSON file. For example, a binary connective for a formula is specified via the entry <code>"type" : ["Formula", "Formula_Bin_Op", "Formula"]</code> in the <code>Formula</code> declaration, with the corresponding declaration of the binary connective(s) in <code>Formula_Bin_Op</code></p>
+
+    <p>To get a better idea of what the other specified parameters in the definition of <code>Atprop</code>, <code>Formula</code> and <code>Formula_Bin_Op</code> mean, let’s have a look at the the Isabelle definitions, generated from the JSON snippet above.</p>
+
+    <pre><code class="language-json">datatype Formula_Bin_Op = Formula_And ("\&lt;and&gt;\&lt;^sub&gt;F")
+                        | Formula_ImpR ("\&lt;rightarrow&gt;\&lt;^sub&gt;F")
+
+datatype Atprop = Atprop string
+                | Atprop_Freevar string ("?\&lt;^sub&gt;A _" [320] 320)
+
+datatype Formula = Formula_Atprop Atprop ("_ \&lt;^sub&gt;F" [320] 330)
+                 | Formula_Bin Formula Formula_Bin_Op Formula ("B\&lt;^sub&gt;F _ _ _" [330,330,330] 331)
+                 | Formula_Freevar string ("?\&lt;^sub&gt;F _" [340] 330)
+</code></pre>
+
+    <p>The parameter <code>isabelle</code> together with <code>precedence</code> (in the JSON file) specify the sugar syntax of the defined terms in Isabelle. Either/both of the parameters can be omitted as in the case of the constructor/term <code>Atprop</code> in the datatype/type <code>Atprop</code>.</p>
+
+    <p>We similarly define structural terms:</p>
+
+    <p>$S:= F \mid \mathsf{Id} \mid S \,; S \mid S &gt; S$</p>
+
+    <p>and sequents:</p>
+
+    <p>$S \vdash S$</p>
+
+    <p>(To see the corresponding JSON entries for these types, check <a href="https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json"><code>default.json</code></a>)</p>
+  </li>
+  <li>
+    <p>The next part of the JSON file contains the encoded rules of the calculus. The encoding of the rules is tied to the definition of the calculus, more specifically to the ASCII sugar defined in the previous step.</p>
+
+    <p>To demonstrate, here is a look at the different encodings of a simple sequent $p \vdash p$:</p>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="text-align: left">Notation</th>
+          <th style="text-align: left">Code generated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: left">No sugar</td>
+          <td style="text-align: left"><code>Sequent (Structure_Formula (Formula_Atprop (Atprop ''p''))) (Structure_Formula (Formula_Atprop (Atprop ''p'')))</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left">Isabelle (raw)</td>
+          <td style="text-align: left"><code>((Atprop ''p'') \&lt;^sub&gt;F) \&lt;^sub&gt;S \&lt;turnstile&gt; ((Atprop ''p'') \&lt;^sub&gt;F) \&lt;^sub&gt;S</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left">ASCII</td>
+          <td style="text-align: left"><code>p |- p</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left">LaTeX</td>
+          <td style="text-align: left"><code>p \vdash p</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>If no sugar is defined, the Isabelle, ASCII and LaTeX representation of the terms of the calculus will correspond to the datatype declaration syntax seen above in the “No sugar” entry of the table.</p>
+
+    <hr />
+
+    <p>However, note the ASCII/LaTeX sugar for the term Atprop, namely <code>"ascii" : "_"</code>. This notation means that only the parameter/argument of Atprop, namely the string identifier, should be kept (the underscore acts as a placeholder for the variable in the sugar notation and is therefore a reserved character). Thus, <code>Atprop &lt;string&gt;</code> is abbreviated to just <code>&lt;string&gt;</code> in the ASCII/LaTeX sugar (also note that strings in Isabelle are enclosed in two single quotes, so the string <code>abc</code> is written as <code>''abc''</code>).</p>
+
+    <hr />
+
+    <p>The encoding of the rules is split up into two parts, first, similarly to the encoding of the terms of the calculus, the rules are defined in the <code>calc_structure_rules</code> section of the JSON file. The actual rule is then encoded in a separate section.<br />
+To demonstrate this, let us have a look at the identity rule in the calculus:</p>
+
+    <script type="math/tex; mode=display">Id \frac{}{p \vdash p}</script>
+
+    <p>The following entries have to be added to the JSON file for the Id rule:</p>
+
+    <pre><code class="language-json">"calc_structure_rules" : {
+   "RuleZer" : {
+      "Id" : {
+         "ascii" : "Id",
+         "latex" : "Id"
+      },
+      ...
+   },
+   ...
+}
+</code></pre>
+
+    <p>and</p>
+
+    <pre><code class="language-json">"rules" : {
+   "RuleZer" : {
+      "Id" : ["A?p |- A?p", ""],
+      ...
+   },
+   ...
+}
+</code></pre>
+
+    <p>The first code snippet generates the Isabelle definition of the form <code>datatype RuleZer = Id</code>, whilst the second code snippet is the actual encoding of the rule (in ASCII), which is parsed and translated into Isabelle.</p>
+
+    <p>All the rules in the JSON file are encoded as lists of sequents, where the first sequent is the rule conclusion (the bottom part), and all the subsequent sequents are the premises (the list must contain a premise and at least one conclusion). For example, the binary rule for an implication in the antecedent of a sequent is the following:</p>
+
+    <script type="math/tex; mode=display">\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}</script>
+
+    <p>And the corresponding JSON encoding:</p>
+
+    <pre><code class="language-json">"ImpR_L" : ["F?A &gt; F?B |- ?X &gt;&gt; ?Y",  "?X |- F?A", "?Y |- F?B"]
+</code></pre>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td><span class="glyphicon glyphicon-exclamation-sign"></span></td>
+          <td>Even though the <em>Id</em> rule is an axiom and it has no conclusions, the empty string needs to be added to the list. <strong>(maybe remove that restriction??)</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the <a href="{{ site.baseurl }}/doc/calculi.html#shallow-embedding">shallow embedding</a> of the calculus and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed, any sequent with free variables within a concrete proof tree will automatically be invalid.</p>
+  </li>
+  <li>
+    <p>After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the toolbox folder and run:</p>
+
+    <pre><code class="language-bash">./build.py -c &lt;path_to_JSON_calculus_description_file&gt;
+</code></pre>
+
+    <p>For a list of optional flags and arguments run <code>./build.py -h</code>. If you get compilation errors, please refer to the <a href="{{ site.baseurl }}/doc/troubleshooting.html">troubleshooting page</a>.</p>
+  </li>
+</ol>
