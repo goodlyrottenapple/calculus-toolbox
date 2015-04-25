@@ -11,7 +11,7 @@ The calculus toolbox is a set of scripts and utilities for generating customized
 
 ### Overview
 
-The calculus toolbox can roughly be split into two categories. The first one is the code generation, which includes utilities for generating Isabelle theories and Scala code from a specification of a calculus, contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found HERE.
+The calculus toolbox can roughly be split into two categories. The first one is the code generation, which includes utilities for generating Isabelle theories and Scala code from a specification of a calculus, contained within a single JSON file. This file contains the full specification of the structure of the calculus, as well as the encoding of the rules of the calculus. The full description of the specification of the JSON file structure can be found in the section on [calculus encoding]({{ site.baseurl }}/doc/calculus-encoding.html).
 
 The [`tools`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/) folder contains the core scripts used for generating the Isabelle theory files and the Scala UI. Detailed description of these tools can be found in the [Utilities]({{ site.baseurl }}/doc/utilities.html) section.
 
@@ -28,7 +28,13 @@ The UI is further documented HERE.
 
 ### Start guide
 
-To get started quickly, this tutorial will guide you through the process of generating a custom calculus.
+To get started quickly, this tutorial will guide you through the process of generating a custom calculus. If you have not yet downloaded the calculus toolbox, you can get the [zip file](https://github.com/goodlyrottenapple/calculus-toolbox/archive/master.zip) or just use git and clone the project with:
+
+~~~
+git clone https://github.com/goodlyrottenapple/calculus-toolbox
+~~~
+
+<br>
 
 1. First open the default calculus template `default.json` and edit the calculus name:
 

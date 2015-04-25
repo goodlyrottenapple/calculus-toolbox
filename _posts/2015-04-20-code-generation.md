@@ -2,7 +2,7 @@
 layout: page
 title: "Code Generation"
 category: doc
-date: 2015-04-20 16:33:24
+date: 2015-04-20 16:13:26
 ---
 
 To make modifications to the [calculi]({{ site.baseurl }}/doc/calculi.html) (such as adding rules and/or connectives) easier, the calculus, originally formalized in Isabelle, was re-encoded in a JSON file and a set of Python scripts were created to generate the needed code for both Isabelle theories and Scala classes. The generator code itself was rewritten several times to facilitate easy extensibility and (hopefully) readability. These requirements were the main reason for using Python, which is great for quick and readable coding and scripting. The scripting abilities of Python allowed for easy file manipulation and generation.
@@ -13,9 +13,12 @@ The full build process (invoked by `build.py`) goes through several stages of ge
 
 <br>
 
-<img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://rawgit.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/gen_dia.svg">
+<img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://cdn.rawgit.com/goodlyrottenapple/calculus-toolbox/c3a314ca9eaf22fbcbc110118a9f3f8191550ff6/_files/gen_dia.svg">
 
 <br>
+
+{:.table}
+<span class="glyphicon glyphicon-info-sign"></span> | The encoding of the calculus is split into two files (referred to as the core calculus and full calculus), because of the way the rules of the calculus are encoded in the JSON file. Since the Isabelle syntax for the DE is quite difficult to write outside of the Isabelle IDE (since the raw Isabelle encoding differs from what the user sees rendered on the screen in the IDE), the rules of the calculus are written in ASCII sugar syntax. This means however, that a parser for the syntax must first be generated and compiled and the rules need to be passed through it to obtain the actual Isabelle encoding. As the generation of this parser depends on the definition of the calculus and the user specified ASCII syntactic sugar, the way the calculus is built is to first generate the core calculus, which only contains the terms of the calculus but not the rules), generating the parser and print classes for this core calculus, translating the ASCII encoded rules from the JSON file into Isabelle encoding and only then generating the full calculus.
 
 #### Load calculus description file
 

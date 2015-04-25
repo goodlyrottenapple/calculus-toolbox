@@ -19,6 +19,14 @@ code {
     white-space: normal;
 }
 
+blockquote {
+    font-size: 1em
+}
+
+.MathJax {
+font-size: 13px;
+}
+
 .hljs{
     font-size: 0.85em;
     background: none
@@ -38,6 +46,12 @@ code {
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
   font-weight: 800;
+}
+
+.language-nohighlight {
+    font-size: 0.85em;
+    display: block;
+    padding: 0.5em
 }
 
 table{
