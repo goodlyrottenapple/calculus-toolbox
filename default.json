@@ -128,7 +128,9 @@
 
 			"Prem" : {
 				"ascii" : "Prem",
-				"latex" : "Prem"
+				"latex" : "Prem",
+				"condition" : "(\\<lambda>x. seq = x)",
+				"locale" : "Premise seq"
 			}
 		},
 
@@ -264,7 +266,8 @@
 
 	"rules" : {
 		"RuleZer" : {
-			"Id" : 				["A?p |- A?p",				""]
+			"Id" : 				["A?p |- A?p",				""],
+			"Prem" : 			["?X |- ?Y",				""]
 		},
 		"RuleU" : {
 			"I_impR" : 			["I |- ?X >> ?Y", 			"?X |- ?Y"],
