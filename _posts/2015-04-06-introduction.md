@@ -36,11 +36,9 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
 <br>
 
-1. First open the default calculus template `default.json` and edit the calculus name:
-
-   ~~~json
-   "calc_name" : "EAKMin"
-   ~~~
+1. First open the default calculus template `default.json` and edit the calculus name: 
+   
+   <div>{% highlight json %}"calc_name" : "EAKMin"{% endhighlight %}
 
    This name is used in all the Isabelle theory files and Scala classes.
    
@@ -50,7 +48,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
    And here is the corresponding definition in the JSON file:
 
-   ~~~json
+   <div markdown="1">{% highlight json %}
    "Atprop" : {
       "Atprop" : {
          "type" : "string",
@@ -98,7 +96,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
          "latex" : "\\rightarrow"
       }
    }
-   ~~~
+   {% endhighlight %}
 
       - - -
    Note that the calculus toolbox is set up for a [deep embedding]({{ site.baseurl }}/doc/calculi.html#deep-embedding) (abbreviated DE) of a calculus in Isabelle, which, for this section, means that:
@@ -108,22 +106,22 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
    -  for every n-ary connective, a `_Zer/Un/Bin/..` term is added to the DE of the corresponding type and a separate type of the following form is added:
 
 
-      ~~~json
+      <div markdown="1">{% highlight json %}
       "<Type>_<Zer/Un/Bin>_Op" : {
             "<Type>_<Connective>" : {
                ...
             }
          }
-      ~~~
+      {% endhighlight %}
 
    -  a type can be promoted into another type through a constructor of the following shape:
 
-      ~~~json
+      <div markdown="1">{% highlight json %}
       "<Type>_<Type>" : {
          "type": "<Type1>",
          ...
       }
-      ~~~
+      {% endhighlight %}
    
       - - -
 
@@ -131,7 +129,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
    To get a better idea of what the other specified parameters in the definition of `Atprop`, `Formula` and `Formula_Bin_Op` mean, let's have a look at the the Isabelle definitions, generated from the JSON snippet above.
 
-   ~~~json
+   <div markdown="1">{% highlight coq %}
    datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
                            | Formula_ImpR ("\<rightarrow>\<^sub>F")
 
@@ -141,7 +139,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
    datatype Formula = Formula_Atprop Atprop ("_ \<^sub>F" [320] 330)
                     | Formula_Bin Formula Formula_Bin_Op Formula ("B\<^sub>F _ _ _" [330,330,330] 331)
                     | Formula_Freevar string ("?\<^sub>F _" [340] 330)
-   ~~~
+   {% endhighlight %}
 
    The parameter `isabelle` together with `precedence` (in the JSON file) specify the syntactic sugar of the defined terms in Isabelle. Either/both of the parameters can be omitted as in the case of the constructor/term `Atprop` in the datatype/type `Atprop`.
 
@@ -185,7 +183,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
    The following entries have to be added to the JSON file for the Id rule:
 
-   ~~~json
+   <div markdown="1">{% highlight json %}
    "calc_structure_rules" : {
       "RuleZer" : {
          "Id" : {
@@ -196,11 +194,11 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
       },
       ...
    }
-   ~~~
+   {% endhighlight %}
 
    and
 
-   ~~~json
+   <div markdown="1">{% highlight json %}
    "rules" : {
       "RuleZer" : {
          "Id" : ["A?p |- A?p", ""],
@@ -208,7 +206,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
       },
       ...
    }
-   ~~~
+   {% endhighlight %}
 
    The first code snippet generates the Isabelle definition of the form `datatype RuleZer = Id`, whilst the second code snippet is the actual encoding of the rule (in ASCII), which is parsed and translated into Isabelle.
 
@@ -219,9 +217,9 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
    And the corresponding JSON encoding:
 
 
-   ~~~json
+   <div markdown="1">{% highlight json %}
    "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
-   ~~~
+   {% endhighlight %}
 
    {:.table}
    <span class="glyphicon glyphicon-exclamation-sign"></span> | Even though the _Id_ rule is an axiom and it has no premises, the empty string needs to be added to the list, even though it is redundant. __(maybe remove that restriction??)__
@@ -230,23 +228,23 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
 4. After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the toolbox folder and run:
    
-   ~~~bash
+   <div markdown="1">{% highlight bash %}
    ./build.py -c <path_to_JSON_calculus_description_file>
-   ~~~
+   {% endhighlight %}
 
    For a list of optional flags and arguments run `./build.py -h`. If you get compilation errors, please refer to the [troubleshooting page]({{ site.baseurl }}/doc/troubleshooting.html).
 
 5. If the build was successful, navigate to the output folder (if not specified, defaults to `gen_calc`) and run:
    
-   ~~~bash
+   <div markdown="1">{% highlight bash %}
    ./build.py 
-   ~~~
+   {% endhighlight %}
 
    This build command is different to the previous one and it does not generate any new code (it simply recompiles everything, now with the addition of the Scala UI __maybe simplify this??__). Once eveything has been compiled without errors, run:
      
-   ~~~bash
+   <div markdown="1">{% highlight bash %}
    make gui
-   ~~~
+   {% endhighlight %}
 
    You should see the following screen:
 
