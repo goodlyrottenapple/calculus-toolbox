@@ -91,7 +91,7 @@ Since the rules of the calculus are encoded using the user defined ASCII sugar, 
 
 However, the underlying `.thy` file encodes the snippet in the following way:
 
-~~~isabelle
+~~~
 (Atprop ''p'') \<^sub>F \<^sub>S \<turnstile> (Atprop ''p'') \<^sub>F \<^sub>S
 ~~~
 

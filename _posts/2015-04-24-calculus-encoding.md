@@ -9,15 +9,15 @@ date: 2015-04-20 16:14:26
 
 The generator tools in the calculus toolbox use a single JSON file, which holds the full description of a display calculus, to generate all the Isabelle and Scala code. The JSON format was chosen because it is simple to use as has parsers in many languages, including Python and Scala. Using JSON files also allows storing data easily and passing data between different systems/languages. In Python, which is used for all the code generation, importing a JSON file is a one line command:
 
-~~~python
+{% highlight python %}
 imported_json = json.loads(json_file.read())
-~~~
+{% endhighlight %}
 
 ### JSON file structure
 
 A valid calculus description file is a JSON file with these four basic key-value pairs, the structure of which is documented below:
 
-~~~json
+{% highlight json %}
 {
     "calc_name" : ...,
 
@@ -33,8 +33,7 @@ A valid calculus description file is a JSON file with these four basic key-value
         ...
     }
 }
-~~~
-
+{% endhighlight %}
 
 #### calc_name
 
@@ -45,13 +44,13 @@ The value for `calc_name` is a string that holds the name of the calculus as it 
 This section encodes the terms of the calculus, defined in Isabelle through the `datatype` definition.
 The encoding of a type and its terms in Isabelle is transformed into the JSON file in the following way:
 
-~~~isabelle
+{% highlight coq %}
 datatype <Term> = <Term_Constructor> <type> (<isabelle> [ [<p_1>, <p_2>,...<p_n>] <p_m> ]
-~~~
+{% endhighlight %}
 
 The generic `datatype` definition above is 'disassembled' into the JSON file below.
 
-~~~json
+{% highlight json %}
 "<Term>" : {
     "<Term_Constructor>" : {
         "type" : "<type>",
@@ -61,7 +60,7 @@ The generic `datatype` definition above is 'disassembled' into the JSON file bel
         "precedence": [ <p_1>, <p_2>,...<p_n>, <p_m> ]
     }
 }
-~~~
+{% endhighlight %}
 
 Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are compulsory and can be omitted. Further details on the parameters used by the calculus toolbox generator tools are detailed here:
 
@@ -78,7 +77,7 @@ Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are 
 
 All the rules of the calculus are encoded in this section of the JSON file. The rules are split up into categories both for organizational purposes and for Isabelle performance reasons (the Isabelle `datatype` declaration for data types with a lot of constructors take a very long time to compile). The basic groups for the minimal calculus, for example, include nullary (or zero-ary) and unary rule groups:
 
-~~~json
+{% highlight json %}
 "calc_structure_rules" : {
     "RuleZer" : {
         "Id" : { ... }, 
@@ -87,11 +86,11 @@ All the rules of the calculus are encoded in this section of the JSON file. The 
     "RuleU" : { ... },
     ...
 }
-~~~
+{% endhighlight %}
 
 The rules themselves are encoded in the following format:
 
-~~~json
+{% highlight json %}
 "<Rule_name>" : {
     "ascii" : "<ascii>",
     "latex" : "<latex>",
@@ -99,7 +98,7 @@ The rules themselves are encoded in the following format:
     "locale" : "<locale>",
     "premise" : "<premise>"
 }
-~~~
+{% endhighlight %}
 
 {: .table}
 | Field      | JSON&nbsp;Data&nbsp;Type | Description |
@@ -114,7 +113,7 @@ The rules themselves are encoded in the following format:
 
 The encoding of the rules themselves (i.e. not just the rule name and LaTeX labels, etc.) is contained within the `rules` section of the JSON file. The rules follow the same format and must be grouped in the same groups as they were defined in the `calc_structure_rules` section:
 
-~~~json
+{% highlight json %}
 "rules" : {
     "RuleZer" : {
         "Id" : ["A?p |- A?p", ... ], 
@@ -123,7 +122,7 @@ The encoding of the rules themselves (i.e. not just the rule name and LaTeX labe
     "RuleU" : { ... },
     ...
 }
-~~~
+{% endhighlight %}
 
 Instead of a dictionary, `Id` now has a list of Strings as its value. This list contains the ASCII encodings of the conclusion, followed by the rule premises. As mentioned in the intorduction, the $\rightarrow_L$ rule
 
@@ -131,9 +130,9 @@ $$\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X
 
 has the corresponding JSON encoding:
 
-~~~json
+{% highlight json %}
 "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
-~~~
+{% endhighlight %}
 
 
 ### Rule Encoding 
@@ -230,9 +229,9 @@ The rule $swap\text{-}out'_R$ given above has been formalized in Isabelle in the
 
 The first part of this rule (the conclusion) looks like any other rule, but its the part after `⟹RD` that differs form the standard encoding, which has the usual form `(λx. Some [ ... ])`. To understand what goes on in <code>swapout_R rel (?<sub>S</sub>''Y'' ⊢ AgS<sub>S</sub> forwK<sub>S</sub> ?<sub>Ag</sub>''a'' (ActS<sub>S</sub> forwA<sub>S</sub> ?<sub>Act</sub>''beta'' ?<sub>S</sub>''X''))</code>, let's take a look at the signature of the function `swapout_R`:
 
-~~~
+{% highlight coq %}
 fun swapout_R :: "(Action ⇒ Agent => Action list) ⇒ Sequent ⇒ Sequent ⇒ Sequent list option" where ...
-~~~
+{% endhighlight %}
 
 Without going into details of what `swapout_R` does, notice that the partially applied function <code>swapout_R rel (?<sub>S</sub>''Y'' ⊢ AgS<sub>S</sub> forwK<sub>S</sub> ?<sub>Ag</sub>''a'' (ActS<sub>S</sub> forwA<sub>S</sub> ?<sub>Act</sub>''beta'' ?<sub>S</sub>''X''))</code> will have the type signature `Sequent ⇒ Sequent list option`, which corresponds to the lambda function `(λx. Some [ ... ])` (where `...` is a list of sequents).  
 One can see that this function takes a sequent and either succeeds in deriving the premises (returns a `Some (Sequent list)`) or fails and returns `None`. In this rule, the `swapout_R` function supersedes the _match_ and _replace/replaceAll_ functions and is used instead, however _match_ and _replace/replaceAll_ are automatically used for all the other rules where they are sufficient. For details on how this works, have a look at the _der_ function in the [Calc_Rules.thy](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy) template.
@@ -246,7 +245,7 @@ The macro 'rule' is a special rule that gets added to any generated calculus by 
 
 In Isabelle, `datatype Rules` is mutually dependent on the `datatype Prooftree`, as a result of the definition of `RuleMacro`:
 
-~~~
+{% highlight coq %}
 datatype Rule = RuleZer RuleZer
                 .
                 .
@@ -254,7 +253,7 @@ datatype Rule = RuleZer RuleZer
               | RuleMacro string Prooftree
               | Fail
      and Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ ⟸ PT ( _ ) _" [341,341] 350)
-~~~
+{% endhighlight %}
 
 - - -
 
