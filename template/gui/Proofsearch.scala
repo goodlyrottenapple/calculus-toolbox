@@ -19,37 +19,23 @@ object Proofsearch{
 			.filter{ case (r, pt) => isProofTreeWithCut(loc++collectPremisesToLocale(pt), pt) }
 				.map{ case (r, pt) => (r, collectPremises(pt)) }
 
-	def cr[A](xs: List[A], zss: List[List[A]]): List[List[A]] = {
-	    for {
-	        x <- xs
-	        zs <- zss
-	    } yield {
-	        x :: zs
-	    }
-	}
-	def zss[A]: List[List[A]] = List(List())
-
-	def crossProd[A](inputList : List[List[A]]) : List[List[A]] = inputList.foldRight( zss[A] ) (cr _)
-
-	def derTrees(loc:List[Locale], n:Int, seq:Sequent) : List[Prooftree] = n match {
-		case 0 => List[Prooftree]()
+	def derTrees(loc:List[Locale], n:Int, seq:Sequent) : Option[Prooftree] = n match {
+		case 0 => None
 		case n => 
-			var ret = new ListBuffer[Prooftree]()
 			for( (rule, derList) <- derAll(loc, seq).sortWith(_._2.length < _._2.length) ) {
-				lazy val ders = crossProd( derList.map(x => derTrees(loc, n-1, x)) )
-
-				for(possibleDer <- ders ) {
-					ret += Prooftreea(seq, rule, possibleDer)
+				lazy val ders = derList.map(x => derTrees(loc, n-1, x))
+				if(!ders.contains(None)){
+					return Some(Prooftreea(seq, rule, ders.map{case Some(pt) => pt}))
 				}
 			}
-			return ret.toList
+			return None
 	}
 
 	def derTree(max:Int, loc:List[Locale], seq:Sequent, n:Int = 0) : Option[Prooftree] = {
 		if (n > max) None
 		else derTrees(loc, n, seq) match {
-			case Nil => derTree(max, loc, seq, n+1)
-			case res => Some(res(0))
+			case None => derTree(max, loc, seq, n+1)
+			case res => res
 		}
 	}
 
