@@ -145,7 +145,7 @@ Uses [__calc_structure_datatype](#calc_structure_datatype) and [__calc_structure
 {: .code .python #calc_structure_all_rules}
 | def __calc_structure_all_rules(rules) |
 
-Given a dictionary of (rule groups)<-HERE (defined in `calc_structure_rules`) generates the `datatype Rules` and `Prooftree`.
+Given a dictionary of [rule categories/groups]({{ site.baseurl }}/doc/calculus-encoding.html#calcstructurerules) (defined in `calc_structure_rules`) generates the `datatype Rules` and `Prooftree`.
 
 Given the rule groups defined in the [default JSON file](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json), this function will produce:
 

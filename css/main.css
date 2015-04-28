@@ -25,11 +25,6 @@ blockquote {
 font-size: 13px;
 }
 
-.hljs{
-    font-size: 0.85em;
-    background: none
-}
-
 .noborder tbody>tr>td {
     border: 0px;
 }

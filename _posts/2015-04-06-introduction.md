@@ -24,7 +24,7 @@ The second category of the calculus toolbox functionality is the Scala UI, which
 +  Automatic typesetting of proof trees in LaTeX
 +  Exporting proof trees back to Isabelle
 
-The UI is further documented HERE.
+The UI is further documented in the [Scala UI]({{ site.baseurl }}/doc/scala-ui.html) section.
 
 ### Start guide
 

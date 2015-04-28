@@ -62,7 +62,7 @@ The generic `datatype` definition above is 'disassembled' into the JSON file bel
 }
 {% endhighlight %}
 
-Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are compulsory and can be omitted. Further details on the parameters used by the calculus toolbox generator tools are detailed here:
+Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are not compulsory and can be omitted. Further details on the parameters used by the calculus toolbox generator tools are detailed here:
 
 {: .table}
 | Field      | JSON&nbsp;Data&nbsp;Type | Description |
@@ -75,7 +75,7 @@ Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are 
 
 #### calc_structure_rules
 
-All the rules of the calculus are encoded in this section of the JSON file. The rules are split up into categories both for organizational purposes and for Isabelle performance reasons (the Isabelle `datatype` declaration for data types with a lot of constructors take a very long time to compile). The basic groups for the minimal calculus, for example, include nullary (or zero-ary) and unary rule groups:
+All the rules of the calculus are encoded in this section of the JSON file. The rules are split up into categories both for organizational purposes and for Isabelle performance reasons (the Isabelle `datatype` declaration for data types with a lot of constructors take a very long time to compile). The groups for the minimal calculus, for example, include nullary (or zero-ary) and unary rule groups:
 
 {% highlight json %}
 "calc_structure_rules" : {
@@ -164,7 +164,7 @@ The first special rule we consider is the atom rule (formal definition given on 
 behaviour of epistemic actions<br><br>__Atom__<br>
 $\frac{}{\displaystyle \Gamma p \vdash \Delta p} atom$<br><br>
 where $\Gamma$ and $\Delta$ are arbitrary finite sequences of the form $(\alpha_1) ... (\alpha_n)$, such that
-each $(\alpha_j)$ is of the form $\\{ \alpha_j \\}$ or of the form ![rotated square brackets alpha j](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/rotated_alpha.png) , for $1 \leq j \leq n$.
+each $(\alpha_j)$ is of the form $\\{ \alpha_j \\}$ or of the form ![latex:backalphaj](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/rotated_alpha.png) , for $1 \leq j \leq n$.
 
 Since this rule cannot successfully be matched to any sequent except for <code>?<sub>S</sub>X ⊢ ?<sub>S</sub>Y</code>, because $\Gamma$ and $\Delta$ can have arbitrary shape and be arbitrarily long, we need an extra precondition which can check that the given sequent is of the correct form. We can do this by defining a function atom, which recursively unfolds the structure until it either reaches $p \vdash p$ or returns false because the sequent is not of the right form:
 
@@ -273,4 +273,4 @@ The use of rule macro simulates this in the Scala UI, keeping the proof trees sh
 
 ![scala ui proof tree macro](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/scala_gui_pt_macro.png)
 
-At the same time, the underlying encoding (ASCII and Isabelle) carries the macro proof tree within the the main proof tree, and this means that the main proof tree can be checked for validity without relying on any external definitions of derived rules. To learn how to define and use rule macros, have a look at the Scala UI documentation HERE.
+At the same time, the underlying encoding (ASCII and Isabelle) carries the macro proof tree within the the main proof tree, and this means that the main proof tree can be checked for validity without relying on any external definitions of derived rules. To learn how to define and use rule macros, have a look at the [Scala UI]({{ site.baseurl }}/doc/scala-ui.html) documentation.
