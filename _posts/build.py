@@ -79,21 +79,35 @@ def img_repl(matchobj):
 		return "\\write18{wget -N " + matchobj.group(1).replace(r"\_", "_") + "}\n\\includegraphics[max width=\\textwidth]{" + matchobj.group(1).replace(r"\_", "_").split("/")[-1] + "}"
 	else: return "\\input{" + matchobj.group(1).replace(r"\_", "_").split("/")[-1].split(".")[0] + "}"
 
-def compile_latex(path):
+def hyperlinks_to_hrefs(matchobj):
+	if "#" in matchobj.group(1):
+		return "\\hyperlink{" + matchobj.group(1).split("#")[-1] + "}"
+	else:
+		return "\\hyperlink{" + matchobj.group(1).split("/")[-1].split(".")[0] + "}"
+
+def compile_latex(path, inp):
 	global TEX_CONST
 
 	md = glob("*.md")
+
+	l = []
+
+	if inp:
+		for i in inp:
+			for p in md:
+				if i in p: l.append(p)
+	else: l = [i for i in md]
 	# file = open(path + '/out.tex', 'w')
 	# file.write( TEX_CONST )
 
-	for p in md:
+	for p in l:
 
 		name = re.sub("([0-9]{4}\-[0-9]{2}\-[0-9]{2})\-", "", p)
 		name = name.replace(".md", "")
 
 		p_str = open(p).read()
-		p_str = re.sub(r"<div markdown=\"1\">\{\% highlight (\w+) \%\}", r"~~~", p_str)
-		p_str = re.sub(r"\{\% highlight (\w+) \%\}", r"~~~", p_str)
+		p_str = re.sub(r"<div markdown=\"1\">\{\% highlight (\w+) \%\}", r"~~~\nlang:\1", p_str)
+		p_str = re.sub(r"\{\% highlight (\w+) \%\}", r"~~~\nlang:\1", p_str)
 		p_str = p_str.replace(r"{% endhighlight %}", "~~~")
 
 		p_str = re.sub(r"!\[latex:(.+)\]\(.+\)", r"\\\1", p_str)
@@ -107,6 +121,8 @@ def compile_latex(path):
 
 		p_str = p_str.replace("<span class=\"glyphicon glyphicon-exclamation-sign\"></span>", "\\danger")
 		p_str = p_str.replace("<span class=\"glyphicon glyphicon-info-sign\"></span>", "\\info")
+
+		p_str = p_str.replace("<sub>FS</sub>", "ₜₛ").replace("<sub>F</sub>", "ₜ").replace("<sub>S</sub>", "ₛ")
 
 		p_file = open(name + '_tmp.md', 'w')
 		p_file.write(p_str)
@@ -149,14 +165,17 @@ def compile_latex(path):
 
 		response = response.replace("\\{", "{").replace("\\}", "}")
 
-		# response = re.sub(r"\\\{\\\% highlight (\w+) \\\%\\\}", r"\\begin{minted}{\1}", response)
-		# response = response.replace(r"\{\% endhighlight \%\}", r"\end{verbatim}")
-		# response = response.replace("coq", "isabelle").replace(r"\textbar{}", r"|").replace(r"\guillemotright{}", ">>")
+		# response = re.sub(r"\\\{\\\% highlight (\w+) \\\%\\\}", r"\\begin{pyglist}\[language = \1\]}", response)
+		# response = response.replace(r"\{\% endhighlight \%\}", r"\end{pyglist}")
+		response = response.replace("coq", "isabelle").replace(r"\textbar{}", r"|").replace(r"\guillemotright{}", ">>")
 
 		response = re.sub(r"\\begin\{spverbatim\}img:(.+)\n\\end\{spverbatim\}", img_repl, response)
 
 		response = re.sub(r"!\[.+\]\((.+)\)", img_repl, response)
 
+		response = re.sub(r"\\begin\{spverbatim\}lang:(\w+)(((\n.+?)|(.+?\n))+?)\\end\{spverbatim\}", r"\\begin{pyglist}[language = \1]\2\\end{pyglist}", response)
+
+		response = re.sub(r"\\href\{\{\{ site.baseurl \}\}(.+?)\}", hyperlinks_to_hrefs, response)
 
 		f = open('{0}/{1}.tex'.format(path, name), 'w')
 		f.write( response )
@@ -173,21 +192,24 @@ def compile_latex(path):
 
 def main(argv):
 	try:
-		opts, args = getopt.getopt(argv, "o:", ["output"])
+		opts, args = getopt.getopt(argv, "o:i:", ["output, input"])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
 
 	#user flag settings
 	OUTPUT_PATH = "."
+	INPUT = ""
 
 	for opt, arg in opts:
 		if opt in ("-o", "--output"):
 			OUTPUT_PATH = arg
+		elif opt in ("-i", "--input"):
+			INPUT = arg.split(",")
 
 	if OUTPUT_PATH.endswith("/"): OUTPUT_PATH = OUTPUT_PATH[:-1]
 	#first compile the generator for core calculus
-	compile_latex(OUTPUT_PATH)
+	compile_latex(OUTPUT_PATH, INPUT)
 	
 
 if __name__ == "__main__":
