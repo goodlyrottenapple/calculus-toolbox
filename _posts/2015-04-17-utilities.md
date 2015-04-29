@@ -128,7 +128,7 @@ The `-r` flag introduces some path rewrite rules, specific to the structure of t
 
     - - -
     
-    The code generation leaves delimiters `(*<identifier>-BEGIN*)` and `(*<identifier>-END*)` for Isabelle theories or `/*<identifier>-BEGIN*/` and `/*<identifier>-END*/` for Scala around generated code. While this may look cluttered, it allows for converting the generated files back into templates as described HERE.  However, these comment delimiters can be removed entirely if need be (have a look at the `tools/utils.py` reference HERE)
+    The code generation leaves delimiters `(*<identifier>-BEGIN*)` and `(*<identifier>-END*)` for Isabelle theories or `/*<identifier>-BEGIN*/` and `/*<identifier>-END*/` for Scala around generated code. While this may look cluttered, it allows for the conversion of the generated files back into templates, as described in the documentation of the [gui.py](#guipyhttpsgithubcomgoodlyrottenapplecalculus-toolboxblobmasterguipy) and [watcher.py](#watcherpyhttpsgithubcomgoodlyrottenapplecalculus-toolboxblobmasterwatcherpy) utilities.  However, these comment delimiters can be removed entirely if need be (_this functionality is present in [`utils.py`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/utils.py) (function `clean`), but is currently not implemented as a stand-alone runnable script_).
     
     - - -
 

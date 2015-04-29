@@ -222,7 +222,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
    {% endhighlight %}
 
    {:.table}
-   <span class="glyphicon glyphicon-exclamation-sign"></span> | Even though the _Id_ rule is an axiom and it has no premises, the empty string needs to be added to the list, even though it is redundant. __(maybe remove that restriction??)__
+   <span class="glyphicon glyphicon-exclamation-sign"></span> |  Since the _Id_ rule is an axiom, it has no premises. However, the empty string needs to be added to the list as the empty premise, even though it is redundant.
 
    Lastly, notice that all the rules are encoded with the free variable constructors that we defined in the previous step. The free variables stand as placeholders for concrete terms. They can be thought of as equivalent to the Isabelle meta-variables in the [shallow embedding]({{ site.baseurl }}/doc/calculi.html#shallow-embedding) of the calculus and even though they are part of the calculus, they are not used for anything besides pattern matching and transforming sequent in rule application. Indeed, any sequent with free variables within a concrete proof tree will automatically be invalid.
 
