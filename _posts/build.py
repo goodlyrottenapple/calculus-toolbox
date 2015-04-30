@@ -177,6 +177,8 @@ def compile_latex(path, inp):
 
 		response = re.sub(r"\\href\{\{\{ site.baseurl \}\}(.+?)\}", hyperlinks_to_hrefs, response)
 
+		response = response.replace("\\begin{pyglist}[language = json]\n\"Prem\" : {\n    \"ascii\" : \"Prem\",\n    \"latex\" : \"Prem\",\n    \"condition\" : \"(\\\\<lambda>x. seq = x)\",\n    \"locale\" : \"Premise seq\"\n}\n\\end{pyglist}", "\\usebox\\scalauiboxa")
+		response = response.replace("\\begin{pyglist}[language = json]\n\"Prem\" : [\"?X |- ?Y\", \"\"]\n\\end{pyglist}\n", "\\usebox\\scalauiboxb\n")
 		f = open('{0}/{1}.tex'.format(path, name), 'w')
 		f.write( response )
 		f.close()

@@ -5,7 +5,7 @@ category: doc
 date: 2015-04-20 16:33:26
 ---
 
-The calculus toolbox is a set of scripts and utilities for generating customized Isabelle theory files for user defined [display calculi]({{ site.baseurl }}/doc/calculi.html) and Scala classes that provide a user interface for working with set calculi.
+The calculus toolbox is a set of scripts and utilities for generating customized Isabelle theory files for user defined [display calculi]({{ site.baseurl }}/doc/calculi.html) and Scala classes that provide a user interface for working with said calculi.
 
 
 
@@ -228,7 +228,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
 4. After defining the terms and the rules of the calculus, we can turn the calculus description file into the corresponding Isabelle theories and Scala code. To run the build script, navigate to the root of the toolbox folder and run:
    
-   <div markdown="1">{% highlight bash %}
+   <div id="compile-step" markdown="1">{% highlight bash %}
    ./build.py -c <path_to_JSON_calculus_description_file>
    {% endhighlight %}
 
