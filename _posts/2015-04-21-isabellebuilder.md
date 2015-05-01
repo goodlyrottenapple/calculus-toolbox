@@ -4,6 +4,9 @@ title: "IsabelleBuilder"
 category: ref
 date: 2015-04-21 11:19:29
 ---
+
+This class ([`tools/isabuilder.py`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/isabuilder.py)) contains all the macro functions, which take the JSON encoded calculus and generate Isabelle code that is replaced into the `.thy` theory files.
+
 Add any macro functions for code generation in Isabelle theories to this [file (`tools/isabuilder.py`)](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/isabuilder.py). They will automatically be called if referenced in the processed file (i.e if a method `foo` is defined, it will be called if `(*foo*)` appears in the processed file).  
 For passing arguments to `foo`, use `(*foo?arg1?arg2?...*)` in the processed file.  
 The return type for any function that can be referenced in the processed files must be string. For any functions that do not return a string, add two underscores before a function name. Also add two underscores if the function is going to be static or purposefully hidden from use in the processed file.
