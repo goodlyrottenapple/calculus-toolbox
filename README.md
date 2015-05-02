@@ -3,7 +3,7 @@ A set of tools for generating calculi in Isabelle and supporting tools through a
 
 ### Get started
 
-To get started, fork the [github repository](https://github.com/goodlyrottenapple/calculus-toolbox) or download the project as a [zip file](https://github.com/goodlyrottenapple/calculus-toolbox/archive/master.zip) and then head over to the [Introduction](https://goodlyrottenapple.github.io/doc/introduction.html) page.
+To get started, fork the [github repository](https://github.com/goodlyrottenapple/calculus-toolbox) or download the project as a [zip file](https://github.com/goodlyrottenapple/calculus-toolbox/archive/master.zip) and then head over to the [Introduction](https://goodlyrottenapple.github.io/calculus-toolbox/doc/introduction.html) page.
 
 ### System requirements
 
