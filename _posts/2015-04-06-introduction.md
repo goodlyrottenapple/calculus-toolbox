@@ -212,13 +212,13 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
    All the rules in the JSON file are encoded as lists of sequents, where the first sequent is the rule conclusion (the bottom part), and all the subsequent sequents are the premises (the list must contain a premise and at least one conclusion). For example, the binary rule for an implication in the antecedent of a sequent is the following:
 
-   $$\rightarrow_L \frac{X \vdash A   \qquad   Y \vdash B}{A \rightarrow B \vdash X > Y}$$
+   $$\rightarrow_L \frac{X \vdash A   \qquad   B \vdash Y}{A \rightarrow B \vdash X > Y}$$
 
    And the corresponding JSON encoding:
 
 
    <div markdown="1">{% highlight json %}
-   "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "?Y |- F?B"]
+   "ImpR_L" : ["F?A > F?B |- ?X >> ?Y",  "?X |- F?A", "F?B |- ?Y"]
    {% endhighlight %}
 
    {:.table}
