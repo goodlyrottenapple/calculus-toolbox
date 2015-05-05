@@ -240,7 +240,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
    ./build.py 
    {% endhighlight %}
 
-   This build command is different to the previous one and it does not generate any new code (it simply recompiles everything, now with the addition of the Scala UI __maybe simplify this??__). Once eveything has been compiled without errors, run:
+   This build command is different to the previous one and it does not generate any new code (it simply recompiles everything, now with the addition of the Scala UI). Once eveything has been compiled without errors, run:
      
    <div markdown="1">{% highlight bash %}
    make gui
