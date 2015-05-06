@@ -33,6 +33,7 @@ class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])]
 
   listenTo(listView.selection)
   reactions += {
+    case KeyReleased(s, Key.Enter, _, _) => if(b.enabled) close()
     case SelectionChanged(`listView`) =>
       val sel = listView.selection.items(0)
       pair = Some((sel._2, sel._3))

@@ -31,7 +31,7 @@ import java.io.PrintWriter
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import Parser.{parseSequent, parseFormula, parseProoftree}
+import Parser.{parseSequent, parseFormula, parseProoftree, parseRule}
 import PrintCalc._
 import Proofsearch.derTree
 
@@ -352,6 +352,33 @@ object GUI extends SimpleSwingApplication {
     border = Swing.EmptyBorder(0, 0, 0, 0)
   }
 
+
+  // def openCSFile(file:java.io.File) = {
+  //   val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
+  //   Some(JSON.parseFull(jsonStr)) match {
+  //     case Some(M(map))  =>
+  //       map.get("assms") match {
+  //         case L(assms) =>
+  //           val ass = assms.map(parseSequent(_))
+  //           session.clearAssms
+  //           for (Some(a) <- ass){
+  //             session.addAssm(a)
+  //           }
+  //         case _ => ;
+  //       }
+  //       map.get("pts") match {
+  //         case L(pts) =>
+  //           val ptss = pts.map(parseProoftree(_))
+  //           session.clearPT
+  //           for (Some(pt) <- ptss){
+  //             session.addPT(pt)
+  //           }
+  //         case _ => ;
+  //       }
+  //     case _ => ;
+  //   }
+  // }
+
   def openCSFile(file:java.io.File) = {
     val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
     Some(JSON.parseFull(jsonStr)) match {
@@ -366,16 +393,48 @@ object GUI extends SimpleSwingApplication {
           case _ => ;
         }
         map.get("pts") match {
-          case L(pts) =>
-            val ptss = pts.map(parseProoftree(_))
+          case LLL(pts) =>
+            println(pts.toString())
             session.clearPT
-            for (Some(pt) <- ptss){
-              session.addPT(pt)
+            for (pt <- pts){
+              session.addPT(readPT(pt))
             }
-          case _ => ;
+            // }
+          case _ => println("fail");
         }
       case _ => ;
     }
+  }
+
+  def readPT(map : Map[String, Any]):Prooftree = {
+        map.get("seq") match {
+          case S(str_seq) => 
+            val seq = parseSequent(str_seq)
+            map.get("rule") match {
+              case S(str_rule) => 
+                val rule = parseRule(str_rule)
+                map.get("pts") match {
+                  case LLL(pts_str) => 
+                    // val pts = List[Prooftree]()
+                    // for ( Some(a) <-  ){ pts += a }
+                    seq match {
+                      case Some(s)=>
+                        rule match {
+                          case Some(r)=> 
+                            // val list = ListBuffer[Prooftree]()
+                            // for (p <- pts_str){
+                            //   Some(JSON.parseFull(p)) match {
+                            //     case Some(M(map)) =>
+                            //       list += readPT(map)
+                            //   }
+                            // }
+                            
+                            return Prooftreea(s, r, pts_str.map(readPT))
+                        }
+                    }
+                }
+            }
+        }
   }
 
   def openLocaleFile(file:java.io.File) = {
@@ -403,10 +462,21 @@ object GUI extends SimpleSwingApplication {
         JSONObject( 
           Map( 
             "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} ),
-            "pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   ) )
+            "pts"   -> JSONArray( session.ptBuffer.toList.map{ case (i,s) => JSONObject(savePT(s)) } )   ) )
           .toString())
       p.close
+      session.ptBuffer.toList(0) match {
+        case (i,s) => println(JSONObject(savePT(s)).toString())
+
+      }
     }
+  }
+  def savePT(pt:Prooftree):Map[String, Any] = pt match {
+    case Prooftreea(s, r, pts) =>
+      Map( 
+        "seq" -> sequentToString(s, PrintCalc.ASCII),
+        "rule"-> ruleToString(r, PrintCalc.ASCII),
+        "pts"-> JSONArray( pts.map(x => JSONObject(savePT(x)) ) )   )
   }
 
   def saveLocaleFile(file:java.io.File) = {  
@@ -554,5 +624,8 @@ class CSFilter extends java.io.FilenameFilter {
   }
 }
 
+object S extends CC[String]
+object LL extends CC[List[Any]]
+object LLL extends CC[List[Map[String,Any]]]
 object M extends CC[Map[String, Any]]
 object MM extends CC[Map[String, String]]
