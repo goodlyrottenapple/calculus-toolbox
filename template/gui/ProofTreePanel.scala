@@ -353,7 +353,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	})
 	popup.add(cutt);
 
-	val replaceIntPT = new MenuItem(new Action("Replace into PT") {
+	/*val replaceIntPT = new MenuItem(new Action("Replace into PT") {
       	def apply = {
       		selectedSequentInPt match {
 			case Some(selSeq) =>
@@ -371,7 +371,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			}
 		}
 	})
-	popup.add(replaceIntPT);
+	popup.add(replaceIntPT);*/
 
 
 	def unselect(root:SequentInPt = tree.getRoot) : Unit = {

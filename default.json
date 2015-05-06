@@ -301,7 +301,7 @@
 		"RuleBin" : {
 			"And_R" :			["?X ; ?Y |- F?A ^ F?B",	"?X |- F?A", "?Y |- F?B"],
 			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
-			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", "?Y |- F?B"]
+			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", 	"F?B |- ?Y"]
 		},
 		"RuleCut" : {
 			"SingleCut" :		["?X |- ?Y",	""]
