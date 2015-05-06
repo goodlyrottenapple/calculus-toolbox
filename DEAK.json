@@ -11,7 +11,7 @@
 				"type" : "string",
 				"isabelle" : "?\\<^sub>A _",
 				"ascii" : "A? _",
-				"latex" : "_",
+				"latex" : "? _",
 				"precedence": [320, 320]
 			}
 		},
@@ -25,7 +25,7 @@
 				"type" : "string",
 				"isabelle" : "?\\<^sub>Ag _",
 				"ascii" : "Ag? _",
-				"latex" : "_",
+				"latex" : "? _",
 				"precedence": [320, 320]
 			}
 		},
@@ -39,7 +39,7 @@
 				"type" : "string",
 				"isabelle" : "?\\<^sub>Act _",
 				"ascii" : "Act? _",
-				"latex" : "_",
+				"latex" : "? _",
 				"precedence": [320, 320]
 			}
 		},
@@ -68,7 +68,7 @@
 				"type" : "string",
 				"isabelle" : "?\\<^sub>F _",
 				"ascii" : "F? _",
-				"latex" : "_",
+				"latex" : "? _",
 				"precedence": [340, 330]
 			},
 			"Formula_Precondition" : {
@@ -196,7 +196,7 @@
 				"type" : "string",
 				"isabelle" : "?\\<^sub>S _",
 				"ascii" : "? _",
-				"latex" : "_",
+				"latex" : "? _",
 				"precedence": [340, 340]
 			},
 
