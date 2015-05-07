@@ -31,7 +31,7 @@ class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])]
     enabled = false 
   } 
 
-  listenTo(listView.selection)
+  listenTo(listView.selection, listView.keys)
   reactions += {
     case KeyReleased(s, Key.Enter, _, _) => if(b.enabled) close()
     case SelectionChanged(`listView`) =>
