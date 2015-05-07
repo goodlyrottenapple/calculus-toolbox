@@ -142,7 +142,7 @@ Since proof trees are first class citizens in the DE, the `inductive` set defini
 The application of a rule thus roughly becomes:
 
 1. the action of retrieving a rule, made up of a rule conclusion (a sequent with free variables) and the rule premises (a list of sequents with free variables)
-2. checking that the conclusion can be matched to the given sequent (done by the `ruleMatch` HERE function in Isabelle)
+2. checking that the conclusion can be matched to the given sequent (done by the `ruleMatch` function in Isabelle)
 3. [derivation]({{ site.baseurl }}/doc/calculi.html#deep-embedding) of the premises of the rule via the _match_ and _replace/replaceAll_ functions.
 
 The these steps are encoded in several separate functions that compose to create the full mechanism for sequent derivation (the `der` function). The rules are (roughly) encoded as pairs of sequents (conclusion) and a list of sequents (premises) in a `rule` function, which, given a rule will return the pair of sequents.  
