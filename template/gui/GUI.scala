@@ -92,7 +92,7 @@ object GUI extends SimpleSwingApplication {
   /*uncommentR?Action?Agent*/*/
 
   val loadLocButton = new Button {
-    text = "Load Locale"
+    text = "Load Macros"
   }
 
 
@@ -497,6 +497,9 @@ object GUI extends SimpleSwingApplication {
     minimumSize = new Dimension(600,400)
 
     System.setProperty("apple.laf.useScreenMenuBar", "true")
+
+
+    //Proofsearch.reversibleRules()
 
     menuBar = new MenuBar {
       contents += new Menu("File") {
