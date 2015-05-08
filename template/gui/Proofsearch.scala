@@ -8,13 +8,13 @@ object Proofsearch{
 
 		val buf = ListBuffer[Tuple2[Rule, Rule]]()
 		for (r <- ruleList) {
-			val rule = DEAK.rule(Premise(rand), r)
-			val r_f = fst(rule)
-			val r_s = snd(rule)(rand) getOrElse List[Rule]()
+			val rl = rule(Premise(rand), r)
+			val r_f = fst(rl)
+			val r_s = snd(rl)(rand) getOrElse List[Rule]()
 			if(r_s.length == 1) {
-				ruleList.find( x => fst(DEAK.rule(Premise(rand), x)) == r_s(0) ) match {
+				ruleList.find( x => fst(rule(Premise(rand), x)) == r_s(0) ) match {
 					case Some(res) => 
-						val f_list = snd(DEAK.rule(Premise(rand), res))(rand) getOrElse List[Rule]()
+						val f_list = snd(rule(Premise(rand), res))(rand) getOrElse List[Rule]()
 						if(f_list.length == 1) {
 							if(r_f == f_list(0)) buf += Tuple2(r, res)
 						}
