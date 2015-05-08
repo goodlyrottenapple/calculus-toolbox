@@ -117,12 +117,14 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
    -  a type can be promoted into another type through a constructor of the following shape:
 
       <div markdown="1">{% highlight json %}
-      "<Type>_<Type>" : {
-         "type": "<Type1>",
+      "Structure_Formula" : {
+         "type": "Formula",
          ...
       }
       {% endhighlight %}
-   
+      
+      where a `Formula` is promoted to a `Structure`.
+
       - - -
 
    The terms are built inductively in this definition by specifying the `type` parameter in the JSON file. For example, a binary connective for a formula is specified via the entry `"type" : ["Formula", "Formula_Bin_Op", "Formula"]` in the `Formula` declaration, with the corresponding declaration of the binary connective(s) in `Formula_Bin_Op`
