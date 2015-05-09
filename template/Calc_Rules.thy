@@ -12,13 +12,13 @@ datatype ruleder = ruleder      Sequent "Sequent \<Rightarrow> Sequent list opti
 
 
 (*(*uncommentL?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)
-fun is_epmod :: "Formula \<Rightarrow> Atprop option" where
-"is_epmod (Formula_Atprop p) = Some p"|
-"is_epmod (Formula_Action_Formula _ _ f) = is_epmod f"|
-"is_epmod _ = None"
+fun is_act_mod :: "Structure \<Rightarrow> Atprop option" where
+"is_act_mod (Structure_Formula (Formula_Atprop p)) = Some p"|
+"is_act_mod (Structure_Action_Structure _ _ s) = is_act_mod s"|
+"is_act_mod _ = None"
 
 fun atom :: "Sequent \<Rightarrow> bool" where
-"atom ((l)\<^sub>S \<turnstile>\<^sub>S (r)\<^sub>S) = ( (is_epmod l) \<noteq> None \<and> (is_epmod l) = (is_epmod r) )"|
+"atom (l \<turnstile>\<^sub>S r) = ( (is_act_mod l) \<noteq> None \<and> (is_act_mod l) = (is_act_mod r) )"|
 "atom _ = False"
 (*uncommentR?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)*)
 
