@@ -28,7 +28,9 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	var editable = true
 
 	// create the layout
-	var treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
+	//println("abbrevMAP:")
+	//println(session.abbrevMap.toMap)
+	var treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT, 20, session.abbrevMap.toMap), nodeExtentProvider, configuration)
 
 	val OFFSET_X = 20
 	val OFFSET_Y = 20
@@ -46,19 +48,19 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	def boundsOfNode(node:SequentInPt) : Rectangle2D.Double = treeLayout.getNodeBounds().get(node)
 
-	def createPTreeAux(proof: Prooftree, tree: DefaultTreeForTreeLayout[SequentInPt], root:SequentInPt, size:Int=20 ) : Unit = proof match {
+	def createPTreeAux(proof: Prooftree, tree: DefaultTreeForTreeLayout[SequentInPt], root:SequentInPt, size:Int=20, abbrevMap:Map[String, String] = Map() ) : Unit = proof match {
 		case Prooftreea(seq, r, list) => {
-    		val l = new SequentInPt(seq, r, size)
+    		val l = new SequentInPt(seq, r, size, None, abbrevMap)
     		tree.addChild(root, l)
-    		list.foreach( x => createPTreeAux(x, tree, l) )
+    		list.foreach( x => createPTreeAux(x, tree, l, size, abbrevMap) )
     	}
 	}
 
-	def createPTree(proof: Prooftree, size:Int=20) : DefaultTreeForTreeLayout[SequentInPt] = proof match {
+	def createPTree(proof: Prooftree, size:Int=20, abbrevMap:Map[String, String] = Map() )  : DefaultTreeForTreeLayout[SequentInPt] = proof match {
 		case Prooftreea(seq, r, list) => {
-    		val l = new SequentInPt(seq, r, size)
+    		val l = new SequentInPt(seq, r, size, None, abbrevMap)
     		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		list.foreach( x => createPTreeAux(x, tree, l, size) )
+    		list.foreach( x => createPTreeAux(x, tree, l, size, abbrevMap) )
     		return tree
     	}
 	}
@@ -386,7 +388,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	def update() = {
 		peer.removeAll()
-		treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
+		treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT, 20, session.abbrevMap.toMap), nodeExtentProvider, configuration)
 		build()
 		peer.revalidate()
 		peer.repaint()

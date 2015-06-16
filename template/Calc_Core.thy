@@ -759,28 +759,42 @@ next
 (*(*uncommentL?Structure_Phi*)
   case (Structure_Phi act)
     thus ?case
-    apply(cases free, cases act, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all)
-    by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+    apply(induct free, auto, case_tac x, simp_all)
+    apply(cases act, simp_all)
+    done
+    (*apply(case_tac x, simp_all, case_tac Action, simp_all)
+    by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)*)
 next
 (*uncommentR?Structure_Phi*)*)
 (*(*uncommentL?Structure_Action_Structure*)
   case (Structure_Action_Structure op a s)
-    thus ?case 
-    apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all)
+    thus ?case
+    apply(cases free, cases s, cases a, simp_all, case_tac x5, simp_all, case_tac x1, simp_all)
     by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+    (*apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all)
+    by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)*)
 next
 (*uncommentR?Structure_Action_Structure*)*)
 (*(*uncommentL?Structure_Agent_Structure*)
   case (Structure_Agent_Structure op a s)
-    thus ?case 
-    apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all)
+    thus ?case
+    apply(cases free, cases s, cases a, simp_all, case_tac x5, simp_all, case_tac x3, simp_all)
     by (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+    (*apply(cases free, cases s, cases a, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all)
+    by (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)*)
 next
 (*uncommentR?Structure_Agent_Structure*)*)
 (*(*uncommentL?Structure_Bigcomma*)
-  show "free \<notin> freevars (;;\<^sub>S []) \<longrightarrow> replace (free, free) (;;\<^sub>S []) = ;;\<^sub>S []" by simp
+  (*show "free \<notin> freevars (;;\<^sub>S []) \<longrightarrow> replace (free, free) (;;\<^sub>S []) = ;;\<^sub>S []" by simp
   show "\<And>a list. free \<notin> freevars a \<longrightarrow> replace (free, free) a = a \<Longrightarrow>
-              free \<notin> freevars (;;\<^sub>S list) \<longrightarrow> replace (free, free) (;;\<^sub>S list) = ;;\<^sub>S list \<Longrightarrow> free \<notin> freevars (;;\<^sub>S (a # list)) \<longrightarrow> replace (free, free) (;;\<^sub>S (a # list)) = ;;\<^sub>S (a # list)" by simp
+              free \<notin> freevars (;;\<^sub>S list) \<longrightarrow> replace (free, free) (;;\<^sub>S list) = ;;\<^sub>S list \<Longrightarrow> free \<notin> freevars (;;\<^sub>S (a # list)) \<longrightarrow> replace (free, free) (;;\<^sub>S (a # list)) = ;;\<^sub>S (a # list)" by simp*)
+  case (Structure_Bigcomma list)
+    thus ?case
+    proof (induct list)
+      case(Nil) thus ?case by simp
+    next
+      case(Cons l ist) thus ?case by simp
+    qed
 (*uncommentR?Structure_Bigcomma*)*)
 qed
 
@@ -830,7 +844,10 @@ next
 (*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Phi*)
   case (Structure_Phi a)
-    thus ?case by(cases free, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+    (*thus ?case by(cases free, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)*)
+    thus ?case 
+    apply(cases free, simp_all, case_tac x5, simp_all, case_tac x1, simp_all )
+    by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
 next
 (*uncommentR?Structure_Phi*)*)
 (*(*uncommentL?Structure_Action_Structure*)
@@ -843,7 +860,9 @@ next
       thus "replace (free, free) y = y" by (metis Structure_Action_Structure.hyps)
     qed
     with 1 have "free \<in> freevars (Structure_Action_Structure c x y) \<longrightarrow> replace (free, free) (Structure_Action_Structure c x y) = Structure_Action_Structure c x (replace (free, free) y)"
-      by (cases free, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+      (*by (cases free, simp_all, case_tac Formula, simp_all, case_tac Action, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)*)
+      by (cases free, simp_all, case_tac x5, simp_all, case_tac x1, simp_all) (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
+
     with 2 show ?case by (metis Structure_Action_Structure.prems)
 next
 (*uncommentR?Structure_Action_Structure*)*)
@@ -857,18 +876,28 @@ next
       thus "replace (free, free) y = y" by (metis Structure_Agent_Structure.hyps)
     qed
     with 1 have "free \<in> freevars (Structure_Agent_Structure c x y) \<longrightarrow> replace (free, free) (Structure_Agent_Structure c x y) = Structure_Agent_Structure c x (replace (free, free) y)"
-      by (cases free, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all) (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+      (*by (cases free, simp_all, case_tac Formula, simp_all, case_tac Agent, simp_all) (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)*)
+      by (cases free, simp_all, case_tac x5, simp_all, case_tac x3, simp_all) (metis freevars_replace_Agent_simp freevars_replace_Agent_simp2)
+
     with 2 show ?case by (metis Structure_Agent_Structure.prems)
 next
 (*uncommentR?Structure_Agent_Structure*)*)
 (*(*uncommentL?Structure_Bigcomma*)
-  show "replace (free, free) (;;\<^sub>S []) = ;;\<^sub>S []" by simp
+  case (Structure_Bigcomma list)
+    thus ?case
+    proof (induct list)
+      case(Nil) thus ?case by simp
+    next
+      case(Cons l ist) thus ?case using freevars_replace_Structure_simp replace_Structure.simps by fastforce
+    qed
+(*  show "replace (free, free) (;;\<^sub>S []) = ;;\<^sub>S []" by simp
   show "\<And>a list. (free \<in> freevars a \<Longrightarrow> replace (free, free) a = a) \<Longrightarrow> replace (free, free) (;;\<^sub>S list) = ;;\<^sub>S list \<Longrightarrow> replace (free, free) (;;\<^sub>S (a # list)) = ;;\<^sub>S (a # list)"
   proof auto
     fix a list
     assume "(free \<in> freevars a \<Longrightarrow> replace_Structure_aux free free a = a)" and assm: "replace_Structure_list_aux free free list = list"
     show "replace_Structure_aux free free a = a" by (metis `free \<in> freevars a \<Longrightarrow> replace_Structure_aux free free a = a` freevars_replace_Structure_simp replace_Structure.simps)
   qed
+*)
 (*uncommentR?Structure_Bigcomma*)*)
 qed
 
@@ -930,9 +959,17 @@ next
 next
 (*uncommentR?Structure_Agent_Structure*)*)
 (*(*uncommentL?Structure_Bigcomma*)
+  case (Structure_Bigcomma list)
+    thus ?case
+    proof (induct list)
+      case(Nil) thus ?case by simp
+    next
+      case(Cons l ist) thus ?case by simp
+    qed
+(*
   show "\<forall>a\<in>set (match (;;\<^sub>S []) (;;\<^sub>S [])). case a of (x, y) \<Rightarrow> x = y" by simp
   show "\<And>a list. \<forall>a\<in>set (match a a). case a of (x, y) \<Rightarrow> x = y \<Longrightarrow>
-              \<forall>a\<in>set (match (;;\<^sub>S list) (;;\<^sub>S list)). case a of (x, y) \<Rightarrow> x = y \<Longrightarrow> \<forall>a\<in>set (match (;;\<^sub>S (a # list)) (;;\<^sub>S (a # list))). case a of (x, y) \<Rightarrow> x = y" by simp
+              \<forall>a\<in>set (match (;;\<^sub>S list) (;;\<^sub>S list)). case a of (x, y) \<Rightarrow> x = y \<Longrightarrow> \<forall>a\<in>set (match (;;\<^sub>S (a # list)) (;;\<^sub>S (a # list))). case a of (x, y) \<Rightarrow> x = y" by simp*)
 (*uncommentR?Structure_Bigcomma*)*)
 qed
 
@@ -1004,11 +1041,11 @@ next
     apply auto
     apply (case_tac a)
     apply auto
-    apply (case_tac Formula)
+    apply (case_tac x5)
     apply auto
     apply (case_tac b)
     apply auto
-    apply (case_tac Formula)
+    apply (case_tac x5)
     apply auto
     proof -
       fix a b
@@ -1044,11 +1081,11 @@ next
     apply auto
     apply (case_tac a)
     apply auto
-    apply (case_tac Formula)
+    apply (case_tac x5)
     apply auto
     apply (case_tac b)
     apply auto
-    apply (case_tac Formula)
+    apply (case_tac x5)
     apply auto
     proof -
       fix a b
@@ -1061,10 +1098,17 @@ next
 next
 (*uncommentR?Structure_Agent_Structure*)*)
 (*(*uncommentL?Structure_Bigcomma*)
-  show "\<forall>free\<in>set (match (Structure_Bigcomma []) (Structure_Bigcomma [])). Structure_Bigcomma [] = replace free (Structure_Bigcomma [])" by simp
+  case (Structure_Bigcomma list)
+    thus ?case
+    proof (induct list)
+      case(Nil) thus ?case by simp
+    next
+      case(Cons l ist) thus ?case by simp
+    qed
+  (*show "\<forall>free\<in>set (match (Structure_Bigcomma []) (Structure_Bigcomma [])). Structure_Bigcomma [] = replace free (Structure_Bigcomma [])" by simp
   show "\<And>a list. \<forall>free\<in>set (match a a). a = replace free a \<Longrightarrow>
           \<forall>free\<in>set (match (Structure_Bigcomma list) (Structure_Bigcomma list)). Structure_Bigcomma list = replace free (Structure_Bigcomma list) \<Longrightarrow>
-          \<forall>free\<in>set (match (Structure_Bigcomma (a # list)) (Structure_Bigcomma (a # list))). Structure_Bigcomma (a # list) = replace free (Structure_Bigcomma (a # list))" by simp
+          \<forall>free\<in>set (match (Structure_Bigcomma (a # list)) (Structure_Bigcomma (a # list))). Structure_Bigcomma (a # list) = replace free (Structure_Bigcomma (a # list))" by simp*)
 (*uncommentR?Structure_Bigcomma*)*)
 qed
 

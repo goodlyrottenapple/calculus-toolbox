@@ -225,7 +225,16 @@ object GUI extends SimpleSwingApplication {
       ptPanel.update
 
     case KeyReleased(`inStr`, k, _, _) =>
-      parseSequent(inStr.text) match {
+      openAbbrevFile();
+      var text = inStr.text
+      for(k <- session.abbrevMap.keys.toList.sortBy(_.length).reverse){
+        //println("currently looking at: " +k)
+        if(text contains k) text = text.replaceAllLiterally(k, session.abbrevMap(k))
+        //println("text now reads: " +text)
+      }
+      println(session.abbrevMap.keys.toList.sortBy(_.length).reverse)
+      println(text)
+      parseSequent(text) match {
         case Some(r) => {
           session.currentSequent = r
           val latex = sequentToString(r)
@@ -454,6 +463,21 @@ object GUI extends SimpleSwingApplication {
         }
       case _ => ;
     }
+  }
+
+  def openAbbrevFile() = {
+    session.abbrevMap.clear
+    for (l <- scala.io.Source.fromFile("abbrev.txt").getLines){
+      val arr = l.split("=")
+      session.abbrevMap.put(arr(0).trim, arr(1).trim);
+    }
+    // println(session.abbrevMap);
+    // for (k <- session.abbrevMap.keys){
+    //   for (k1 <- session.abbrevMap.keys){
+    //     if(session.abbrevMap(k) contains k1) session.abbrevMap(k) = session.abbrevMap(k).replaceAllLiterally(k1, session.abbrevMap(k1))
+    //   }
+    // }
+    // println(session.abbrevMap);
   }
 
   def saveCSFile(file:java.io.File) = {  

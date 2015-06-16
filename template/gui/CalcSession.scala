@@ -63,6 +63,7 @@ case class CalcSession() extends Publisher {
 	val ptBuffer = ListBuffer[(Icon, Prooftree)]()
 
 	val macroBuffer = ListBuffer[(String, Prooftree)]()
+	val abbrevMap = scala.collection.mutable.Map[String, String]()
 
 
 	val listView = new ListView[(Icon, Sequent)]() {
