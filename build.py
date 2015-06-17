@@ -55,6 +55,7 @@ def usage():
     usage.append( "-v  --verbose                                    Verbose mode" )
     usage.append( "-b  --build     {all, scala, isabelle}           Compile only selected files. Defaults to 'all' flag" )
     usage.append( "-s  --stage     {core_calc_gen, calc_compile,    Call a specific stage of the build\n                rule_calc_gen, add_gui}    " )
+    usage.append( "--isa2014       use if running the 2014 version of Isabelle" )
 
     print "\n".join(usage)
 
@@ -242,12 +243,17 @@ def add_gui(flags):
     for l in list:
         shutil.copyfile(libs[list.index(l)], OUTPUT_PATH + "lib/"+l+".jar")
 
+    # adds a file abbrev.txt - this should probably be temporary!!
+    file = open(OUTPUT_PATH+'abbrev.txt', 'w')
+    file.close()
+
+
 
 
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hfvc:p:t:b:s:", ["help", "force", "verbose", "build=", "calc=", "path=", "template=", "stage="])
+        opts, args = getopt.getopt(argv, "hfvc:p:t:b:s:", ["isa2014", "help", "force", "verbose", "build=", "calc=", "path=", "template=", "stage="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -257,6 +263,7 @@ def main(argv):
     global SCALA_SRC_PATH
     global ISABELLE_SRC_PATH
     global CALC_TEMPLATE
+    global ISA_CORE_TEMPLATE
     #user flag settings
     BUILD_FLAGS = ["all"]
     STAGE = None
@@ -280,6 +287,9 @@ def main(argv):
             BUILD_FLAGS += arg.split(",")
         elif opt in ( "-s", "--stage"):
             STAGE = arg
+        elif opt in ( "--isa2014"):
+            ISA_CORE_TEMPLATE += "_Isa2014"
+            print("using " + ISA_CORE_TEMPLATE)
     #sanitize paths
     if not OUTPUT_PATH.endswith('/'):
         OUTPUT_PATH = OUTPUT_PATH + "/"
