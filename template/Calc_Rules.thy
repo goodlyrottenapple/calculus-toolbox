@@ -198,7 +198,7 @@ fun replaceIntoPT :: "Sequent \<Rightarrow> Prooftree \<Rightarrow> Prooftree" w
 
 fun collectPremises :: "Prooftree \<Rightarrow> Sequent list" where
 "collectPremises (Prooftree p (RuleZer Prem) []) = [p]" |
-"collectPremises (Prooftree _ (RuleMacro _ pt) list) = foldr append (map collectPremises list) (collectPremises pt)" |
+"collectPremises (Prooftree _ (RuleMacro _ pt) list) = foldr append (map collectPremises list) []" |
 "collectPremises (Prooftree _ _ list) = foldr append (map collectPremises list) []"
 
 fun collectPremisesToLocale :: "Prooftree \<Rightarrow> Locale list" where
@@ -206,8 +206,8 @@ fun collectPremisesToLocale :: "Prooftree \<Rightarrow> Locale list" where
 
 fun collectCutFormulas :: "Prooftree \<Rightarrow> Formula list" where
 "collectCutFormulas (Prooftree _ (RuleCut _) [l, r]) = (
-  (case (consq (concl l)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl r)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] else []) |  _ \<Rightarrow> []) |
-    _ \<Rightarrow> (case (consq (concl r)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl l)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] else []) |  _ \<Rightarrow> []))
+  (case (consq (concl l)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl r)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] @ (collectCutFormulas l) @ (collectCutFormulas r) else (collectCutFormulas l) @ (collectCutFormulas r)) |  _ \<Rightarrow> (collectCutFormulas l) @ (collectCutFormulas r) ) |
+    _ \<Rightarrow> (case (consq (concl r)) of (Structure_Formula f) \<Rightarrow> (case (ant (concl l)) of (Structure_Formula f') \<Rightarrow> (if f = f' then [f] @ (collectCutFormulas l) @ (collectCutFormulas r) else (collectCutFormulas l) @ (collectCutFormulas r)) |  _ \<Rightarrow> (collectCutFormulas l) @ (collectCutFormulas r)))
   )
 )" |
 "collectCutFormulas (Prooftree _ (RuleMacro _ pt) list) = foldr append (map collectCutFormulas list) (collectCutFormulas pt)" |
@@ -234,6 +234,7 @@ fun isProofTree :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" wher
 
 fun isProofTreeWithCut :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" where
 "isProofTreeWithCut loc pt = isProofTree (append loc (collectCutFormulasToLocale pt)) pt"
+
 
 (*"isProofTree loc (s \<Longleftarrow> B(r) l) = ( foldr (op \<and>) (map (isProofTree loc) l) True \<and> set (Product_Type.snd (der r s)) = set (map concl l) )"*)
 
@@ -379,7 +380,6 @@ primrec rulifySequent :: "Sequent \<Rightarrow> Sequent" where
 
 fun rulifyProoftree :: "Prooftree \<Rightarrow> Prooftree" where
 "rulifyProoftree (Prooftree s r list) = (Prooftree (rulifySequent s) r (map rulifyProoftree list))"
-
 
 export_code open der isProofTree ruleList ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut in Scala
 module_name (*calc_name*) file (*export_path*)
