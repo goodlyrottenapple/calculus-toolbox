@@ -12,6 +12,7 @@ import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
 import PrintCalc.{sequentToString, prooftreeToString}
+import Parser.{parseSequent}
 
 case class PTChanged(valid : Boolean) extends Event
 case class MacroAdded() extends Event
@@ -64,6 +65,7 @@ case class CalcSession() extends Publisher {
 
 	val macroBuffer = ListBuffer[(String, Prooftree)]()
 	val abbrevMap = scala.collection.mutable.Map[String, String]()
+	var abbrevsOn = true
 
 
 	val listView = new ListView[(Icon, Sequent)]() {
@@ -113,8 +115,7 @@ case class CalcSession() extends Publisher {
 	}*/
 
     def addAssm(seq:Sequent = currentSequent) = {
-		val formula = new TeXFormula(sequentToString(seq))
-		val newAssm = (formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), seq)
+		val newAssm = (sequentToIcon(seq), seq)
 
 		assmsBuffer.find(_._2 ==seq) match {
 			case Some(r) => 
@@ -130,6 +131,12 @@ case class CalcSession() extends Publisher {
 		for (i <- listView.selection.items) assmsBuffer -= i
 		listView.listData = assmsBuffer
 		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
+	}
+
+	def reloadAssms() = {
+		val assms = assmsBuffer.toList
+		assmsBuffer.clear()
+		for (i <- assms) addAssm(i._2)
 	}
 
 	def clearAssms() = {
@@ -182,6 +189,12 @@ case class CalcSession() extends Publisher {
 			removePTsButton.enabled = false
 			loadPTButton.enabled = false
 		}*/
+	}
+
+	def reloadPTs() = {
+		val pts = ptBuffer.toList
+		ptBuffer.clear()
+		for (i <- pts) addPT(i._2)
 	}
 
 	def clearPT() = {
@@ -239,8 +252,28 @@ case class CalcSession() extends Publisher {
 	}
 
 	def ptToIcon(pt:Prooftree) : TeXIcon = {
-		new TeXFormula(sequentToString(concl(pt))).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
+		sequentToIcon(concl(pt))
 	}
+
+	def sequentToIcon(seq:Sequent, usingAbbrevs:Boolean = abbrevsOn, size:Int = 15) : TeXIcon = 
+		new TeXFormula(sequentToIconStr(seq, usingAbbrevs)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
+		
+    def sequentToIconStr(seq:Sequent, usingAbbrevs:Boolean = abbrevsOn) : String = usingAbbrevs match {
+		case false => sequentToString(seq)
+		case true => 
+			var text = sequentToString(seq, PrintCalc.ASCII)
+	    	for(k <- abbrevMap.keys.toList.sortBy(abbrevMap(_).length).reverse)
+        		if(text contains abbrevMap(k)) text = text.replaceAllLiterally(abbrevMap(k), k)
+
+		    parseSequent(text) match {
+		   		case Some(seq) => 
+		   			var ret = sequentToString(seq)
+		   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
+		   				if(ret contains k) ret = ret.replaceAllLiterally(k, "\\boldsymbol{"+k+"}")
+		   			ret
+		   		case None => "error"
+		   	}
+    }
 
 	def findMatches(seq: Sequent) : List[Prooftree] = for {
 		(i, pt) <- ptBuffer.toList

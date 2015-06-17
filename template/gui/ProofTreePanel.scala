@@ -30,7 +30,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	// create the layout
 	//println("abbrevMAP:")
 	//println(session.abbrevMap.toMap)
-	var treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT, 20, session.abbrevMap.toMap), nodeExtentProvider, configuration)
+	var treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
 
 	val OFFSET_X = 20
 	val OFFSET_Y = 20
@@ -48,19 +48,19 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	def boundsOfNode(node:SequentInPt) : Rectangle2D.Double = treeLayout.getNodeBounds().get(node)
 
-	def createPTreeAux(proof: Prooftree, tree: DefaultTreeForTreeLayout[SequentInPt], root:SequentInPt, size:Int=20, abbrevMap:Map[String, String] = Map() ) : Unit = proof match {
+	def createPTreeAux(proof: Prooftree, tree: DefaultTreeForTreeLayout[SequentInPt], root:SequentInPt, size:Int=20) : Unit = proof match {
 		case Prooftreea(seq, r, list) => {
-    		val l = new SequentInPt(seq, r, size, None, abbrevMap)
+    		val l = new SequentInPt(seq, r, size, None, session)
     		tree.addChild(root, l)
-    		list.foreach( x => createPTreeAux(x, tree, l, size, abbrevMap) )
+    		list.foreach( x => createPTreeAux(x, tree, l, size) )
     	}
 	}
 
-	def createPTree(proof: Prooftree, size:Int=20, abbrevMap:Map[String, String] = Map() )  : DefaultTreeForTreeLayout[SequentInPt] = proof match {
+	def createPTree(proof: Prooftree, size:Int=20)  : DefaultTreeForTreeLayout[SequentInPt] = proof match {
 		case Prooftreea(seq, r, list) => {
-    		val l = new SequentInPt(seq, r, size, None, abbrevMap)
+    		val l = new SequentInPt(seq, r, size, None, session)
     		val tree = new DefaultTreeForTreeLayout[SequentInPt](l)
-    		list.foreach( x => createPTreeAux(x, tree, l, size, abbrevMap) )
+    		list.foreach( x => createPTreeAux(x, tree, l) )
     		return tree
     	}
 	}
@@ -173,7 +173,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			case Some(selSeq) =>
 				if(tree.isLeaf(selSeq)) {
 					val list = derAll(session.currentLocale, selSeq.seq).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
-					new SequentListDialog(list=list).pair match {
+					new SequentListDialog(list=list, session=session).pair match {
 					/*new SequentInputDialog().sequent match {
 						case Some(s) =>
 							//println(selSeq.seq)
@@ -388,7 +388,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	def update() = {
 		peer.removeAll()
-		treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT, 20, session.abbrevMap.toMap), nodeExtentProvider, configuration)
+		treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
 		build()
 		peer.revalidate()
 		peer.repaint()

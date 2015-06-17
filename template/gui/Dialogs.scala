@@ -17,12 +17,12 @@ import Parser.{parseSequent, parseFormula}
 import PrintCalc._
 import Proofsearch.derTree
 
-class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])] ) extends Dialog(owner) {
+class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])], session:CalcSession = CalcSession() ) extends Dialog(owner) {
   var pair:Option[(Rule, List[Sequent])] = None
   modal = true
 
   val listView = new ListView[(Icon, Rule, List[Sequent])]() {   
-    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( sequentToString(_) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
+    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( session.sequentToIconStr(_) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
     renderer = ListView.Renderer(_._1)
     selection.intervalMode = IntervalMode.Single
   }

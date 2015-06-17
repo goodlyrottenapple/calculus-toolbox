@@ -31,7 +31,7 @@ import java.io.PrintWriter
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import Parser.{parseSequent, parseFormula, parseProoftree, parseRule}
+import Parser.{parseSequent, parseStructure, parseFormula, parseProoftree, parseRule}
 import PrintCalc._
 import Proofsearch.derTree
 
@@ -39,11 +39,15 @@ object GUI extends SimpleSwingApplication {
 
   val AUTO_ADD_PT = "AUTO_ADD_PT"
   val AUTO_ADD_ASSM = "AUTO_ADD_ASSM"
+  val USE_ABBREVS = "USE_ABBREVS"
+
   var globalPrefs = scala.collection.mutable.Map[String, Boolean]()
 
   var saveFile:Option[java.io.File] = None
 
   val session = CalcSession()
+
+  openAbbrevFile()
   //UI elements
   val inStr = new TextField { 
     text = "a |- a"
@@ -237,9 +241,10 @@ object GUI extends SimpleSwingApplication {
       parseSequent(text) match {
         case Some(r) => {
           session.currentSequent = r
-          val latex = sequentToString(r)
-          val formula = new TeXFormula(latex)
-          parsedStr.icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
+          // val latex = sequentToString(r)
+          // val formula = new TeXFormula(latex)
+          // parsedStr.icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
+          parsedStr.icon = session.sequentToIcon(r)
 
           if(k == Key.Enter){
             println("ASCII: " + sequentToString(session.currentSequent, PrintCalc.ASCII))
@@ -471,13 +476,32 @@ object GUI extends SimpleSwingApplication {
       val arr = l.split("=")
       session.abbrevMap.put(arr(0).trim, arr(1).trim);
     }
-    // println(session.abbrevMap);
-    // for (k <- session.abbrevMap.keys){
-    //   for (k1 <- session.abbrevMap.keys){
-    //     if(session.abbrevMap(k) contains k1) session.abbrevMap(k) = session.abbrevMap(k).replaceAllLiterally(k1, session.abbrevMap(k1))
-    //   }
-    // }
-    // println(session.abbrevMap);
+    println(session.abbrevMap);
+
+    
+
+    var modified = false
+    do {
+      modified = false
+      for (k <- session.abbrevMap.keys){
+        for (k1 <- session.abbrevMap.keys){
+          if(session.abbrevMap(k) contains k1){
+            session.abbrevMap(k) = session.abbrevMap(k).replaceAllLiterally(k1, session.abbrevMap(k1))
+            modified = true
+            println(session.abbrevMap(k))
+          }
+        }
+      }
+    } while(modified)
+
+    for (k <- session.abbrevMap.keys){
+        parseStructure(session.abbrevMap(k)) match {
+          case Some(res) => session.abbrevMap(k) = structureToString(res, PrintCalc.ASCII)
+          case None => session.abbrevMap.remove(k)
+        }
+      }
+    
+    session.abbrevMap.foreach{println}
   }
 
   def saveCSFile(file:java.io.File) = {  
@@ -618,13 +642,27 @@ object GUI extends SimpleSwingApplication {
           globalPrefs += (AUTO_ADD_ASSM -> selected)
         }
         contents += aaAssm
-        listenTo(aaPT, aaAssm)
+        val useAbbrevs = new CheckMenuItem("Use Abbreviations") {
+          //this.tooltip = tooltip; 
+          selected = true
+          globalPrefs += (USE_ABBREVS -> selected)
+        }
+        contents += useAbbrevs
+        listenTo(aaPT, aaAssm, useAbbrevs)
         reactions += {
           case ButtonClicked(`aaPT`) => 
             globalPrefs += (AUTO_ADD_PT -> aaPT.selected)
             addPtButton.visible = !aaPT.selected
             revalidate()
             repaint()
+          case ButtonClicked(`useAbbrevs`) => 
+            globalPrefs += (USE_ABBREVS -> useAbbrevs.selected)
+            session.abbrevsOn = useAbbrevs.selected
+            session.reloadAssms
+            session.reloadPTs
+
+            parsedStr.icon = session.sequentToIcon(session.currentSequent)
+            ptPanel.update
           case ButtonClicked(`aaAssm`) => 
             globalPrefs += (AUTO_ADD_ASSM -> aaAssm.selected)
         }
