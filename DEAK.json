@@ -73,9 +73,9 @@
 			},
 			"Formula_Precondition" : {
 				"type" : "Action",
-				"isabelle" : "Pre\\<^sub>F _",
-				"ascii" : "Pre _",
-				"latex" : "Pre( _ )",
+				"isabelle" : "One\\<^sub>F _",
+				"ascii" : "One _",
+				"latex" : "1_ _",
 				"precedence": [340, 330]
 			},
 			"Formula_Bin" : {
@@ -767,13 +767,21 @@
 				"ascii" : "FboxA_R",
 				"latex" : "FboxA_R"
 			},
+			"One_L" : {
+				"ascii" : "One_L",
+				"latex" : "One_L"
+			},
+			"One_R" : {
+				"ascii" : "One_R",
+				"latex" : "One_R"
+			},
+
 			"Pre_L" : {
 				"ascii" : "Pre_L",
-				"latex" : "Pre_L"
-			},
-			"Pre_R" : {
-				"ascii" : "Pre_R",
-				"latex" : "Pre_R"
+				"latex" : "Pre_L",
+				"condition" : "pre_l alpha",
+				"premise" : "(\\<lambda>x. Some [(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
+				"locale" : "PreFormula alpha f"
 			}
 		},
 
@@ -1000,8 +1008,9 @@
 			"FdiamA_R" :		["forwA Act?alpha ?X |- fdiamA Act?alpha F?A",	"?X |- F?A"],
 			"FboxA_L" :			["fboxA Act?alpha F?A |- forwA Act?alpha ?X",	"F?A |- ?X"],
 			"FboxA_R" :			["?X |- fboxA Act?alpha F?A",					"?X |- forwA Act?alpha F?A"],
-			"Pre_L" :			["Pre Act?alpha |- ?X",							"Phi Act?alpha |- ?X"],
-			"Pre_R" :			["Phi Act?alpha |- Pre Act?alpha",				""]
+			"One_L" :			["One Act?alpha |- ?X",							"Phi Act?alpha |- ?X"],
+			"One_R" :			["Phi Act?alpha |- One Act?alpha",				""],
+			"Pre_L" :			["?X |- ?Y",	""]
 		},
 		"RuleBigcomma" : {
 			"Bigcomma_Nil_L" :	["I |- ?Y",		";;[] |- ?Y"],
