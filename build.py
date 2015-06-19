@@ -246,6 +246,10 @@ def add_gui(flags):
     # adds a file abbrev.txt - this should probably be temporary!!
     file = open(OUTPUT_PATH+'abbrev.txt', 'w')
     file.close()
+    file = open(OUTPUT_PATH+'preform.txt', 'w')
+    file.close()
+    file = open(OUTPUT_PATH+'relAKA.txt', 'w')
+    file.close()
 
 
 

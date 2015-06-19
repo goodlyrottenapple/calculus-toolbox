@@ -22,7 +22,7 @@ class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])]
   modal = true
 
   val listView = new ListView[(Icon, Rule, List[Sequent])]() {   
-    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( session.sequentToIconStr(_) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
+    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( session.sequentToIconStr(_, session.abbrevMap.toMap) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
     renderer = ListView.Renderer(_._1)
     selection.intervalMode = IntervalMode.Single
   }
@@ -253,17 +253,20 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
 
 
 
-class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = true, macroName : String = "") extends Dialog(owner) {
+class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = true, macroName : String = "", abbrevs : Option[Map[String, String]] = None, editable : Boolean = false) extends Dialog(owner) {
 
   var rule : Option[String] = None
 
   val session = CalcSession()
   session.currentPT = pt
-
-  val ptPanel = new ProofTreePanel(session){
-    preferredSize = new java.awt.Dimension(400, 300)
-    editable = false
+  if(abbrevs.isDefined) {
+    session.abbrevMap ++= abbrevs.get
+    session.abbrevsOn = true
   }
+
+  preferredSize = new java.awt.Dimension(400, 300)
+  
+  val ptPanel = new ProofTreePanel(session= session, editable=editable)
   ptPanel.build()
 
   modal = true
@@ -278,7 +281,7 @@ class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = tr
 
     if (adding) layout(new Label("Save selected PT as macro?")) = North
     else layout(new Label("Macro " + macroName)) = North
-    layout(ptPanel) = Center
+    layout(new ScrollPane(ptPanel){border = Swing.EmptyBorder(0, 0, 0, 0)}) = Center
 
     if (adding) {
       layout(new BoxPanel(Orientation.Horizontal) {

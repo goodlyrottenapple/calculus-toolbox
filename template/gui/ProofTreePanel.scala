@@ -4,6 +4,8 @@ import swing.event.{ButtonClicked, MouseClicked}
 import javax.swing.KeyStroke.getKeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Color
+import java.awt.Dimension
+
 import java.awt.geom.Rectangle2D
 
 import java.awt.Toolkit;
@@ -21,11 +23,9 @@ import PrintCalc.sequentToString
 import Proofsearch._
 
 
-class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 60) extends scala.swing.Panel {
+class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 80, editable : Boolean = true) extends scala.swing.Panel {
 	val configuration = new DefaultConfiguration[SequentInPt](gapBetweenLevels, gapBetweenNodes, org.abego.treelayout.Configuration.Location.Bottom)
 	val nodeExtentProvider = new SequentInPtNodeExtentProvider()
-
-	var editable = true
 
 	// create the layout
 	//println("abbrevMAP:")
@@ -40,7 +40,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	var selectedSequentInPt : Option[SequentInPt] = None
 
-	//preferredSize = treeLayout.getBounds().getBounds().getSize()
+	preferredSize = new Dimension(treeLayout.getBounds().getBounds().getSize().width+2*OFFSET_X, treeLayout.getBounds().getBounds().getSize().height+2*OFFSET_Y)
 
 	def tree = treeLayout.getTree()
 
@@ -66,33 +66,101 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	}
 
 
+	protected def add(comp: SequentInPt, x: Int, y: Int): Unit = {
+		val p = comp.peer
+		p.setLocation(x+OFFSET_X, y+OFFSET_Y)
+		//comp.ruleButton.peer.setLocation(x+p.getPreferredSize.width+OFFSET_X, y+OFFSET_Y-p.getPreferredSize.height/2)
+		comp.ruleButton.peer.setSize(comp.ruleButton.peer.getPreferredSize)
+		p.setSize(p.getPreferredSize)
+		peer.add(p)
+		peer.add(comp.ruleButton.peer)
+
+
+//parent:SequentInPt) : Unit = {
+		val b1 = boundsOfNode(comp)
+		val yy = (b1.getMinY()).toInt-3
+		var xmin = (b1.getMinX()).toInt
+		var xmax = (b1.getMaxX()).toInt //+15
+
+
+		for (child <- children(comp)) { 
+			val b2 = boundsOfNode(child)
+			if( (b2.getMinX()).toInt < xmin) xmin = (b2.getMinX()).toInt
+			if( (b2.getMaxX()).toInt > xmax) xmax = (b2.getMaxX()).toInt
+		}
+
+		//g.drawLine( xmin, y, xmax+15, y )
+		//g.drawLine( xmin+OFFSET_X, y+OFFSET_Y, xmax+OFFSET_X, y+OFFSET_Y )
+		comp.ruleButton.peer.setLocation(xmax+5+OFFSET_X, yy-(comp.ruleIcon.getIconHeight/2)+OFFSET_Y)
+		listenTo(comp.seqButton)
+		listenTo(comp.ruleButton)
+
+	}
+
 	protected def add(comp: Component, x: Int, y: Int): Unit = {
 		val p = comp.peer
 		p.setLocation(x+OFFSET_X, y+OFFSET_Y)
+		//comp.ruleButton.peer.setLocation(x+p.getPreferredSize.width+OFFSET_X, y+OFFSET_Y-p.getPreferredSize.height/2)
+		//comp.ruleButton.peer.setSize(comp.ruleButton.peer.getPreferredSize)
 		p.setSize(p.getPreferredSize)
 		peer.add(p)
 		listenTo(comp)
+
 	}
 
 	listenTo(mouse.clicks)
 	reactions += {
-		case ButtonClicked(b) if editable =>
+		case ButtonClicked(b) =>
+			b.text match {
+				case "rule" =>
+					val pressed = b.asInstanceOf[RuleInPtButton]
+					if(pressed.parent.seqButton.visible){
+						println("old bounds: " + boundsOfNode(pressed.parent))
+						println("old height: " + pressed.parent.height)
 
-			val pressed = b.asInstanceOf[SequentInPt]
-			/*println(b.text)
-			println("Children:")
-			for (child <- children(pressed)) { 
-				println(child.text)
-			}*/
-			unselect()
-			selectedSequentInPt = Some(pressed)
-			pressed.border = Swing.LineBorder(Color.black)
-			pressed.sel = true
-			//val b1 = boundsOfNode(pressed)
-			popup.peer.show(b.peer, OFFSET_X, OFFSET_Y)
+						pressed.parent.contents -= pressed.parent.seqButton
+						pressed.parent.preferredSize = pressed.parent.macroPtPanel.get.preferredSize
+						pressed.parent.contents += pressed.parent.macroPtPanel.get
+						println("new bounds: " + boundsOfNode(pressed.parent))
+						println("new height: " + pressed.parent.height)
 
+					} else {
+						println("old bounds: " + boundsOfNode(pressed.parent))
+						println("old height: " + pressed.parent.height)
+
+						pressed.parent.contents -= pressed.parent.macroPtPanel.get
+						pressed.parent.preferredSize = pressed.parent.seqButton.preferredSize
+						pressed.parent.contents += pressed.parent.seqButton
+						println("new bounds: " + boundsOfNode(pressed.parent))
+						println("new height: " + pressed.parent.height)
+
+					}
+					pressed.parent.seqButton.visible = !pressed.parent.seqButton.visible
+
+					repaint()
+					//update()
+
+
+				case "sequent" if editable =>
+					unselect()
+					val pressed = b.asInstanceOf[SequentInPtButton]
+					/*println(b.text)
+					println("Children:")
+					for (child <- children(pressed)) { 
+						println(child.text)
+					}*/
+					selectedSequentInPt = Some(pressed.parent)
+					pressed.border = Swing.LineBorder(Color.black)
+					pressed.parent.sel = true
+					//val b1 = boundsOfNode(pressed)
+					popup.peer.show(b.peer, OFFSET_X, OFFSET_Y)
+				case _ =>
+					unselect()
+
+			}
 		case m : MouseClicked => 
 			selectedSequentInPt = None
+			println("unselect")
 			unselect()
 
 	}
@@ -274,7 +342,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case Some(selSeq) =>
 					session.currentPT = session.rebuildFromPoint(selSeq, children)
 	            	session.savePT()
-	            	update()
+	            	//update()
 					
 			}
 		}
@@ -377,10 +445,12 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 
 	def unselect(root:SequentInPt = tree.getRoot) : Unit = {
-		root.border = Swing.EmptyBorder(0,0,0,0)
+		root.seqButton.border = Swing.EmptyBorder(0,0,0,0)
+		root.sel = false
+
 		for (child <- children(root)) {
-			child.border = Swing.EmptyBorder(0,0,0,0)
-			child.sel = false
+			//child.border = Swing.EmptyBorder(0,0,0,0)
+			//child.sel = false
 			unselect(child)
 		}
 
@@ -389,6 +459,17 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	def update() = {
 		peer.removeAll()
 		treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
+		build()
+		peer.revalidate()
+		peer.repaint()
+		val s = treeLayout.getBounds().getBounds().getSize()
+		preferredSize = new java.awt.Dimension(s.width + OFFSET_X*8, s.height + OFFSET_Y*2)
+	}
+
+	override def repaint() = {
+		peer.removeAll()
+		val old = treeLayout.getTree()
+		treeLayout = new TreeLayout[SequentInPt](old, nodeExtentProvider, configuration)
 		build()
 		peer.revalidate()
 		peer.repaint()
@@ -420,9 +501,10 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 		//g.drawLine( xmin, y, xmax+15, y )
 		g.drawLine( xmin+OFFSET_X, y+OFFSET_Y, xmax+OFFSET_X, y+OFFSET_Y )
-		parent.ruleIcon.paintIcon(null, g, xmax+5+OFFSET_X, y-(parent.ruleIcon.getIconHeight/2)+OFFSET_Y)
+		//parent.ruleIcon.paintIcon(null, g, xmax+5+OFFSET_X, y-(parent.ruleIcon.getIconHeight/2)+OFFSET_Y)
 		//g.drawString(parent.strule, xmax+5+OFFSET_X, y+5+OFFSET_Y)
 	}
+
 
 	override def paintComponent(g: Graphics2D) = {
 		super.paintComponent(g)

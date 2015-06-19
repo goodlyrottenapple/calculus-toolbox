@@ -31,7 +31,7 @@ import java.io.PrintWriter
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import Parser.{parseSequent, parseStructure, parseFormula, parseProoftree, parseRule}
+import Parser.{parseSequent, parseStructure, parseFormula, parseAction, parseProoftree, parseRule}
 import PrintCalc._
 import Proofsearch.derTree
 
@@ -291,6 +291,7 @@ object GUI extends SimpleSwingApplication {
 
     /*/*uncommentL?Action?Agent*/
     case ButtonClicked(`reloadrelAKAButton`) =>
+      openPreFormulaFile()
       val buff = scala.collection.mutable.Map[Tuple2[Action, Agent], List[Action]]()
       for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
         val arr = l.split(",")
@@ -308,17 +309,17 @@ object GUI extends SimpleSwingApplication {
         }
       }
       session.relAKAMap = buff.toMap
-      for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
-        val arr = l.split(",")
-        if (arr.length == 3) {
-          val alpha = Actiona(arr(0).trim.toList)
-          val a = Agenta(arr(1).trim.toList)
-          val beta = Actiona(arr(2).trim.toList)
+      // for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
+      //   val arr = l.split(",")
+      //   if (arr.length == 3) {
+      //     val alpha = Actiona(arr(0).trim.toList)
+      //     val a = Agenta(arr(1).trim.toList)
+      //     val beta = Actiona(arr(2).trim.toList)
 
-          println(session.relAKA(alpha)(a))
+      //     println(session.relAKA(alpha)(a))
 
-        }
-      }
+      //   }
+      // }
     /*uncommentR?Action?Agent*/*/ 
   }
 
@@ -435,14 +436,54 @@ object GUI extends SimpleSwingApplication {
                       case Some(s)=>
                         rule match {
                           case Some(r)=> 
-                            // val list = ListBuffer[Prooftree]()
-                            // for (p <- pts_str){
-                            //   Some(JSON.parseFull(p)) match {
-                            //     case Some(M(map)) =>
-                            //       list += readPT(map)
-                            //   }
-                            // }
-                            
+                            return Prooftreea(s, r, pts_str.map(readPT))
+                        }
+                    }
+                }
+              case None =>
+
+                map.get("macro") match {
+                  case M(macro_rule) => 
+                    val macroName = macro_rule.keys.head
+                    println(macroName)
+                    val rule = macro_rule.get(macroName) match {
+                      case M(map) => Some(RuleMacro(macroName.toList, readPT(map)))
+                      case _ => None
+                    }
+                      
+                    map.get("pts") match {
+                      case LLL(pts_str) => 
+                        // val pts = List[Prooftree]()
+                        // for ( Some(a) <-  ){ pts += a }
+                        seq match {
+                          case Some(s)=>
+                            rule match {
+                              case Some(r)=> 
+                                return Prooftreea(s, r, pts_str.map(readPT))
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+  }
+
+def readPTold(map : Map[String, Any]):Prooftree = {
+        map.get("seq") match {
+          case S(str_seq) => 
+            val seq = parseSequent(str_seq)
+            map.get("rule") match {
+              case S(str_rule) => 
+                val rule = parseRule(str_rule)
+                map.get("pts") match {
+                  case LLL(pts_str) => 
+                    // val pts = List[Prooftree]()
+                    // for ( Some(a) <-  ){ pts += a }
+                    seq match {
+                      case Some(s)=>
+                        rule match {
+                          case Some(r)=> 
                             return Prooftreea(s, r, pts_str.map(readPT))
                         }
                     }
@@ -476,7 +517,7 @@ object GUI extends SimpleSwingApplication {
       val arr = l.split("=")
       session.abbrevMap.put(arr(0).trim, arr(1).trim);
     }
-    println(session.abbrevMap);
+    //println(session.abbrevMap);
 
     
 
@@ -488,7 +529,7 @@ object GUI extends SimpleSwingApplication {
           if(session.abbrevMap(k) contains k1){
             session.abbrevMap(k) = session.abbrevMap(k).replaceAllLiterally(k1, session.abbrevMap(k1))
             modified = true
-            println(session.abbrevMap(k))
+            //println(session.abbrevMap(k))
           }
         }
       }
@@ -501,7 +542,24 @@ object GUI extends SimpleSwingApplication {
         }
       }
     
-    session.abbrevMap.foreach{println}
+    //session.abbrevMap.foreach{println}
+  }
+
+  def openPreFormulaFile() = {
+    session.preFormulaMap.clear
+
+    for (l <- scala.io.Source.fromFile("preform.txt").getLines){
+      val arr = l.split("=")
+      parseAction(arr(0).trim) match {
+        case Some(action) =>
+          parseFormula(arr(1).trim) match {
+            case Some(formula) => session.preFormulaMap.put(action, formula)
+            case None =>
+          }
+        case None =>
+      }
+      
+    }
   }
 
   def saveCSFile(file:java.io.File) = {  
@@ -520,6 +578,15 @@ object GUI extends SimpleSwingApplication {
     }
   }
   def savePT(pt:Prooftree):Map[String, Any] = pt match {
+    case Prooftreea(s, RuleMacro(str, pt), pts) =>
+      Map( 
+        "seq" -> sequentToString(s, PrintCalc.ASCII),
+        "macro"-> JSONObject( 
+          Map( 
+            str.mkString -> JSONObject( savePT(pt) )
+          )),
+        "pts"-> JSONArray( pts.map(x => JSONObject(savePT(x)) ) )   )
+
     case Prooftreea(s, r, pts) =>
       Map( 
         "seq" -> sequentToString(s, PrintCalc.ASCII),

@@ -109,6 +109,13 @@ fun swapout_R :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequ
 (*uncommentR?RuleSwapout*)*)
 
 
+(*(*uncommentL?Pre_L*)
+fun pre_l :: "Action \<Rightarrow> Sequent \<Rightarrow> bool" where
+"pre_l a ((One\<^sub>F alpha)\<^sub>S \<turnstile>\<^sub>S X) = (a = alpha)"|
+"pre_l a _ = False"
+(*uncommentR?Pre_L*)*)
+
+
 
 (*
 fun relAKAA :: "Action \<Rightarrow> Agent \<Rightarrow> Action \<Rightarrow> bool" where
@@ -142,6 +149,10 @@ datatype Locale = (*(*uncommentL?Formula?RuleCut*)
                   (*(*uncommentL?Action?Agent*)
                   RelAKA "Action \<Rightarrow> Agent \<Rightarrow> Action list" | 
                   (*uncommentR?Action?Agent*)*)
+                  (*(*uncommentL?Action?Formula*)
+                  PreFormula Action Formula |
+                  (*uncommentR?Action?Formula*)*)
+
                   Empty
 
 (*rules_rule_fun*)
@@ -379,8 +390,26 @@ primrec rulifySequent :: "Sequent \<Rightarrow> Sequent" where
 (*uncommentR?Sequent*)*)
 
 fun rulifyProoftree :: "Prooftree \<Rightarrow> Prooftree" where
+"rulifyProoftree (Prooftree s (RuleMacro str pt) list) = Prooftree (rulifySequent s) (RuleMacro str (rulifyProoftree pt)) (map rulifyProoftree list)" |
 "rulifyProoftree (Prooftree s r list) = (Prooftree (rulifySequent s) r (map rulifyProoftree list))"
 
-export_code open der isProofTree ruleList ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut in Scala
+
+fun replaceIntoProoftree :: "Prooftree list \<Rightarrow> Prooftree \<Rightarrow> Prooftree"  where
+"replaceIntoProoftree [] (Prooftree s (RuleZer Prem) []) = (Prooftree s (RuleZer Prem) [])" |
+"replaceIntoProoftree (l#ist) (Prooftree s (RuleZer Prem) []) = (if (concl l) = s then l else replaceIntoProoftree ist (Prooftree s (RuleZer Prem) []))" |
+"replaceIntoProoftree list (Prooftree s r []) =  (Prooftree s r [])" |
+"replaceIntoProoftree list (Prooftree s r l) =  (Prooftree s r (map (replaceIntoProoftree list) l))"
+
+fun expandProoftree :: "Prooftree \<Rightarrow> Prooftree"  where
+"expandProoftree (Prooftree _ (RuleMacro n (Prooftree s r l)) list) = (Prooftree s r (map (replaceIntoProoftree (map expandProoftree list)) (map expandProoftree l)))" |
+"expandProoftree (Prooftree s r list) = Prooftree s r (map expandProoftree list)"
+
+
+
+
+value " ((((B\<^sub>F ((Atprop ''b'') \<^sub>F) (\<and>\<^sub>F) ((Atprop ''a'') \<^sub>F)) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleMacro ''W_LL''((((B\<^sub>F ((Atprop ''b'') \<^sub>F) (\<and>\<^sub>F) ((Atprop ''a'') \<^sub>F)) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleOp (And_L)) [(((B\<^sub>S (((Atprop ''b'') \<^sub>F) \<^sub>S) (;\<^sub>S) (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleDisp (Comma_impL_disp2)) [(((((Atprop ''b'') \<^sub>F) \<^sub>S) \<turnstile>\<^sub>S (B\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S) (\<leftarrow>\<^sub>S) (((Atprop ''a'') \<^sub>F) \<^sub>S))) \<Longleftarrow> PT (RuleStruct (W_impL_L)) [(((((Atprop ''a'') \<^sub>F) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleZer (Prem)) [])])])])) [(((((Atprop ''a'') \<^sub>F) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleZer (Id)) [])])"
+value "expandProoftree ((((B\<^sub>F ((Atprop ''b'') \<^sub>F) (\<and>\<^sub>F) ((Atprop ''a'') \<^sub>F)) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleMacro ''W_LL''((((B\<^sub>F ((Atprop ''b'') \<^sub>F) (\<and>\<^sub>F) ((Atprop ''a'') \<^sub>F)) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleOp (And_L)) [(((B\<^sub>S (((Atprop ''b'') \<^sub>F) \<^sub>S) (;\<^sub>S) (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleDisp (Comma_impL_disp2)) [(((((Atprop ''b'') \<^sub>F) \<^sub>S) \<turnstile>\<^sub>S (B\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S) (\<leftarrow>\<^sub>S) (((Atprop ''a'') \<^sub>F) \<^sub>S))) \<Longleftarrow> PT (RuleStruct (W_impL_L)) [(((((Atprop ''a'') \<^sub>F) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleZer (Prem)) [])])])])) [(((((Atprop ''a'') \<^sub>F) \<^sub>S) \<turnstile>\<^sub>S (((Atprop ''a'') \<^sub>F) \<^sub>S)) \<Longleftarrow> PT (RuleZer (Id)) [])])"
+
+export_code open der isProofTree ruleList ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut expandProoftree in Scala
 module_name (*calc_name*) file (*export_path*)
 end

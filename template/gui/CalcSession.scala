@@ -23,6 +23,8 @@ case class CalcSession() extends Publisher {
 
 	var relAKAMap : Map[Tuple2[Action, Agent], List[Action]] = Map()
 
+	var preFormulaMap : scala.collection.mutable.Map[Action, Formula] = scala.collection.mutable.Map()
+
 	/*def relAKAOld(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
 		// case (Actiona(List('e','p')), Agenta(List('c')), Actiona(List('e','w'))) => true
 		// should we have this one as well? :
@@ -85,10 +87,10 @@ case class CalcSession() extends Publisher {
     	renderer = ListView.Renderer(_._1)
     }
 
-    def currentLocale() : List[Locale] = List(
+    def currentLocale : List[Locale] = List(
 		Empty() 
 		/*/*uncommentL?Action?Agent*/ , RelAKA(relAKA) /*uncommentR?Action?Agent*/*/
-	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)})
+	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)}) ++ preFormulaMap.keys.toList.map{case a => PreFormula(a,preFormulaMap(a))}
 
 
 
@@ -219,7 +221,12 @@ case class CalcSession() extends Publisher {
 		if (result == FileChooser.Result.Approve) {
 			val file = if (!chooser.selectedFile.toString.endsWith(".tex")) chooser.selectedFile.toString+".tex" else chooser.selectedFile.toString
 			Some(new PrintWriter(file)).foreach{p =>
-		    	p.write(prooftreeToString(sel._2) + "\\DisplayProof")
+				//addPT(DEAK.expandProoftree(sel._2))
+				if(abbrevsOn){
+					def seqToStr(s:Sequent) = sequentToIconStr(s, abbrevMap.toMap)
+					p.write(prooftreeToString(DEAK.expandProoftree(sel._2), PrintCalc.LATEX, seqToStr) + "\\DisplayProof")
+				}
+		    	else p.write(prooftreeToString(DEAK.expandProoftree(sel._2)) + "\\DisplayProof")
 		    	p.close
 		    }
 		}
@@ -255,24 +262,26 @@ case class CalcSession() extends Publisher {
 		sequentToIcon(concl(pt))
 	}
 
-	def sequentToIcon(seq:Sequent, usingAbbrevs:Boolean = abbrevsOn, size:Int = 15) : TeXIcon = 
-		new TeXFormula(sequentToIconStr(seq, usingAbbrevs)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
+	def sequentToIcon(seq:Sequent, usingAbbrevs:Boolean = abbrevsOn, size:Int = 15) : TeXIcon = usingAbbrevs match {
+		case false =>
+			new TeXFormula(sequentToIconStr(seq)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
+		case true =>
+			new TeXFormula(sequentToIconStr(seq, abbrevMap.toMap)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
+	}
 		
-    def sequentToIconStr(seq:Sequent, usingAbbrevs:Boolean = abbrevsOn) : String = usingAbbrevs match {
-		case false => sequentToString(seq)
-		case true => 
-			var text = sequentToString(seq, PrintCalc.ASCII)
-	    	for(k <- abbrevMap.keys.toList.sortBy(abbrevMap(_).length).reverse)
-        		if(text contains abbrevMap(k)) text = text.replaceAllLiterally(abbrevMap(k), k)
+    def sequentToIconStr(seq:Sequent, abbrevMap:Map[String, String] = Map()) : String = {
+		var text = sequentToString(seq, PrintCalc.ASCII)
+    	for(k <- abbrevMap.keys.toList.sortBy(abbrevMap(_).length).reverse)
+    		if(text contains abbrevMap(k)) text = text.replaceAllLiterally(abbrevMap(k), k)
 
-		    parseSequent(text) match {
-		   		case Some(seq) => 
-		   			var ret = sequentToString(seq)
-		   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
-		   				if(ret contains k) ret = ret.replaceAllLiterally(k, "\\boldsymbol{"+k+"}")
-		   			ret
-		   		case None => "error"
-		   	}
+	    parseSequent(text) match {
+	   		case Some(seq) => 
+	   			var ret = sequentToString(seq)
+	   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
+	   				if(ret contains k) ret = ret.replaceAllLiterally(k, "\\boldsymbol{"+k+"}")
+	   			ret
+	   		case None => "error"
+	   	}
     }
 
 	def findMatches(seq: Sequent) : List[Prooftree] = for {

@@ -27,28 +27,31 @@ object PrintCalc{
 		case LATEX => "Macro/" + stringToString(a, format)
 	}
 
-	def prooftreeListToString(in:List[Prooftree], format:String = LATEX) : String = format match {
-		case ASCII | ISABELLE => "[" + in.map(x => prooftreeToString(x, format)).mkString(", ") + "]"
-		case LATEX => in.map(x => prooftreeToString(x, format)).mkString("\n")
+	def sequentToLatexString(seq:Sequent) = sequentToString(seq, LATEX)
+
+	def prooftreeListToString(in:List[Prooftree], format:String = LATEX, sequentLatexPrint: Sequent => String = sequentToLatexString) : String = format match {
+		case ASCII | ISABELLE => "[" + in.map(x => prooftreeToString(x, format, sequentLatexPrint)).mkString(", ") + "]"
+		case LATEX => in.map(x => prooftreeToString(x, format, sequentLatexPrint)).mkString("\n")
 	}
 
-	def prooftreeToString(in:Prooftree, format:String = LATEX) : String = format match {
+
+	def prooftreeToString(in:Prooftree, format:String = LATEX, sequentLatexPrint: Sequent => String = sequentToLatexString) : String = format match {
 		case ASCII =>
 			in match {
-				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "<==" + " (" + ruleToString(b, format) + ") " + prooftreeListToString(c, format) + ")"
+				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "<==" + " (" + ruleToString(b, format) + ") " + prooftreeListToString(c, format, sequentLatexPrint) + ")"
 			}
 		case LATEX =>
 			in match {
-				case Prooftreea(a,b,List()) => "\\AxiomC{$ " + sequentToString(a, format)  + " $}\n"
-				case Prooftreea(a,b,List(c)) => prooftreeToString(c, format) + "\\UnaryInfC{$ " + sequentToString(a, format)  + " $}\n"
-				case Prooftreea(a,b,List(c, d)) => prooftreeListToString(List(c, d), format) + "\\BinaryInfC{$ " + sequentToString(a, format)  + " $}\n"
-				case Prooftreea(a,b,List(c, d, e)) => prooftreeListToString(List(c, d, e), format) + "\\TrinaryInfC{$ " + sequentToString(a, format)  + " $}\n"
-				case Prooftreea(a,b,List(c, d, e, f)) => prooftreeListToString(List(c, d, e, f), format) + "\\QuaternaryInfC{$ " + sequentToString(a, format)  + " $}\n"
-				case Prooftreea(a,b,list) => prooftreeListToString(list, format) + "\\QuinaryInfC{$ " + sequentToString(a, format)  + " $}\n"
+				case Prooftreea(a,b,List()) => "\\AxiomC{$ " + sequentLatexPrint(a)  + " $}\n \\RightLabel{ $" + ruleToString(b) + "$ }"
+				case Prooftreea(a,b,List(c)) => prooftreeToString(c, format, sequentLatexPrint) + "\\UnaryInfC{$ " + sequentLatexPrint(a)  + " $}\n \\RightLabel{ $" + ruleToString(b) + "$ }"
+				case Prooftreea(a,b,List(c, d)) => prooftreeListToString(List(c, d), format, sequentLatexPrint) + "\\BinaryInfC{$ " + sequentLatexPrint(a)  + " $}\n \\RightLabel{ $" + ruleToString(b) + "$ }"
+				case Prooftreea(a,b,List(c, d, e)) => prooftreeListToString(List(c, d, e), format, sequentLatexPrint) + "\\TrinaryInfC{$ " + sequentLatexPrint(a)  + " $}\n"
+				case Prooftreea(a,b,List(c, d, e, f)) => prooftreeListToString(List(c, d, e, f), format, sequentLatexPrint) + "\\QuaternaryInfC{$ " + sequentLatexPrint(a)  + " $}\n"
+				case Prooftreea(a,b,list) => prooftreeListToString(list, format, sequentLatexPrint) + "\\QuinaryInfC{$ " + sequentLatexPrint(a)  + " $}\n"
 			}
 		case ISABELLE =>
 			in match {
-				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "\\<Longleftarrow>" + " " + "PT" + " " + ruleToString(b, format) + " " + prooftreeListToString(c, format) + ")"
+				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "\\<Longleftarrow>" + " " + "PT" + " " + ruleToString(b, format) + " " + prooftreeListToString(c, format, sequentLatexPrint) + ")"
 			}
 	}
 	
