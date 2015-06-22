@@ -42,9 +42,9 @@ object PrintCalc{
 			}
 		case LATEX =>
 			in match {
-				case Prooftreea(a,b,List()) => "\\AxiomC{$ " + sequentLatexPrint(a)  + " $}\n \\RightLabel{ $" + ruleToString(b) + "$ }"
-				case Prooftreea(a,b,List(c)) => prooftreeToString(c, format, sequentLatexPrint) + "\\UnaryInfC{$ " + sequentLatexPrint(a)  + " $}\n \\RightLabel{ $" + ruleToString(b) + "$ }"
-				case Prooftreea(a,b,List(c, d)) => prooftreeListToString(List(c, d), format, sequentLatexPrint) + "\\BinaryInfC{$ " + sequentLatexPrint(a)  + " $}\n \\RightLabel{ $" + ruleToString(b) + "$ }"
+				case Prooftreea(a,b,List()) => "\\RightLabel{ $" + ruleToString(b) + "$ }\n\\AxiomC{$ " + sequentLatexPrint(a)  + " $}"
+				case Prooftreea(a,b,List(c)) => prooftreeToString(c, format, sequentLatexPrint) + "\\RightLabel{ $" + ruleToString(b) + "$ }\n\\UnaryInfC{$ " + sequentLatexPrint(a)  + " $}"
+				case Prooftreea(a,b,List(c, d)) => prooftreeListToString(List(c, d), format, sequentLatexPrint) + "\\RightLabel{ $" + ruleToString(b) + "$ }\n\\BinaryInfC{$ " + sequentLatexPrint(a)  + " $}"
 				case Prooftreea(a,b,List(c, d, e)) => prooftreeListToString(List(c, d, e), format, sequentLatexPrint) + "\\TrinaryInfC{$ " + sequentLatexPrint(a)  + " $}\n"
 				case Prooftreea(a,b,List(c, d, e, f)) => prooftreeListToString(List(c, d, e, f), format, sequentLatexPrint) + "\\QuaternaryInfC{$ " + sequentLatexPrint(a)  + " $}\n"
 				case Prooftreea(a,b,list) => prooftreeListToString(list, format, sequentLatexPrint) + "\\QuinaryInfC{$ " + sequentLatexPrint(a)  + " $}\n"
