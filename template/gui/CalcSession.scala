@@ -278,10 +278,21 @@ case class CalcSession() extends Publisher {
 	   		case Some(seq) => 
 	   			var ret = sequentToString(seq)
 	   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
-	   				if(ret contains k) ret = ret.replaceAllLiterally(k, "\\boldsymbol{"+k+"}")
+	   				if(ret contains k) ret = ret.replaceAllLiterally(k, "\\boldsymbol{"+scramble(k)+"}")
+	   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
+	   				if(ret contains scramble(k)) ret = ret.replaceAllLiterally(scramble(k), k)
 	   			ret
 	   		case None => "error"
 	   	}
+    }
+
+    def scramble(in:String) : String = {
+    	val buf = new scala.collection.mutable.StringBuilder()
+    	for (c <- in){
+    		if (c.isLetter) buf += c
+    		buf += c
+    	}
+    	return buf.toString
     }
 
 	def findMatches(seq: Sequent) : List[Prooftree] = for {
