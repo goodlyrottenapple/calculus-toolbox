@@ -288,9 +288,10 @@ case class CalcSession() extends Publisher {
 
     def scramble(in:String) : String = {
     	val buf = new scala.collection.mutable.StringBuilder()
+    	val l = in.length.toString
     	for (c <- in){
-    		if (c.isLetter) buf += c
     		buf += c
+    		buf ++= l
     	}
     	return buf.toString
     }
