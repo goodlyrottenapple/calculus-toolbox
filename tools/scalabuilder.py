@@ -80,23 +80,27 @@ class ScalaBuilder:
 	@staticmethod
 	def __is_terminal(name, structure):
 
-		l = [ i for c in structure[name].keys() for i in structure[name][c].get("type", [])]
-		#print name, l
+		l = [ i for c in structure.get(name, {}).keys() for i in structure.get(name, {}).get(c, {}).get("type", []) ]
+		# print name, structure.get(name, {}).keys()
 		if l: return False
 		return True
 
 	@staticmethod
 	def __prefix_candidtate(name, constructor, structure):
-		type = structure[name][constructor].get("type", [])
-		if type:
-			return ScalaBuilder.__is_terminal(type[0], structure) and type[-1] == name
+		constructor = structure.get(name, {}).get(constructor, {})
+		if constructor:
+			type = constructor.get("type", [])
+			if type:
+				return ScalaBuilder.__is_terminal(type[0], structure) and type[-1] == name
 		return False
 
 	@staticmethod
 	def __infix_candidtate(name, constructor, structure):
-		type = structure[name][constructor].get("type", [])
-		if len(type) == 3:
-			return ScalaBuilder.__is_terminal(type[1], structure) and type[-1] == name and type[0] == name
+		constructor = structure.get(name, {constructor:{}}).get(constructor, {})
+		if constructor:
+			type = constructor.get("type", [])
+			if len(type) == 3:
+				return ScalaBuilder.__is_terminal(type[1], structure) and type[-1] == name and type[0] == name
 		return False
 
 	@staticmethod
@@ -172,7 +176,23 @@ class ScalaBuilder:
 		for c in datatype:
 			if name in datatype[c].get("type", []) and datatype[c].get("parsable", True):
 				print c,"\n"
-				if ScalaBuilder.__prefix_candidtate(name, c, structure):
+				if ScalaBuilder.__infix_candidtate(name, c, structure):
+					list_of_generated_parsers.append(c)
+					print "infix candidate found!!!\n"
+					op = datatype[c]["type"][1]
+					for cc in structure[op]:
+						#print cc, structure[op][cc].get("ascii", c)
+						symb = structure[op][cc].get("ascii", c)
+
+						prec = structure[op][cc].get("ascii_precedence", [500, 501])
+						prec = ", ".join([str(i) for i in prec])
+
+						#add manual change for precedence!!
+						infix = "Infix({3})({0}Parser) {{ (_, a, b) => {1}(a, {2}(), b ) }}".format(cc.lower(), c, cc, prec )
+						infix_list.append(infix)
+						#print infix
+
+				elif ScalaBuilder.__prefix_candidtate(name, c, structure):
 					list_of_generated_parsers.append(c)
 					print "prefix candidate found!!!\n"
 					op = datatype[c]["type"][0]
@@ -195,29 +215,13 @@ class ScalaBuilder:
 						#Prefix(200)("fboxK" ~ agentParser) { case ("fboxK" ~ a, n)  => Formula_Agent_Formula(Formula_FboxK(), a, n) },
 
 						prec = structure[op][cc].get("ascii_precedence", [200])
-
 						prec = str(prec[0])
 
 						prefix = "Prefix({7})({0}Parser{3}) {{ case (_{4}, {5}) => {1}({2}(){6}, {5}) }}".format(cc.lower(), c, cc, inbetween_parsers, args, ascii_lowercase[len(inbetween)], args.replace('~', ','), prec )
 						prefix_list.append(prefix)
 						#print prefix
 
-				if ScalaBuilder.__infix_candidtate(name, c, structure):
-					list_of_generated_parsers.append(c)
-					print "infix candidate found!!!\n"
-					op = datatype[c]["type"][1]
-					for cc in structure[op]:
-						#print cc, structure[op][cc].get("ascii", c)
-						symb = structure[op][cc].get("ascii", c)
-
-						prec = structure[op][cc].get("ascii_precedence", [500, 501])
-
-						prec = ", ".join([str(i) for i in prec])
-
-						#add manual change for precedence!!
-						infix = "Infix({3})({0}Parser) {{ (_, a, b) => {1}(a, {2}(), b ) }}".format(cc.lower(), c, cc, prec )
-						infix_list.append(infix)
-						#print infix
+				
 
 		list_of_additional_parsers = []
 
@@ -420,15 +424,15 @@ class ScalaBuilder:
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 
 	@staticmethod
-	def __print_calc_structure_datatype(name, datatype):
+	def __print_calc_structure_datatype(name, structure):
+		datatype = structure[name]
 		ret = "	def {0}ToString(in:{1}, format:String = LATEX) : String = format match {{\n".format(name.lower(), name)
 		isa_list = []
 		latex_list = []
 		ascii_list = []
 
 		for c in datatype.keys():
-			constructor = c
-			if c == name: constructor += "a" # fix for scala export, as you cant have the same datatype name and constructor
+			constructor = c if c != name else c +"a" # fix for scala export, as you cant have the same datatype name and constructor
 			type = datatype[c].get("type", [])
 
 			args = ",".join(ascii_lowercase[:len(type)])
@@ -450,7 +454,7 @@ class ScalaBuilder:
 				no_sugar = True
 			middle = " + \" \" + ".join( type_toString_isa_list )
 			
-			#the operator precednece in the isa files is not implemented!! and this might result in warnings
+			# the operator precednece in the isa files is not implemented!! and this might result in warnings
 			# if (len(type_toString_list) > 1 or no_sugar) and len([i for i in type_toString_isa_list if not i.startswith("\"")]) > 0: 
 			# 	isa_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
 			# else : isa_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
@@ -487,6 +491,17 @@ class ScalaBuilder:
 			# 	middle = " + ".join( type_toString_latex_list )
 			# 	latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
 			# else:
+
+
+				# type_toString_list.append( "{0}ToString({1}, format)".format(t.lower().replace(' ', '_'), ascii_lowercase[ x ]) )
+
+			if ScalaBuilder.__prefix_candidtate(name, c, structure):
+				type_toString_list[-1] = "bracketIf( {0}, {1}Prec({2}({3}))._2 < {1}Prec({4})._1 )".format( type_toString_list[-1], name.lower(), constructor, args, ascii_lowercase[len(type)-1] )
+			elif ScalaBuilder.__infix_candidtate(name, c, structure):
+				type_toString_list[0] = "bracketIf( {0}, {1}Prec({2}({3}))._1 <= {1}Prec({4})._1 )".format( type_toString_list[0], name.lower(), constructor, args, ascii_lowercase[0] )
+				type_toString_list[-1] = "bracketIf( {0}, {1}Prec({2}({3}))._2 < {1}Prec({4})._1 )".format( type_toString_list[-1], name.lower(), constructor, args, ascii_lowercase[len(type)-1] )
+
+
 			type_toString_latex_list = list(type_toString_list)
 			if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
 				filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
@@ -512,58 +527,62 @@ class ScalaBuilder:
 					
 					x += 1
 
+				# duplicated code from above, due to the _Agent_ and _Action_ hackery.....
+				if ScalaBuilder.__prefix_candidtate(name, c, structure):
+					type_toString_latex_list[-1] = "bracketIf( {0}, {1}Prec({2}({3}))._2 < {1}Prec({4})._1 )".format( type_toString_latex_list[-1], name.lower(), constructor, args, ascii_lowercase[len(type)-1] )
+			
 					
 
 			middle = " + \" \" + ".join( type_toString_latex_list )
 			#if len(type_toString_list) > 1 and len([i for i in type_toString_latex_list if not i.startswith("\"")]) > 0 and "sequent" not in name.lower(): 
 			#i feel like the following code is a terrible mess...it basically does magic to remove all but the essential bracketing from a latex term
-			if name in type:
-				for c1 in [i for i in datatype.keys() if name in datatype[i]["type"] and len(datatype[i]["type"]) > 2]:
-					constructor1 = c1
-					if c1 == name: constructor1 += "a" # fix for scala export, as you cant have the same datatype name and constructor
-					type1 = datatype[c1].get("type", [])
-					args_list = list(ascii_lowercase[0:len(type)])
-					args_list[type.index(name)] = "{0}({1})".format(constructor1, ",".join(ascii_lowercase[len(type):len(type)+len(type1)])) 
-					args1 = ",".join(args_list)
+			# if name in type:
+			# 	for c1 in [i for i in datatype.keys() if name in datatype[i]["type"] and len(datatype[i]["type"]) > 2]:
+			# 		constructor1 = c1
+			# 		if c1 == name: constructor1 += "a" # fix for scala export, as you cant have the same datatype name and constructor
+			# 		type1 = datatype[c1].get("type", [])
+			# 		args_list = list(ascii_lowercase[0:len(type)])
+			# 		args_list[type.index(name)] = "{0}({1})".format(constructor1, ",".join(ascii_lowercase[len(type):len(type)+len(type1)])) 
+			# 		args1 = ",".join(args_list)
 
-					type_toString_list = []
+			# 		type_toString_list = []
 
-					if "_Agent_" in constructor or "_Action_" in constructor :
-						x = 0
-						flag = -1
-						op = ""
-						for t in type:
-							if "op" in t.lower() : 
-								op = "{0}ToString({1}, format)".format(t.lower(), args_list[ x ])
-								type_toString_list.append(  op+".split(\"_\")(0)" )
-								flag = x+1
-							else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
+			# 		if "_Agent_" in constructor or "_Action_" in constructor :
+			# 			x = 0
+			# 			flag = -1
+			# 			op = ""
+			# 			for t in type:
+			# 				if "op" in t.lower() : 
+			# 					op = "{0}ToString({1}, format)".format(t.lower(), args_list[ x ])
+			# 					type_toString_list.append(  op+".split(\"_\")(0)" )
+			# 					flag = x+1
+			# 				else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
 							
-							if flag == x : 
-								type_toString_list.append(  op+".split(\"_\")(1)" )
-							x += 1
+			# 				if flag == x : 
+			# 					type_toString_list.append(  op+".split(\"_\")(1)" )
+			# 				x += 1
 
-						if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
-							filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
-							for filtered_latex_symb in filtered_latex_symbs:
-								type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+			# 			if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+			# 				filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+			# 				for filtered_latex_symb in filtered_latex_symbs:
+			# 					type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
 
-					else:
-						x = 0
-						flag = True
-						for t in type:
-							if t == name and flag : 
-								type_toString_list.append( "\"(\" + {0}ToString({1}, format) + \")\"".format(t.lower(), args_list[ x ]) )
-								flag = False
-							else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
-							x += 1
+			# 		else:
+			# 			x = 0
+			# 			flag = True
+			# 			for t in type:
+			# 				if t == name and flag : 
+			# 					type_toString_list.append( "\"(\" + {0}ToString({1}, format) + \")\"".format(t.lower(), args_list[ x ]) )
+			# 					flag = False
+			# 				else: type_toString_list.append( "{0}ToString({1}, format)".format(t.lower(), args_list[ x ]) )
+			# 				x += 1
 
-						if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
-							filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
-							for filtered_latex_symb in filtered_latex_symbs:
-								type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
-					middle1 = " + \" \" + ".join( type_toString_list )
-					latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args1, middle1) )
+			# 			if "latex" in datatype[c] and [i for i in datatype[c]["latex"].split(" ") if i != "_"]:
+			# 				filtered_latex_symbs = [i for i in datatype[c]["latex"].split(" ") if i != "_"]
+			# 				for filtered_latex_symb in filtered_latex_symbs:
+			# 					type_toString_list.insert(datatype[c]["latex"].split(" ").index(filtered_latex_symb), "\"{0}\"".format( repr(str(filtered_latex_symb))[1:-1] ))
+			# 		middle1 = " + \" \" + ".join( type_toString_list )
+			# 		latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args1, middle1) )
 			latex_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
 
 		ret += "		case ASCII =>\n			in match {\n"
@@ -574,6 +593,48 @@ class ScalaBuilder:
 		ret += "\n".join(isa_list)
 		ret += "\n			}\n	}\n"
 		return ret
+
+	@staticmethod
+	def __print_calc_structure_precedence(name, structure):
+		datatype = structure[name]
+
+		ret = "	def {0}Prec(in:{1}) : Tuple2[Int, Int] = in match {{\n".format(name.lower(), name)
+		list = []
+
+		for c in datatype:
+			constructor = c if c != name else c +"a"
+
+			type = datatype[c].get("type", [])
+
+			args = ",".join(ascii_lowercase[:len(type)])
+
+			
+			if ScalaBuilder.__prefix_candidtate(name, c, structure):
+				op_type = type[0]
+				op_list = []
+				for op in structure[op_type]:
+					op_constructor = op if op != op_type else op +"a"
+
+					prec = structure[op_type][op].get("ascii_precedence", [200])
+					prec = str(prec[0])
+
+					op_list.append("			case {0}() => ({1}, {1})".format(op_constructor, prec))
+				list.append( "		case {0}({1}) => a match {{\n{2}\n		}}".format(constructor, args, "\n".join(op_list)) )
+			elif ScalaBuilder.__infix_candidtate(name, c, structure):
+				op_type = type[1]
+				op_list = []
+				for op in structure[op_type]:
+					op_constructor = op if op != op_type else op +"a"
+
+					prec = structure[op_type][op].get("ascii_precedence", [500, 501])
+					prec = ", ".join([str(i) for i in prec])
+
+					op_list.append("			case {0}() => ({1})".format(op_constructor, prec))
+				list.append( "		case {0}({1}) => b match {{\n{2}\n		}}".format(constructor, args, "\n".join(op_list)) )
+			else: list.append( "		case {0}({1}) => (Int.MinValue, Int.MinValue)".format(constructor, args) )
+		
+		return ret + "\n".join(list) + "\n	}"
+		
 
 	@staticmethod
 	def __calc_structure_all_rules(rules):
@@ -600,7 +661,9 @@ class ScalaBuilder:
 		list = []
 		if "calc_structure" in self.calc:
 			for d in sorted(self.calc["calc_structure"].keys()):
-				list.append ( ScalaBuilder.__print_calc_structure_datatype(d, self.calc["calc_structure"][d]) )
+				list.append ( ScalaBuilder.__print_calc_structure_datatype(d, self.calc["calc_structure"]) )
+				if not ScalaBuilder.__is_terminal(d, self.calc["calc_structure"]):
+					list.append ( ScalaBuilder.__print_calc_structure_precedence(d, self.calc["calc_structure"]) )
 			ret = "\n" + "\n".join(list) + "\n"
 
 		return ret
@@ -610,7 +673,7 @@ class ScalaBuilder:
 		list = []
 		if "calc_structure_rules" in self.calc and "core_compiled" in self.calc: #and flag in self.calc
 			for d in sorted(self.calc["calc_structure_rules"].keys()):
-				list.append ( ScalaBuilder.__print_calc_structure_datatype(d, self.calc["calc_structure_rules"][d]) )
+				list.append ( ScalaBuilder.__print_calc_structure_datatype(d, self.calc["calc_structure_rules"]) )
 			list.append( ScalaBuilder.__calc_structure_all_rules(self.calc["calc_structure_rules"]) )
 			ret = "\n" + "\n".join(list) + "\n"
 

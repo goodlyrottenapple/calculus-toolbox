@@ -6,6 +6,11 @@ object PrintCalc{
 	val ISABELLE = "isabelle"
 
 
+	def bracketIf(in:String, b: Boolean = true) : String = {
+		if(b) return "(" + in + ")"
+		else return in
+	}
+
 	def stringToString(x:List[Char], format:String = LATEX) : String = format match {
 		case ASCII => x.mkString
 		case LATEX => x.mkString
