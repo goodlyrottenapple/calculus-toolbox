@@ -52,10 +52,12 @@
 			},
 
 			"Formula_Agent" : {
-				"type": "Agent"
+				"type": "Agent",
+				"parsable" : false
 			},
 			"Formula_Action" : {
-				"type": "Action"
+				"type": "Action",
+				"parsable" : false
 			},
 
 			"Formula_Zer" : {
@@ -98,8 +100,7 @@
 			"Formula_FdiamK" : {
 				"isabelle" : "fdiamK\\<^sub>F",
 				"ascii" : "fdiamK",
-				"latex" : "\\langle_\\rangle"
-			},
+				"latex" : "\\langle_\\rangle"			},
 			"Formula_BdiamK" : {
 				"isabelle" : "bdiamK\\<^sub>F",
 				"ascii" : "bdiamK",
@@ -156,12 +157,14 @@
 			"Formula_And" : {
 				"isabelle" : "\\<and>\\<^sub>F",
 				"ascii" : "/\\",
-				"latex" : "\\wedge"
+				"latex" : "\\wedge",
+				"ascii_precedence": [400, 401]
 			},
 			"Formula_Or" : {
 				"isabelle" : "\\<or>\\<^sub>F",
 				"ascii" : "\\/",
-				"latex" : "\\vee"
+				"latex" : "\\vee",
+				"ascii_precedence": [400, 401]
 			},
 			"Formula_ImpR" : {
 				"isabelle" : "\\<rightarrow>\\<^sub>F",
@@ -250,7 +253,8 @@
 			"Structure_Comma" : {
 				"isabelle" : ";\\<^sub>S",
 				"ascii" : ";",
-				"latex" : ";"
+				"latex" : ";",
+				"ascii_precedence": [400, 401]
 			},
 			"Structure_ImpR" : {
 				"isabelle" : "\\<rightarrow>\\<^sub>S",
@@ -291,7 +295,8 @@
 
 		"Sequent" : {
 			"Sequent_Structure" : {
-				"type": "Structure"
+				"type": "Structure",
+				"parsable" : false
 			},
 
 			"Sequent": {

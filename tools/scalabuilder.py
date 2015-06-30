@@ -46,6 +46,17 @@ class ScalaBuilder:
 				ret += ScalaBuilder.__keywords(calc[k])
 		return list(set(ret))
 
+	@staticmethod
+	def __ascii_reserved(calc):
+		ret = []
+		if not isinstance(calc, dict): return []
+		for k,v in calc.iteritems():
+			if isinstance(v, dict):
+				ascii_val = v.get("ascii", "")
+				if ascii_val: ret.append(ascii_val)
+				ret += ScalaBuilder.__ascii_reserved(v)
+		return list(set(ret))
+
 	# uncomments a section enclosed in '(*(*uncommentL?{ident}*) ... (*uncommentR?{ident}*)*)' if 'ident' is defined in 'calc_structure'
 	def uncommentL(self, list):
 		if len(list) < 1: return ""
@@ -60,7 +71,188 @@ class ScalaBuilder:
 		datatypes = ScalaBuilder.__keywords(self.calc)
 		if set(list) <= set(datatypes):
 			return "/*"
-		return ""
+		return 
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+	
+	@staticmethod
+	def __is_terminal(name, structure):
+
+		l = [ i for c in structure[name].keys() for i in structure[name][c].get("type", [])]
+		#print name, l
+		if l: return False
+		return True
+
+	@staticmethod
+	def __prefix_candidtate(name, constructor, structure):
+		type = structure[name][constructor].get("type", [])
+		if type:
+			return ScalaBuilder.__is_terminal(type[0], structure) and type[-1] == name
+		return False
+
+	@staticmethod
+	def __infix_candidtate(name, constructor, structure):
+		type = structure[name][constructor].get("type", [])
+		if len(type) == 3:
+			return ScalaBuilder.__is_terminal(type[1], structure) and type[-1] == name and type[0] == name
+		return False
+
+	@staticmethod
+	def __is_recursive(name, structure):
+		#print structure.keys()
+		return ScalaBuilder.__is_recursive_aux(name, name, structure)
+
+
+	@staticmethod
+	def __is_recursive_aux(name, current, structure):
+		if current not in structure: return False
+		else: 
+			#print structure[name]
+			l = list(set( [ i for c in structure[current].keys() for i in structure[current][c].get("type", [])] ))
+			#print(name, current, l)
+			if name in l: return True
+			if l: 
+				return any([ScalaBuilder.__is_recursive_aux(name, i, structure) for i in l if i != current])
+			else: return False
+
+
+	@staticmethod
+	def __constructor_parsers_build(name, structure):
+		datatype = structure[name]
+		sub_parsers_list = []
+
+
+		for c in datatype:
+			if datatype[c].get("parsable", True): #if parsing in ASCII is enabled for this constructor
+				#if the constructor is not recursive (ie self referential) or doesnt fit into prefix or infix form....suffix not considered atm
+				if name not in datatype[c].get("type", []) or not ScalaBuilder.__prefix_candidtate(name, c, structure) or not ScalaBuilder.__infix_candidtate(name, c, structure):
+					constructor = c
+					#scala language fix introduced in isabelle -> scala conversion when the datatype and constructor for set datatype are the same
+					#ie. datatype Atprop = Atprop *type*, becomes datatype Atprop with constructor Atpropa
+					if c == name: constructor += "a"
+
+					def_str = "	lazy val {0}Parser : PackratParser[{1}] =\n		".format(constructor.lower(), name)
+					type = datatype[c].get("type", [])
+
+					constructor_with_args = "{0}({1})".format( constructor, ", ".join(ascii_lowercase[:len(type)]) )
+					used_parsers_list = ["{0}Parser".format(t.lower()).replace(' ', '_') for t in type]
+					tilde_case_list = [ str(x) for x in ascii_lowercase[:len(type)] ]
+
+					#ascii formatting
+					
+					if "ascii" in datatype[c] and [i for i in datatype[c]["ascii"].split(" ") if i != "_"]:
+						filtered_ascii_symb = [i for i in datatype[c]["ascii"].split(" ") if i != "_"][0]
+						#print "filtered_ascii_symb: ", filtered_ascii_symb, "\n\n"
+						used_parsers_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
+						tilde_case_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
+					elif "type" not in datatype[c]:
+						used_parsers_list.insert( 0, "\"{0}\"".format(c) )
+						tilde_case_list.insert( 0, "\"{0}\"".format(c) )
+					used_parsers = " ~ ".join(used_parsers_list)
+					tilde_case = " ~ ".join(tilde_case_list)
+
+					if len(tilde_case_list) == 1 and tilde_case_list[0].startswith("\""):
+						sub_parsers_list.append( def_str + "{0} ^^ {{ _ => {1} }}".format(used_parsers, constructor_with_args ) )
+					else:
+						sub_parsers_list.append( def_str + "{0} ^^ {{ case {1} => {2} }}".format(used_parsers, tilde_case, constructor_with_args ) )
+
+		#ScalaBuilder.__main_parser_build(name, structure)
+		return "\n\n" + ScalaBuilder.__main_parser_build(name, structure) + "\n\n" + "\n\n".join(sub_parsers_list)
+
+	@staticmethod
+	def __main_parser_build(name, structure):
+		datatype = structure[name]
+		prefix_list = []
+		infix_list = []
+
+		list_of_generated_parsers = []
+
+		for c in datatype:
+			if name in datatype[c].get("type", []) and datatype[c].get("parsable", True):
+				print c,"\n"
+				if ScalaBuilder.__prefix_candidtate(name, c, structure):
+					list_of_generated_parsers.append(c)
+					print "prefix candidate found!!!\n"
+					op = datatype[c]["type"][0]
+
+					inbetween = [datatype[c]["type"][i] for i in range(1, len(datatype[c]["type"])-1)]
+
+					if inbetween: 
+						inbetween_parsers = "~" + "~".join(["{0}Parser".format(t.lower()) for t in inbetween])
+						args = "~" + "~".join(ascii_lowercase[:len(inbetween)])
+					else: 
+						inbetween_parsers = ""
+						args = ""
+
+
+					for cc in structure[op]:
+						#print cc, structure[op][cc].get("ascii", c)
+						symb = structure[op][cc].get("ascii", c)
+
+						#add manual change for precedence!!
+						#Prefix(200)("fboxK" ~ agentParser) { case ("fboxK" ~ a, n)  => Formula_Agent_Formula(Formula_FboxK(), a, n) },
+
+						prec = structure[op][cc].get("ascii_precedence", [200])
+
+						prec = str(prec[0])
+
+						prefix = "Prefix({7})({0}Parser{3}) {{ case (_{4}, {5}) => {1}({2}(){6}, {5}) }}".format(cc.lower(), c, cc, inbetween_parsers, args, ascii_lowercase[len(inbetween)], args.replace('~', ','), prec )
+						prefix_list.append(prefix)
+						#print prefix
+
+				if ScalaBuilder.__infix_candidtate(name, c, structure):
+					list_of_generated_parsers.append(c)
+					print "infix candidate found!!!\n"
+					op = datatype[c]["type"][1]
+					for cc in structure[op]:
+						#print cc, structure[op][cc].get("ascii", c)
+						symb = structure[op][cc].get("ascii", c)
+
+						prec = structure[op][cc].get("ascii_precedence", [500, 501])
+
+						prec = ", ".join([str(i) for i in prec])
+
+						#add manual change for precedence!!
+						infix = "Infix({3})({0}Parser) {{ (_, a, b) => {1}(a, {2}(), b ) }}".format(cc.lower(), c, cc, prec )
+						infix_list.append(infix)
+						#print infix
+
+		list_of_additional_parsers = []
+
+		#definition for _Parser : PackratParser[_] = ...
+		ordered_d = {k : ScalaBuilder.__calc_structure_datatype_constructor_rank(name, k, structure) for k in datatype}
+
+		# fix for rules... the parser for 'rule2' should always be before 'rule' 
+		sortedL = sorted(ordered_d, key=ordered_d.get, reverse=False) if "rule" not in name.lower() else sorted(ordered_d.keys(), reverse=True)
+		for c in sortedL:
+			if c not in list_of_generated_parsers:
+				if "ascii" in datatype[c] or "latex" in datatype[c] or "isabelle" in datatype[c]:
+					constructor = c
+					#scala language fix introduced in isabelle -> scala conversion when the datatype and constructor for set datatype are the same
+					#ie. datatype Atprop = Atprop string becomes datatype Atprop with constructor Atpropa
+					if c == name: constructor += "a"
+				 	list_of_additional_parsers.append( "{0}Parser".format(constructor.lower()) )
+					type = datatype[c].get("type", [])
+					#if the constructor of current datatype calls another datatype defined in the calulus flag is set to True
+					#add_structure introduced for calc_structure_rules which call on calc_structure
+
+		list_of_additional_parsers.append( "\"(\" ~> {0}Parser <~ \")\"".format(name.lower()) )
+
+		ret = "	lazy val {0}Parser:PackratParser[{1}] = operators[Any,{1}](\n		".format(name.lower(), name)
+		ret += ",\n		".join([",\n		".join(prefix_list), ",\n		".join(infix_list)])
+		ret += "\n	) ( {0} )".format(" | ".join(list_of_additional_parsers))
+
+		ret += "\n\n	def parse{0}(s:String) : Option[{0}] = parseAll({1}Parser,s) match {{\n".format(name, name.lower())
+		ret += "		case Success(result, _) => Some(result)\n"
+		ret += "		case failure : NoSuccess => None\n"
+		ret += "	}"
+		return ret
+
+
+
+#PARSER-OLD----------------------------------------------------------------------------------------------------------------------------------------
 
 	@staticmethod
 	def __calc_structure_datatype_constructor_rank(name, current, structure):
@@ -89,6 +281,8 @@ class ScalaBuilder:
 			total_len += len(structure[name][c].get("type", []))
 		return max_rank
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------
+
 	@staticmethod
 	def __parse_calc_structure_datatype(name, structure, add_structure={}):
 		datatype = structure[name]
@@ -98,35 +292,48 @@ class ScalaBuilder:
 		sub_parsers_list = []
 		flag = False
 
+		all_ascii_reserved = ScalaBuilder.__ascii_reserved(structure)
+
 		for c in datatype:
-			constructor = c
-			#scala language fix introduced in isabelle -> scala conversion when the datatype and constructor for set datatype are the same
-			#ie. datatype Atprop = Atprop string becomes datatype Atprop with constructor Atpropa
-			if c == name: constructor += "a"
+			if datatype[c].get("parsable", True):
+				constructor = c
+				#scala language fix introduced in isabelle -> scala conversion when the datatype and constructor for set datatype are the same
+				#ie. datatype Atprop = Atprop *type*, becomes datatype Atprop with constructor Atpropa
+				if c == name: constructor += "a"
 
-			def_str = "	lazy val {0}Parser : PackratParser[{1}] =\n		".format(constructor.lower(), name)
-			type = datatype[c].get("type", [])
+				def_str = "	lazy val {0}Parser : PackratParser[{1}] =\n		".format(constructor.lower(), name)
+				type = datatype[c].get("type", [])
 
-			constructor_with_args = "{0}({1})".format( constructor, ", ".join(ascii_lowercase[:len(type)]) )
-			used_parsers_list = ["{0}Parser".format(t.lower()).replace(' ', '_') for t in type]
-			tilde_case_list = [ str(x) for x in ascii_lowercase[:len(type)] ]
+				constructor_with_args = "{0}({1})".format( constructor, ", ".join(ascii_lowercase[:len(type)]) )
+				used_parsers_list = ["{0}Parser".format(t.lower()).replace(' ', '_') for t in type]
+				tilde_case_list = [ str(x) for x in ascii_lowercase[:len(type)] ]
 
-			#ascii formatting
-			
-			if "ascii" in datatype[c] and [i for i in datatype[c]["ascii"].split(" ") if i != "_"]:
-				filtered_ascii_symb = [i for i in datatype[c]["ascii"].split(" ") if i != "_"][0]
-				used_parsers_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
-				tilde_case_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
-			elif "type" not in datatype[c]:
-				used_parsers_list.insert( 0, "\"{0}\"".format(c) )
-				tilde_case_list.insert( 0, "\"{0}\"".format(c) )
-			used_parsers = " ~ ".join(used_parsers_list)
-			tilde_case = " ~ ".join(tilde_case_list)
+				#ascii formatting
+				
+				if "ascii" in datatype[c] and [i for i in datatype[c]["ascii"].split(" ") if i != "_"]:
+					filtered_ascii_symb = [i for i in datatype[c]["ascii"].split(" ") if i != "_"][0]
 
-			if len(tilde_case_list) == 1 and tilde_case_list[0].startswith("\""):
-				sub_parsers_list.append( def_str + "{0} ^^ {{ _ => {1} }}".format(used_parsers, constructor_with_args ) )
-			else:
-				sub_parsers_list.append( def_str + "{0} ^^ {{ case {1} => {2} }}".format(used_parsers, tilde_case, constructor_with_args ) )
+					#this chunk creates an unambiguous parser for acii terminal symbols which are prefixes of other symbols.
+					#a terminal  ">" which is a prefix of ">>" and  ">-" will produce a parser - ">" ~ not(">" | "-")
+					if len(filtered_ascii_symb) == 1:
+						prefixes_of_filtered_ascii = [i.replace('_', ' ').strip() for i in all_ascii_reserved if i.startswith(filtered_ascii_symb[0]) and i != filtered_ascii_symb[0]]
+						if prefixes_of_filtered_ascii:
+							prefixes_of_filtered_ascii = ["\""+repr(str(i))[len(filtered_ascii_symb[0])+1:-1]+"\"" for i in prefixes_of_filtered_ascii]
+							used_parsers_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"~not({1})".format( repr(str(filtered_ascii_symb))[1:-1], " | ".join(prefixes_of_filtered_ascii) ) )
+						else: used_parsers_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
+
+					else: used_parsers_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
+					tilde_case_list.insert( datatype[c]["ascii"].split(" ").index(filtered_ascii_symb), "\"{0}\"".format( repr(str(filtered_ascii_symb))[1:-1] ) )
+				elif "type" not in datatype[c]:
+					used_parsers_list.insert( 0, "\"{0}\"".format(c) )
+					tilde_case_list.insert( 0, "\"{0}\"".format(c) )
+				used_parsers = " ~ ".join(used_parsers_list)
+				tilde_case = " ~ ".join(tilde_case_list)
+
+				if len(tilde_case_list) == 1 and tilde_case_list[0].startswith("\""):
+					sub_parsers_list.append( def_str + "{0} ^^ {{ _ => {1} }}".format(used_parsers, constructor_with_args ) )
+				else:
+					sub_parsers_list.append( def_str + "{0} ^^ {{ case {1} => {2} }}".format(used_parsers, tilde_case, constructor_with_args ) )
 
 
 		#definition for _Parser : PackratParser[_] = ...
@@ -146,7 +353,6 @@ class ScalaBuilder:
 				#add_structure introduced for calc_structure_rules which call on calc_structure
 				if type and set(type) <= set(structure.keys()) | set(add_structure.keys()): flag = True
 
-		# DISABLED: add a bracketed case where (expr) is added for each expr that has at least two constructors
 		# if len(datatype) > 1 and flag :
 		# now always add a bracketed case
 		list_of_parsers.append( "\"(\" ~> {0}Parser <~ \")\"".format(name.lower()) )
@@ -160,6 +366,25 @@ class ScalaBuilder:
 		ret += "		case failure : NoSuccess => None\n"
 		ret += "	}"
 		return ret
+
+
+	def parser_calc_structure(self):
+		ret = ""
+		list = []
+		if "calc_structure" in self.calc:
+
+			for d in sorted(self.calc["calc_structure"].keys()):
+				if not ScalaBuilder.__is_recursive(d, self.calc["calc_structure"]):
+					list.append ( ScalaBuilder.__parse_calc_structure_datatype(d, self.calc["calc_structure"]) )
+				else: 
+					#list.append ( d+" parser TODO" )
+					list.append ( ScalaBuilder.__constructor_parsers_build(d, self.calc["calc_structure"]) )
+					#list.append ( d+" parser TODO" )
+
+			ret = "\n" + "\n\n\n\n".join(list) + "\n"
+		return ret
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------
 
 	@staticmethod
 	def __parser_calc_structure_all_rules(rules):
@@ -181,15 +406,6 @@ class ScalaBuilder:
 		return ret
 
 
-	def parser_calc_structure(self):
-		ret = ""
-		list = []
-		if "calc_structure" in self.calc:
-			for d in sorted(self.calc["calc_structure"].keys()):
-				list.append ( ScalaBuilder.__parse_calc_structure_datatype(d, self.calc["calc_structure"]) )
-			ret = "\n" + "\n\n\n\n".join(list) + "\n"
-		return ret
-
 	def parser_calc_structure_rules(self):
 		ret = ""
 		list = []
@@ -200,6 +416,8 @@ class ScalaBuilder:
 			ret = "\n" + "\n\n\n\n".join(list) + "\n"
 		return ret
 
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------
 
 	@staticmethod
 	def __print_calc_structure_datatype(name, datatype):

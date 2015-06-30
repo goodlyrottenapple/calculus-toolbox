@@ -2,7 +2,6 @@
 TODO:
 
 -- reimplement printCalcDef
-
 */
 
 import swing.{FileChooser, Orientation, Publisher, BoxPanel, FlowPanel, 
