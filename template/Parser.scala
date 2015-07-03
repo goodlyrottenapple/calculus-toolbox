@@ -7,10 +7,13 @@ object Parser extends JavaTokenParsers with OperatorPrecedenceParsers {
 	lazy val stringParser:PackratParser[List[Char]] = 
 		ident ^^ { i => i.toList }
 
+
+	def listParser[T](innerParser:PackratParser[T]):PackratParser[List[T]] =
+		"[" ~ "]" ^^ { _ => List[T]() } |
+		"[" ~> rep(innerParser <~ ",") ~ innerParser <~ "]" ^^ { case list ~ last => list ++ List[T](last) }
+
 /*/*uncommentL?Structure*/
-	lazy val structure_listParser:PackratParser[List[Structure]] =
-		"[" ~ "]" ^^ { _ => List[Structure]() } |
-		"[" ~> rep(structureParser <~ ",") ~ structureParser <~ "]" ^^ { case list ~ last => list ++ List[Structure](last) }
+	lazy val structure_listParser:PackratParser[List[Structure]] = listParser[Structure](structureParser)
 /*uncommentR?Structure*/*/
 
 /*parser_calc_structure*/

@@ -30,7 +30,7 @@ import java.io.PrintWriter
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import Parser.{parseSequent, parseStructure, parseFormula, parseAction, parseProoftree, parseRule}
+import Parser._
 import PrintCalc._
 import Proofsearch.derTree
 
@@ -39,6 +39,7 @@ object GUI extends SimpleSwingApplication {
   val AUTO_ADD_PT = "AUTO_ADD_PT"
   val AUTO_ADD_ASSM = "AUTO_ADD_ASSM"
   val USE_ABBREVS = "USE_ABBREVS"
+  val USE_DISPLAY = "USE_DISPLAY"
 
   var globalPrefs = scala.collection.mutable.Map[String, Boolean]()
 
@@ -253,7 +254,9 @@ object GUI extends SimpleSwingApplication {
             //val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
             //val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
             //derTree(currentValue, session.currentLocale++currentAssm, session.currentSequent) match {
-            new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=session.currentSequent).pt match {
+            
+
+            new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=session.currentSequent, useRules=session.currentRuleList).pt match {
               case Some(r) =>
                 session.currentPT = r
                 //display prooftree r in the PTPanel
@@ -290,7 +293,9 @@ object GUI extends SimpleSwingApplication {
 
     /*/*uncommentL?Action?Agent*/
     case ButtonClicked(`reloadrelAKAButton`) =>
+      /*/*uncommentL?Action?Formula*/
       openPreFormulaFile()
+      /*uncommentR?Action?Formula*/*/
       val buff = scala.collection.mutable.Map[Tuple2[Action, Agent], List[Action]]()
       for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
         val arr = l.split(",")
@@ -544,6 +549,7 @@ def readPTold(map : Map[String, Any]):Prooftree = {
     //session.abbrevMap.foreach{println}
   }
 
+  /*/*uncommentL?Action?Formula*/
   def openPreFormulaFile() = {
     session.preFormulaMap.clear
 
@@ -560,6 +566,7 @@ def readPTold(map : Map[String, Any]):Prooftree = {
       
     }
   }
+  /*uncommentR?Action?Formula*/*/
 
   def saveCSFile(file:java.io.File) = {  
     Some(new PrintWriter(file)).foreach{p =>
@@ -611,7 +618,6 @@ def readPTold(map : Map[String, Any]):Prooftree = {
     minimumSize = new Dimension(600,400)
 
     System.setProperty("apple.laf.useScreenMenuBar", "true")
-
 
     //Proofsearch.reversibleRules()
 
@@ -714,7 +720,15 @@ def readPTold(map : Map[String, Any]):Prooftree = {
           globalPrefs += (USE_ABBREVS -> selected)
         }
         contents += useAbbrevs
-        listenTo(aaPT, aaAssm, useAbbrevs)
+
+        val useDisplayOnly = new CheckMenuItem("Use only display rules") {
+          //this.tooltip = tooltip; 
+          selected = false
+          globalPrefs += (USE_DISPLAY -> selected)
+        }
+        contents += useDisplayOnly
+
+        listenTo(aaPT, aaAssm, useAbbrevs, useDisplayOnly)
         reactions += {
           case ButtonClicked(`aaPT`) => 
             globalPrefs += (AUTO_ADD_PT -> aaPT.selected)
@@ -729,6 +743,9 @@ def readPTold(map : Map[String, Any]):Prooftree = {
 
             parsedStr.icon = session.sequentToIcon(session.currentSequent)
             ptPanel.update
+          case ButtonClicked(`useDisplayOnly`) => 
+            globalPrefs += (USE_DISPLAY -> useDisplayOnly.selected)
+            session.currentRuleList = if(!globalPrefs(USE_DISPLAY)) ruleList else RuleZera(Prem()) :: displayRules
           case ButtonClicked(`aaAssm`) => 
             globalPrefs += (AUTO_ADD_ASSM -> aaAssm.selected)
         }

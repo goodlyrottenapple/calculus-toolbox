@@ -1,5 +1,5 @@
 theory (*calc_name*)
-imports Main (*calc_name_core*) "~~/src/HOL/Library/Code_Char" "~~/src/HOL/Code_Numeral" (*always keep Code_char import last! its added for code generator to output Haskell strings instead of the isabelle nibble stuff *)
+imports Main (*calc_name_core*) "~~/src/HOL/Library/Multiset" "~~/src/HOL/Library/Code_Char" "~~/src/HOL/Code_Numeral" (*always keep Code_char import last! its added for code generator to output Haskell strings instead of the isabelle nibble stuff *)
 begin
 
 (*calc_structure_rules*)
@@ -146,6 +146,9 @@ datatype Locale = (*(*uncommentL?Formula?RuleCut*)
                   (*(*uncommentL?Sequent*)
                   Premise Sequent |
                   (*uncommentR?Sequent*)*)
+                  (*(*uncommentL?Structure*)
+                  Part Structure |
+                  (*uncommentR?Structure*)*)
                   (*(*uncommentL?Action?Agent*)
                   RelAKA "Action \<Rightarrow> Agent \<Rightarrow> Action list" | 
                   (*uncommentR?Action?Agent*)*)
@@ -404,8 +407,106 @@ fun expandProoftree :: "Prooftree \<Rightarrow> Prooftree"  where
 "expandProoftree (Prooftree _ (RuleMacro n (Prooftree s r l)) list) = (Prooftree s r (map (replaceIntoProoftree (map expandProoftree list)) (map expandProoftree l)))" |
 "expandProoftree (Prooftree s r list) = Prooftree s r (map expandProoftree list)"
 
+fun collect_freevars_Structure :: "Structure \<Rightarrow> Structure list" where
+(*(*uncommentL?Structure_Formula*)  "collect_freevars_Structure (Structure_Formula f) = [Structure_Formula f]" (*uncommentR?Structure_Formula*)*)
+(*(*uncommentL?Structure_Bin*) | "collect_freevars_Structure (Structure_Bin l _ r) = (collect_freevars_Structure l) @ (collect_freevars_Structure r)" (*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Freevar*) | "collect_freevars_Structure (Structure_Freevar free) = [Structure_Freevar free]" (*uncommentR?Structure_Freevar*)*)
+(*(*uncommentL?Structure_Action_Structure*) | "collect_freevars_Structure (Structure_Action_Structure oper ac struct) = [Structure_Formula (Formula_Action ac)] @ (collect_freevars_Structure struct)" (*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Agent_Structure*) | "collect_freevars_Structure (Structure_Agent_Structure oper ag struct) = [Structure_Formula (Formula_Agent ag)] @ (collect_freevars_Structure struct)" (*uncommentR?Structure_Agent_Structure*)*)
+(*(*uncommentL?Structure_Phi*) | "collect_freevars_Structure (Structure_Phi a) = [Structure_Phi a]"  (*uncommentR?Structure_Phi*)*)
+(*(*uncommentL?Structure_Zer*) | "collect_freevars_Structure (Structure_Zer z) = [Structure_Zer z]" (*uncommentR?Structure_Zer*)*)
+(*(*uncommentL?Structure_Bigcomma*) | "collect_freevars_Structure (Structure_Bigcomma list) = foldr (op @) (map collect_freevars_Structure list) []" (*uncommentR?Structure_Bigcomma*)*)
 
 
-export_code open der isProofTree ruleList ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut expandProoftree in Scala
+fun collect_freevars_Sequent :: "Sequent \<Rightarrow> Structure list" where
+"collect_freevars_Sequent (Sequent l r) = (collect_freevars_Structure l) @ (collect_freevars_Structure r)" |
+"collect_freevars_Sequent (Sequent_Structure _) = []"
+
+
+fun is_display_rule :: "Rule \<Rightarrow> Rule list" where
+"is_display_rule r = 
+(if (case (snd (rule Empty r) (fst (rule Empty r)) ) of Some list \<Rightarrow>
+  (case list of h#rest \<Rightarrow>
+  multiset_of (collect_freevars_Sequent (fst (rule Empty r))) = 
+  multiset_of (collect_freevars_Sequent h ) | _ \<Rightarrow> False ) | _ \<Rightarrow> False )
+then [r] 
+else [])"
+
+definition displayRules :: "Rule list" where
+"displayRules = foldr (op @) (map is_display_rule ruleList) []"
+
+value "displayRules"
+
+(*
+definition "lhs = collect_freevars_Sequent (fst (rule Empty (RuleStruct I_impL)))"
+definition "rhs = collect_freevars_Sequent (hd (the (snd (rule Empty (RuleStruct I_impL)) (fst (rule Empty (RuleStruct E_L)))  )))"
+
+value "multiset_of lhs = multiset_of rhs"
+*)
+
+datatype polarity = Plus ("+p") | Minus ("-p") | N
+
+fun polarity_weird_xor :: "polarity \<Rightarrow> polarity \<Rightarrow> polarity" (infix "\<or>p" 400) where
+"polarity_weird_xor +p N = +p" |
+"polarity_weird_xor -p N = -p" |
+"polarity_weird_xor N x = x" |
+"polarity_weird_xor +p _ = N" |
+"polarity_weird_xor -p _ = N"
+
+
+fun polarity_not :: "polarity \<Rightarrow> polarity" ( "\<not>p _") where
+"polarity_not -p = +p" |
+"polarity_not +p = -p" |
+"polarity_not N = N"
+
+
+fun polarity_weird_and :: "polarity \<Rightarrow> polarity \<Rightarrow> polarity" (infix "\<and>p" 400) where
+"polarity_weird_and -p x = \<not>p x" |
+"polarity_weird_and +p x = x" |
+"polarity_weird_and N _ = N"
+
+lemma polarity_weird_xor_comm: "a \<or>p b = b \<or>p a"
+apply (induct a, (induct b, auto)+)
+done
+
+lemma polarity_weird_and_comm: "a \<and>p b = b \<and>p a"
+apply (induct a, (induct b, auto)+)
+done
+
+fun structure_Op_polarity :: "Structure_Bin_Op \<Rightarrow> (polarity \<times> polarity)" where
+(*(*uncommentL?Structure_Comma*) 
+   "structure_Op_polarity Structure_Comma = (+p, +p)"
+(*uncommentR?Structure_Comma*)*)
+(*(*uncommentL?Structure_ImpL*) 
+ | "structure_Op_polarity Structure_ImpL = (+p, -p)"
+(*uncommentR?Structure_ImpL*)*)
+(*(*uncommentL?Structure_ImpR*) 
+ | "structure_Op_polarity Structure_ImpR = (-p, +p)"
+(*uncommentR?Structure_ImpR*)*)
+
+
+(*we assume the structure appears in the sequent exactly once*)
+fun polarity_Structure :: "Structure \<Rightarrow> Structure \<Rightarrow> polarity" where
+(*(*uncommentL?Structure_Bin*) 
+"polarity_Structure s (Structure_Bin l oper r) = (
+  if l = s then prod.fst (structure_Op_polarity oper)
+  else if r = s then prod.snd (structure_Op_polarity oper)
+  else ((prod.fst (structure_Op_polarity oper)) \<and>p (polarity_Structure s l)) \<or>p ((prod.snd (structure_Op_polarity oper)) \<and>p (polarity_Structure s r)) )" | 
+(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Action_Structure*) "polarity_Structure s (Structure_Action_Structure oper ac struct) = (polarity_Structure s struct)" | (*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Agent_Structure*) "polarity_Structure s (Structure_Agent_Structure oper ag struct) = (polarity_Structure s struct)" | (*uncommentR?Structure_Agent_Structure*)*)
+"polarity_Structure _ _ = N"
+
+
+fun polarity_Sequent :: "Structure \<Rightarrow> Sequent \<Rightarrow> polarity" where
+"polarity_Sequent s (Sequent lhs rhs) = (
+  if s = lhs then -p
+  else if s = rhs then +p
+  else ((\<not>p(polarity_Structure s lhs)) \<or>p (polarity_Structure s rhs)) )" |
+"polarity_Sequent s _ = N"
+
+
+
+export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut expandProoftree polarity_Sequent in Scala
 module_name (*calc_name*) file (*export_path*)
 end

@@ -17,7 +17,7 @@ import Parser.{parseSequent, parseFormula}
 import PrintCalc._
 import Proofsearch.derTree
 
-class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])], session:CalcSession = CalcSession() ) extends Dialog(owner) {
+class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])], session:CalcSession = CalcSession()) extends Dialog(owner) {
   var pair:Option[(Rule, List[Sequent])] = None
   modal = true
 
@@ -175,7 +175,7 @@ class RuleSelectDialog(owner: Window = null, list : List[(Rule, List[Sequent])] 
 
 
 
-class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq : Sequent, depth : Int = 5) extends Dialog(owner) {
+class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq : Sequent, depth : Int = 5, useRules : List[Rule] = ruleList) extends Dialog(owner) {
 
 
   // the following code (interruptableFuture) is from http://stackoverflow.com/questions/16020964/cancellation-with-future-and-promise-in-scala
@@ -210,7 +210,7 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
   reactions += {
     case WindowOpened(_) =>
       val (f, c) = interruptableFuture[Option[Prooftree]] { () =>
-        derTree(depth, locale, seq)
+        derTree(depth, locale, seq, 0, useRules)
       }
 
       cancel = c
@@ -301,5 +301,24 @@ class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = tr
 
 }
 
+class SequentTreeViewDialog(owner: Window = null, sequent : Sequent) extends Dialog(owner) {
+
+  preferredSize = new java.awt.Dimension(400, 300)
+  
+  val seqPanel = new SequentViewPanel(sequent)
+  seqPanel.build()
+
+  modal = false
+
+  
+  contents = new BorderPanel {
+    layout(new ScrollPane(seqPanel){border = Swing.EmptyBorder(0, 0, 0, 0)}) = Center
+  }
+
+  centerOnScreen()
+
+  open()
+
+}
 
 

@@ -39,7 +39,7 @@ object Proofsearch{
 		return buf.toList
 	}
 
-	def derAll(loc:List[Locale], s:Sequent, restr:List[Rule] = List()) : List[(Rule, List[Sequent])] = restrictRules(ruleList, restr).map(rule => derAllAux(loc, s, rule)).flatten
+	def derAll(loc:List[Locale], s:Sequent, restr:List[Rule] = List(), useRules : List[Rule] = ruleList) : List[(Rule, List[Sequent])] = restrictRules(useRules, restr).map(rule => derAllAux(loc, s, rule)).flatten
 
 
 	def derAllAux(loc:List[Locale], s:Sequent, rule:Rule) : List[(Rule, List[Sequent])] = {
@@ -52,15 +52,17 @@ object Proofsearch{
 		return List()
 	}
 
+
+	// used for macro rules - manual only, not used for PS!!
 	def derAllM(loc:List[Locale], s:Sequent, macros : List[(String, Prooftree)] = List()) : List[(Rule, List[Sequent])] = 
 		macros.map{ case (n, pt) => (RuleMacro(n.toList, replaceIntoPT(s, pt)), replaceIntoPT(s, pt)) }
 			.filter{ case (r, pt) => isProofTreeWithCut(loc++collectPremisesToLocale(pt), pt) }
 				.map{ case (r, pt) => (r, collectPremises(pt)) }
 
-	def derTrees(loc:List[Locale], n:Int, seq:Sequent, history:Rule = RuleZera(Id())) : Option[Prooftree] = n match {
+	def derTrees(loc:List[Locale], n:Int, seq:Sequent, history:Rule = RuleZera(Id()), useRules : List[Rule] = ruleList) : Option[Prooftree] = n match {
 		case 0 => None
 		case n => 
-			for( (rule, derList) <- derAll(loc, seq, List(history)).sortWith(_._2.length < _._2.length) ) {
+			for( (rule, derList) <- derAll(loc, seq, List(history), useRules).sortWith(_._2.length < _._2.length) ) {
 				lazy val ders = derList.map(x => derTrees(loc, n-1, x, rule))
 				if(!ders.contains(None)){
 					return Some(Prooftreea(seq, rule, ders.map{case Some(pt) => pt}))
@@ -69,10 +71,10 @@ object Proofsearch{
 			return None
 	}
 
-	def derTree(max:Int, loc:List[Locale], seq:Sequent, n:Int = 0) : Option[Prooftree] = {
+	def derTree(max:Int, loc:List[Locale], seq:Sequent, n:Int = 0, useRules : List[Rule] = ruleList) : Option[Prooftree] = {
 		if (n > max) None
-		else derTrees(loc, n, seq) match {
-			case None => derTree(max, loc, seq, n+1)
+		else derTrees(loc=loc, n=n, seq=seq, useRules=useRules) match {
+			case None => derTree(max, loc, seq, n+1, useRules)
 			case res => res
 		}
 	}

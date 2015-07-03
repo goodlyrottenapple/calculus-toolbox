@@ -1,5 +1,5 @@
 {
-	"calc_name" : "EAKMin",
+	"calc_name" : "SequentCalc",
 
 	"calc_structure" : {
 		"Atprop" : {
@@ -30,6 +30,12 @@
 				"precedence": [340, 330]
 			},
 
+			"Formula_Un" : {
+				"type" : ["Formula_Un_Op", "Formula"],
+				"isabelle" : "U\\<^sub>F _",
+				"precedence": [330, 331]
+			},
+
 			"Formula_Bin" : {
 				"type" : ["Formula", "Formula_Bin_Op", "Formula"],
 				"isabelle" : "B\\<^sub>F _",
@@ -37,6 +43,14 @@
 			}
 		},
 
+		"Formula_Un_Op" : {
+			"Formula_Not" : {
+				"isabelle" : "\\<not>\\<^sub>F",
+				"ascii" : "-",
+				"latex" : "\\lnot"
+			}
+		},
+		
 		"Formula_Bin_Op" : {
 			"Formula_And" : {
 				"isabelle" : "\\<and>\\<^sub>F",
@@ -84,7 +98,7 @@
 		},
 
 		"Structure_Zer_Op" : {
-			"Structure_Neutral" : {
+			"Structure_Empty" : {
 				"isabelle" : "I\\<^sub>S",
 				"ascii" : "I",
 				"latex" : "I"

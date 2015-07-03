@@ -50,6 +50,8 @@ case class CalcSession() extends Publisher {
 
 	/*uncommentR?Action?Agent*/*/
 
+	var currentRuleList = ruleList
+
 	var currentSequent : Sequent = Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a')))))
 
 	private var _currentPT : Prooftree = Prooftreea( Sequenta(Structure_Formula(Formula_Atprop(Atpropa(List('a')))),Structure_Formula(Formula_Atprop(Atpropa(List('a'))))), RuleZera(Id()), List())
@@ -90,8 +92,7 @@ case class CalcSession() extends Publisher {
     def currentLocale : List[Locale] = List(
 		Empty() 
 		/*/*uncommentL?Action?Agent*/ , RelAKA(relAKA) /*uncommentR?Action?Agent*/*/
-	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)}) ++ preFormulaMap.keys.toList.map{case a => PreFormula(a,preFormulaMap(a))}
-
+	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)}) /*/*uncommentL?Action?Formula*/ ++ preFormulaMap.keys.toList.map{case a => PreFormula(a,preFormulaMap(a))} /*uncommentR?Action?Formula*/*/
 
 
     var proofDepth = 5
@@ -224,9 +225,9 @@ case class CalcSession() extends Publisher {
 				//addPT(DEAK.expandProoftree(sel._2))
 				if(abbrevsOn){
 					def seqToStr(s:Sequent) = sequentToIconStr(s, abbrevMap.toMap)
-					p.write(prooftreeToString(DEAK.expandProoftree(sel._2), PrintCalc.LATEX, seqToStr) + "\\DisplayProof")
+					p.write(prooftreeToString(expandProoftree(sel._2), PrintCalc.LATEX, seqToStr) + "\\DisplayProof")
 				}
-		    	else p.write(prooftreeToString(DEAK.expandProoftree(sel._2)) + "\\DisplayProof")
+		    	else p.write(prooftreeToString(expandProoftree(sel._2)) + "\\DisplayProof")
 		    	p.close
 		    }
 		}
@@ -291,6 +292,7 @@ case class CalcSession() extends Publisher {
     	val l = in.length.toString
     	for (c <- in){
     		buf += c
+    		buf ++= "randomtext"
     		buf ++= l
     	}
     	return buf.toString

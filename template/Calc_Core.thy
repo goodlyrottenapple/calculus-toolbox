@@ -163,6 +163,8 @@ begin
   where
 (*(*uncommentL?Formula_Atprop*)  "match_Formula (Formula_Atprop rule) x = (case x of (Formula_Atprop m) \<Rightarrow> map (\<lambda>(x,y). (Formula_Atprop x, Formula_Atprop y)) (match rule m) | _ \<Rightarrow> [])" (*uncommentR?Formula_Atprop*)*)
 (*(*uncommentL?Formula_Bin*)  | "match_Formula (Formula_Bin var11 op1 var12) x = (case x of (Formula_Bin var21 op2 var22) \<Rightarrow> (if op1 = op2 then (match var11 var21) @m (match var12 var22) else []) | _ \<Rightarrow> [])" (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)  | "match_Formula (Formula_Un op1 var1) x = (case x of (Formula_Un op2 var2) \<Rightarrow> (if op1 = op2 then (match var1 var2) else []) | _ \<Rightarrow> [])" (*uncommentR?Formula_Un*)*)
+
 (*(*uncommentL?Formula_Freevar*)  | "match_Formula (Formula_Freevar free) x = [((Formula_Freevar free), x)]" (*uncommentR?Formula_Freevar*)*)
 (*(*uncommentL?Formula_Action_Formula*)  | "match_Formula (Formula_Action_Formula op1 act1 form1) x = (case x of (Formula_Action_Formula op2 act2 form2) \<Rightarrow> (if op1 = op2 then map (\<lambda>(x,y). (Formula_Action x, Formula_Action y)) (match act1 act2) @m (match form1 form2) else []) | _ \<Rightarrow> [])" (*uncommentR?Formula_Action_Formula*)*)
 (*(*uncommentL?Formula_Agent_Formula*)  | "match_Formula (Formula_Agent_Formula op1 act1 form1) x = (case x of (Formula_Agent_Formula op2 act2 form2) \<Rightarrow> (if op1 = op2 then map (\<lambda>(x,y). (Formula_Agent x, Formula_Agent y)) (match act1 act2) @m (match form1 form2) else []) | _ \<Rightarrow> [])" (*uncommentR?Formula_Agent_Formula*)*)
@@ -175,6 +177,8 @@ begin
   where
 (*(*uncommentL?Formula_Atprop*)   "freevars_Formula (Formula_Atprop var) = image (\<lambda>x. Formula_Atprop x) (freevars var)" (*uncommentR?Formula_Atprop*)*)
 (*(*uncommentL?Formula_Bin*)  | "freevars_Formula (Formula_Bin var1 _ var2) = (freevars var1) \<union> (freevars var2)" (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)  | "freevars_Formula (Formula_Un  _ var) = freevars var" (*uncommentR?Formula_Un*)*)
+
 (*(*uncommentL?Formula_Freevar*)  | "freevars_Formula (Formula_Freevar var) = {(Formula_Freevar var)}" (*uncommentR?Formula_Freevar*)*)
 
 (*(*uncommentL?Formula_Action_Formula*)  | "freevars_Formula (Formula_Action_Formula _ act1 form1) = image (\<lambda>x. Formula_Action x) (freevars act1) \<union> (freevars form1)" (*uncommentR?Formula_Action_Formula*)*)
@@ -188,6 +192,7 @@ begin
   where
 (*(*uncommentL?Formula_Atprop*)    "replace_Formula_aux x mtch (Formula_Atprop a) = (case x of (Formula_Atprop xa) \<Rightarrow> (case mtch of (Formula_Atprop mtcha) \<Rightarrow> Formula_Atprop (replace (xa, mtcha) a) | _ \<Rightarrow> (Formula_Atprop a)) | _ \<Rightarrow> (Formula_Atprop a))" (*uncommentR?Formula_Atprop*)*)
 (*(*uncommentL?Formula_Bin*)  | "replace_Formula_aux x mtch (Formula_Bin var1 op1 var2) = Formula_Bin (replace_Formula_aux x mtch var1) op1 (replace_Formula_aux x mtch var2)" (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)  | "replace_Formula_aux x mtch (Formula_Un op1 var) = Formula_Un op1 (replace_Formula_aux x mtch var)" (*uncommentR?Formula_Un*)*)
 (*(*uncommentL?Formula_Freevar*)  | "replace_Formula_aux x mtch (Formula_Freevar free) = (if x = (Formula_Freevar free) then mtch else (Formula_Freevar free))" (*uncommentR?Formula_Freevar*)*)
 
 (*(*uncommentL?Formula_Action_Formula*)  | "replace_Formula_aux x mtch (Formula_Action_Formula op1 act1 form1) = 
@@ -412,6 +417,10 @@ next
   case (Formula_Bin x c y) thus ?case by simp
 next
 (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)
+  case (Formula_Un c x) thus ?case by simp
+next
+(*uncommentR?Formula_Un*)*)
 (*(*uncommentL?Formula_Action*)
   case (Formula_Action x) thus ?case by simp
 next
@@ -491,6 +500,11 @@ next
     with 1 2 show ?case by (metis Formula_Bin.prems)
 next
 (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)
+  case (Formula_Un c x)
+    thus ?case by simp
+next
+(*uncommentR?Formula_Un*)*)
 (*(*uncommentL?Formula_Action*)
     case (Formula_Action x)
     show ?case by simp
@@ -505,7 +519,7 @@ next
   case (Formula_Precondition x)
     have 0: "freevars (Formula_Precondition x) = image (\<lambda>x. Formula_Action x) (freevars x)" by simp
     then obtain afree where "afree \<in> freevars x" "Formula_Action afree = free" 
-      by (metis Formula_Precondition.prems freevars_Formula.simps(6) imageE)
+      by (metis Formula_Precondition.prems imageE)
     then have "replace (free, free) (Formula_Precondition x) = Formula_Precondition (replace (afree, afree) x)" by auto
     thus ?case by (metis freevars_replace_Action_simp freevars_replace_Action_simp2)
 next
@@ -570,6 +584,11 @@ next
     with assms 0 show ?case by auto
 next
 (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)
+  case (Formula_Un c x)
+    thus ?case by simp
+next
+(*uncommentR?Formula_Un*)*)
 (*(*uncommentL?Formula_Action*)
   case (Formula_Action x)
     show ?case by simp
@@ -638,6 +657,11 @@ next
     thus ?case by (metis "0" "1")
 next
 (*uncommentR?Formula_Bin*)*)
+(*(*uncommentL?Formula_Un*)
+  case (Formula_Un c x)
+    thus ?case by auto
+next
+(*uncommentR?Formula_Un*)*)
 (*(*uncommentL?Formula_Freevar*)
   case (Formula_Freevar x)
     show ?case by simp

@@ -327,6 +327,13 @@
 				"latex" : "Prem",
 				"condition" : "(\\<lambda>x. seq = x)",
 				"locale" : "Premise seq"
+			},
+
+			"Partial" : {
+				"ascii" : "Partial",
+				"latex" : "Partial",
+				"condition" : "(\\<lambda>x. (case x of Sequent lhs rhs => struct = lhs \\<or> struct = lhs ))",
+				"locale" : "Part struct"
 			}
 		},
 
@@ -863,7 +870,8 @@
 		"RuleZer" : {
 			"Id" : 				["A?p |- A?p",				""],
 			"Atom" : 			["?X |- ?Y",				""],
-			"Prem" : 			["?X |- ?Y",				""]
+			"Prem" : 			["?X |- ?Y",				""],
+			"Partial" : 			["?X |- ?Y",				""]
 		},
 		"RuleStruct" : {
 			"I_impL" : 			["I |- ?Y << ?X", 			"?X |- ?Y"],

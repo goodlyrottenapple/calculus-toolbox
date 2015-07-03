@@ -42,6 +42,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	preferredSize = new Dimension(treeLayout.getBounds().getBounds().getSize().width+2*OFFSET_X, treeLayout.getBounds().getBounds().getSize().height+2*OFFSET_Y)
 
+	var seqTreeViewDialog : Option[SequentTreeViewDialog] = None//new SequentTreeViewDialog(null, concl(session.currentPT))
+
 	def tree = treeLayout.getTree()
 
 	def children(parent:SequentInPt) : Iterable[SequentInPt] = tree.getChildren(parent)
@@ -149,7 +151,16 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 					for (child <- children(pressed)) { 
 						println(child.text)
 					}*/
+
 					selectedSequentInPt = Some(pressed.parent)
+
+					seqTreeViewDialog match {
+						case Some(dialog) => 
+							dialog.seqPanel.currentSequent = pressed.parent.seq
+							dialog.seqPanel.rebuild()
+						case None => 
+					}
+
 					pressed.border = Swing.LineBorder(Color.black)
 					pressed.parent.sel = true
 					//val b1 = boundsOfNode(pressed)
@@ -240,7 +251,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		selectedSequentInPt match {
 			case Some(selSeq) =>
 				if(tree.isLeaf(selSeq)) {
-					val list = derAll(session.currentLocale, selSeq.seq).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
+					val list = derAll(session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
 					new SequentListDialog(list=list, session=session).pair match {
 					/*new SequentInputDialog().sequent match {
 						case Some(s) =>
@@ -422,6 +433,22 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
       	def apply = cut()
 	})
 	popup.add(cutt);
+
+	val displaySeqTree = new MenuItem(new Action("Display Sequent tree") {
+		accelerator = Some(getKeyStroke('t'))
+      	def apply = {
+      		seqTreeViewDialog match {
+      			case None => 
+      				val dialog = new SequentTreeViewDialog(null, selectedSequentInPt.get.seq)
+      				seqTreeViewDialog = Some(dialog)
+      			case Some(dialog) => 
+      				dialog.seqPanel.currentSequent = selectedSequentInPt.get.seq
+					dialog.seqPanel.rebuild()
+					dialog.open()
+      		}
+      	}
+	})
+	popup.add(displaySeqTree);
 
 	/*val replaceIntPT = new MenuItem(new Action("Replace into PT") {
       	def apply = {

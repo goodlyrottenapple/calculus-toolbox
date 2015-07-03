@@ -245,7 +245,9 @@ class ScalaBuilder:
 		list_of_additional_parsers.append( "\"(\" ~> {0}Parser <~ \")\"".format(name.lower()) )
 
 		ret = "	lazy val {0}Parser:PackratParser[{1}] = operators[Any,{1}](\n		".format(name.lower(), name)
-		ret += ",\n		".join([",\n		".join(prefix_list), ",\n		".join(infix_list)])
+		ret += ",\n		".join(prefix_list)
+		if prefix_list: ret += ","
+		ret += "\n		"+",\n		".join(infix_list)
 		ret += "\n	) ( {0} )".format(" | ".join(list_of_additional_parsers))
 
 		ret += "\n\n	def parse{0}(s:String) : Option[{0}] = parseAll({1}Parser,s) match {{\n".format(name, name.lower())
