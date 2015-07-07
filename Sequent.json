@@ -149,7 +149,7 @@
 			"Partial" : {
 				"ascii" : "Partial",
 				"latex" : "Partial",
-				"condition" : "(\\<lambda>x. (case x of Sequent lhs rhs => struct = lhs \\<or> struct = lhs ))",
+				"condition" : "(\\<lambda>x. (case x of Sequent lhs rhs => struct = lhs \\<or> struct = rhs ))",
 				"locale" : "Part struct"
 			}
 		},
