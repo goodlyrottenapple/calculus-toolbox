@@ -311,7 +311,7 @@ class SequentTreeViewDialog(owner: Window = null, sequent : Sequent, selecting:B
   modal = selecting
 
   lazy val fresh = sequent_fresh_name(seqPanel.sequent)
-  var tuple:Option[(DEAK.Sequent, Option[DEAK.Structure])] = None
+  var tuple:Option[(Sequent, Option[Structure])] = None
 
   
   contents = new BorderPanel {

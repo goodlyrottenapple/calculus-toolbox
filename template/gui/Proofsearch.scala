@@ -63,7 +63,7 @@ object Proofsearch{
 			// }
 			println("SEQ: ")
 			println(PrintCalc.sequentToString(seq, PrintCalc.ASCII))
-			println("GOAL/ANTIGOAL: ")
+			println("GOAL: ")
 			println(PrintCalc.structureToString(goal, PrintCalc.ASCII))
 			//println(PrintCalc.structureToString(antigoal, PrintCalc.ASCII))
 
