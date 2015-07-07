@@ -27,6 +27,108 @@ object Proofsearch{
 		buf.toList
 	}
 
+	def displayTactic(seq: Sequent, struct: Structure = Structure_Formula(Formula_Atprop( Atpropa(List('X')) )), history:List[Sequent] = Nil) : Option[Prooftree] = seq match {
+		case Sequenta(lhs, rhs) =>
+			println("POLARITY: ")
+			println(polarity_Sequent(struct, seq))
+			println("POS: ")
+			println(position_in_Sequent(struct, seq))
+			val goal = //( polarity_Sequent(struct, seq) == position_in_Sequent(struct, seq) ) match {
+				//case true => 
+				position_in_Sequent(struct, seq) match {
+					case Minus() => partial_goal(struct, lhs)
+					case Plus() => partial_goal(struct, rhs)
+					case _ => return None
+				}
+
+			// 	case false => position_in_Sequent(struct, seq) match {
+			// 		case Minus() => partial_goal_complement(struct, lhs)
+			// 		case Plus() => partial_goal_complement(struct, rhs)
+			// 		case _ => return None
+			// 	}
+			// }
+
+			// val antigoal = ( polarity_Sequent(struct, seq) == position_in_Sequent(struct, seq) ) match {
+			// 	case true => position_in_Sequent(struct, seq) match {
+			// 		case Minus() => partial_goal_complement(struct, lhs)
+			// 		case Plus() => partial_goal_complement(struct, rhs)
+			// 		case _ => return None
+			// 	}
+
+			// 	case false => position_in_Sequent(struct, seq) match {
+			// 		case Minus() => partial_goal(struct, lhs)
+			// 		case Plus() => partial_goal(struct, rhs)
+			// 		case _ => return None
+			// 	}
+			// }
+			println("SEQ: ")
+			println(PrintCalc.sequentToString(seq, PrintCalc.ASCII))
+			println("GOAL/ANTIGOAL: ")
+			println(PrintCalc.structureToString(goal, PrintCalc.ASCII))
+			//println(PrintCalc.structureToString(antigoal, PrintCalc.ASCII))
+
+			var tree = derTree(3, Part(goal) :: Nil, seq, 0, displayRules)
+			tree match {
+				case Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Partial()), List()) ) ) ) =>
+					println("TREE: ")
+					println(PrintCalc.prooftreeToString( Prooftreea(seq, rule, List(Prooftreea(nextGoal, RuleZera(Partial()), List()))) , PrintCalc.ASCII))
+
+					nextGoal match {
+						case Sequenta(l, r) => if (l == struct || r == struct) return Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) )
+						case  _ =>
+					}
+
+					if(!history.contains(nextGoal)) {
+							displayTactic(nextGoal, struct, seq::history) match {
+							case Some(pt) => return Some( Prooftreea(seq, rule, List( pt ) ) )
+							case None => return Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) )
+						}
+					}
+
+
+				case Some( Prooftreea(seq1, rule1, List( Prooftreea(seq2, rule2, List( Prooftreea(nextGoal, RuleZera(Partial()), List()) ) ) ) ) ) =>
+					println("TREE: 3 too big meh... ")
+
+					nextGoal match {
+						case Sequenta(l, r) => if (l == struct || r == struct) return Some( Prooftreea(seq1, rule1, List( Prooftreea(seq2, rule2, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) ) ) )
+						case  _ =>
+					}
+
+					if(!history.contains(nextGoal)) {
+							displayTactic(nextGoal, struct, seq::history) match {
+							case Some(pt) => return Some( Prooftreea(seq1, rule1, List( Prooftreea(seq2, rule2, List( pt ) ) ) ) )
+							case None => return Some( Prooftreea(seq1, rule1, List( Prooftreea(seq2, rule2, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) ) ) )
+						}
+					}
+					
+				case _ =>
+			}
+
+			// tree = derTree(2, Part(antigoal) :: Nil, seq, 0, displayRules)
+			// tree match {
+			// 	case Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Partial()), List()) ) ) ) =>
+			// 		println("ALT-TREE: ")
+			// 		println(PrintCalc.prooftreeToString( Prooftreea(seq, rule, List(Prooftreea(nextGoal, RuleZera(Partial()), List()))) , PrintCalc.ASCII))
+
+			// 		nextGoal match {
+			// 			case Sequenta(l, r) => if (l == struct || r == struct) return Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) )
+			// 			case  _ =>
+			// 		}
+
+			// 		if(!history.contains(nextGoal)) {
+
+			// 			displayTactic(nextGoal, struct, seq::history) match {
+			// 				case Some(pt) => return Some( Prooftreea(seq, rule, List( pt ) ) )
+			// 				case None => return Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) )
+			// 			}
+			// 		}
+			// 	case None =>
+			// }
+			// println("\n\n\n")
+			return tree
+		case _ => None
+	}
+
 	def restrictRules(rules : List[Rule], restr : List[Rule]) :  List[Rule] = {
 		val buf = ListBuffer[Rule]()
 		buf ++= rules

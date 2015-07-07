@@ -25,7 +25,7 @@ import PrintCalc._
 import Proofsearch._
 
 
-class SequentViewPanel(sequent : Sequent, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 10, editable : Boolean = true) extends scala.swing.Panel {
+case class SequentViewPanel(sequent : Sequent, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 10, editable : Boolean = false) extends scala.swing.Panel {
 	val configuration = new DefaultConfiguration[StructureInPt](gapBetweenLevels, gapBetweenNodes, org.abego.treelayout.Configuration.Location.Top)
 	val nodeExtentProvider = new StructureInPtNodeExtentProvider()
 
@@ -51,13 +51,36 @@ class SequentViewPanel(sequent : Sequent, gapBetweenLevels:Int = 10, gapBetweenN
 
 	def boundsOfNode(node:StructureInPt) : Rectangle2D.Double = treeLayout.getNodeBounds().get(node)
 
-	// def createPTreeAux(proof: Prooftree, tree: DefaultTreeForTreeLayout[SequentInPt], root:SequentInPt, size:Int=20) : Unit = proof match {
-	// 	case Prooftreea(seq, r, list) => {
- //    		val l = new SequentInPt(seq, r, size, None, session)
- //    		tree.addChild(root, l)
- //    		list.foreach( x => createPTreeAux(x, tree, l, size) )
- //    	}
-	// }
+	listenTo(mouse.clicks)
+	reactions += {
+		case ButtonClicked(b) if editable =>
+			
+			unselect()
+			val pressed = b.asInstanceOf[StructureInPt]
+			if(pressed.selectable){
+				pressed.border = Swing.LineBorder(Color.black)
+				pressed.sel = true
+			}
+			//val b1 = boundsOfNode(pressed)
+			//popup.peer.show(b.peer, OFFSET_X, OFFSET_Y)
+
+		case m : MouseClicked => 
+			//selectedSequentInPt = None
+			println("unselect")
+			unselect()
+
+	}
+
+
+	def unselect(root:StructureInPt = tree.getRoot) : Unit = {
+		root.border = Swing.EmptyBorder(0,0,0,0)
+		root.sel = false
+
+		for (child <- children(root)) {
+			unselect(child)
+		}
+
+	}
 
 	def createSequentTreeAux(structure:Structure, size:Int=20, tree:DefaultTreeForTreeLayout[StructureInPt], root:StructureInPt) : Unit = structure match {
 		/*/*uncommentL?Structure_Formula*/
@@ -109,7 +132,7 @@ class SequentViewPanel(sequent : Sequent, gapBetweenLevels:Int = 10, gapBetweenN
 
 	def createSequentTree(seq: Sequent, size:Int=20)  : DefaultTreeForTreeLayout[StructureInPt] = seq match {
 		case Sequenta(lhs, rhs) => {
-    		val root = new StructureInPt(None, size, "\\vdash")
+    		val root = new StructureInPt(None, size, "\\vdash", false)
     		val tree = new DefaultTreeForTreeLayout[StructureInPt](root)
     		createSequentTreeAux(lhs, size, tree, root)
     		createSequentTreeAux(rhs, size, tree, root)
@@ -117,6 +140,68 @@ class SequentViewPanel(sequent : Sequent, gapBetweenLevels:Int = 10, gapBetweenN
     	}
 	}
 
+	def rebuildSeqent(root:StructureInPt, repl:Structure = Structure_Formula(Formula_Atprop( Atpropa(List('X')) )) ) : Option[ Tuple2[Sequent, Option[Structure]] ] = {
+		val it = children(root).iterator
+		val lhs_StructureInPt = it.next()
+		val rhs_StructureInPt = it.next()
+
+		val lhs_new = rebuildStructure(lhs_StructureInPt, repl).getOrElse( Tuple2(lhs_StructureInPt.struct.getOrElse(repl),  None) )
+		val rhs_new = rebuildStructure(rhs_StructureInPt, repl).getOrElse( Tuple2(rhs_StructureInPt.struct.getOrElse(repl),  None) )
+
+		val new_repl = if (!lhs_new._2.isEmpty) lhs_new._2 else rhs_new._2
+		return Some( Tuple2(Sequenta(lhs_new._1, rhs_new._1), new_repl ) )
+	}
+
+
+	def rebuildStructure(root:StructureInPt, repl:Structure = Structure_Formula(Formula_Atprop( Atpropa(List('X')) )) ) : Option[ Tuple2[Structure, Option[Structure]] ] = {
+		if(root.sel) return Some( Tuple2(repl, root.struct) )
+		else{
+
+			root.struct match {
+				case Some(s) => s match {
+				   	/*/*uncommentL?Structure_Bin*/
+					case Structure_Bin(lhs, op, rhs) =>
+				   		// val l = new StructureInPt(Some( Structure_Bin(lhs, op, rhs) ), size, structure_bin_opToString(op))
+				   		val it = children(root).iterator
+				   		val lhs_StructureInPt = it.next()
+				   		val rhs_StructureInPt = it.next()
+
+				   		val lhs_new = rebuildStructure(lhs_StructureInPt, repl).getOrElse( Tuple2(lhs_StructureInPt.struct.getOrElse(repl),  None) )
+				   		val rhs_new = rebuildStructure(rhs_StructureInPt, repl).getOrElse( Tuple2(rhs_StructureInPt.struct.getOrElse(repl),  None) )
+				   		val new_repl = if (!lhs_new._2.isEmpty) lhs_new._2 else rhs_new._2
+				   		return Some( Tuple2(Structure_Bin(lhs_new._1, op, rhs_new._1), new_repl ) )
+				   	/*uncommentR?Structure_Bin*/*/
+				   	/*/*uncommentL?Structure_Action_Structure*/
+				   	case Structure_Action_Structure(op, ac, s) =>
+				   	//children(root).next()
+					   	val it = children(root).iterator
+					   	it.next()
+				   		val s_StructureInPt = it.next()
+
+				   		val s_new = rebuildStructure(s_StructureInPt, repl).getOrElse( Tuple2(s_StructureInPt.struct.getOrElse(repl),  None) )
+				   		return Some( Tuple2(Structure_Action_Structure(op, ac, s_new._1), s_new._2 ) )
+				   	/*uncommentR?Structure_Action_Structure*/*/
+				   	/*/*uncommentL?Structure_Agent_Structure*/
+				   	case Structure_Agent_Structure(op, ag, s) =>
+				   		val it = children(root).iterator
+					   	it.next()
+				   		val s_StructureInPt = it.next()
+
+				   		val s_new = rebuildStructure(s_StructureInPt, repl).getOrElse( Tuple2(s_StructureInPt.struct.getOrElse(repl),  None) )
+				   		return Some( Tuple2(Structure_Agent_Structure(op, ag, s_new._1), s_new._2 ) )
+				   	/*uncommentR?Structure_Agent_Structure*/*/
+				   	case x =>
+				   		return Some( Tuple2(x, None) )
+				}
+
+				case None => return None
+
+			}
+
+		}
+	}
+
+	
 
 	// def update() = {
 	// 	peer.removeAll()
@@ -204,10 +289,10 @@ class StructureInPtNodeExtentProvider extends org.abego.treelayout.NodeExtentPro
 	def getHeight(treeNode:StructureInPt) = treeNode.height
 }
 
-class StructureInPt(struct:Option[Structure], size:Int = 15, latex:String = "") extends Button{
+case class StructureInPt(struct:Option[Structure], iconSize:Int = 15, latex:String = "", selectable:Boolean = true) extends Button{
 
 	val latXForm = new TeXFormula(latex)
-    icon = latXForm.createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
+    icon = latXForm.createTeXIcon(TeXConstants.STYLE_DISPLAY, iconSize)
 
   
   // val macroPtPanel = rule match {

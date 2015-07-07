@@ -438,7 +438,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		accelerator = Some(getKeyStroke('t'))
       	def apply = {
       		seqTreeViewDialog match {
-      			case None => 
+      			case None =>
+      				displayTactic( selectedSequentInPt.get.seq )
       				val dialog = new SequentTreeViewDialog(null, selectedSequentInPt.get.seq)
       				seqTreeViewDialog = Some(dialog)
       			case Some(dialog) => 
@@ -449,6 +450,34 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
       	}
 	})
 	popup.add(displaySeqTree);
+
+	val displayX = new MenuItem(new Action("Display X") {
+		accelerator = Some(getKeyStroke('x'))
+      	def apply = {
+      		val dialog = new SequentTreeViewDialog(null, selectedSequentInPt.get.seq, true)
+      		dialog.tuple match {
+      			case Some((seq, Some(struct))) => 
+      				displayTactic( seq, dialog.fresh ) match {
+	      			case Some(pt) =>
+	      				val mPT = replace_SFAtprop_into_PT(dialog.fresh, struct, pt)
+      					session.currentPT = session.mergePTs(mPT, selectedSequentInPt.get, tree.getRoot(), children)
+	      				session.savePT()
+	      				update()
+	      			case None => 
+      			}
+
+      			case None =>
+      		}
+      		/*displayTactic( selectedSequentInPt.get.seq ) match {
+      			case Some(pt) =>
+      				session.currentPT = session.mergePTs(pt, selectedSequentInPt.get, tree.getRoot(), children)
+					session.savePT()
+					update()
+      			case None => 
+      		}*/
+     	}
+	})
+	popup.add(displayX);
 
 	/*val replaceIntPT = new MenuItem(new Action("Replace into PT") {
       	def apply = {

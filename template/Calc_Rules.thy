@@ -495,18 +495,144 @@ fun polarity_Structure :: "Structure \<Rightarrow> Structure \<Rightarrow> polar
 (*uncommentR?Structure_Bin*)*)
 (*(*uncommentL?Structure_Action_Structure*) "polarity_Structure s (Structure_Action_Structure oper ac struct) = (polarity_Structure s struct)" | (*uncommentR?Structure_Action_Structure*)*)
 (*(*uncommentL?Structure_Agent_Structure*) "polarity_Structure s (Structure_Agent_Structure oper ag struct) = (polarity_Structure s struct)" | (*uncommentR?Structure_Agent_Structure*)*)
-"polarity_Structure _ _ = N"
+"polarity_Structure s x = (if s = x then +p else N)"
 
 
 fun polarity_Sequent :: "Structure \<Rightarrow> Sequent \<Rightarrow> polarity" where
-"polarity_Sequent s (Sequent lhs rhs) = (
-  if s = lhs then -p
-  else if s = rhs then +p
-  else ((\<not>p(polarity_Structure s lhs)) \<or>p (polarity_Structure s rhs)) )" |
+"polarity_Sequent s (Sequent lhs rhs) = (\<not>p(polarity_Structure s lhs)) \<or>p (polarity_Structure s rhs)" |
 "polarity_Sequent s _ = N"
 
+fun partial_goal :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure" where
+(*(*uncommentL?Structure_Bin*) 
+"partial_goal s (Structure_Bin l oper r) = (case (polarity_Structure s l) of N \<Rightarrow> (if s = l then l else r) | _ \<Rightarrow> l)" |
+(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Action_Structure*) "partial_goal s (Structure_Action_Structure oper ac struct) = struct" | (*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Agent_Structure*) "partial_goal s (Structure_Agent_Structure oper ag struct) = struct" | (*uncommentR?Structure_Agent_Structure*)*)
+"partial_goal s x = x"
+
+fun partial_goal_complement :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure" where
+(*(*uncommentL?Structure_Bin*) 
+"partial_goal_complement s (Structure_Bin l oper r) = (case (polarity_Structure s l) of N \<Rightarrow> (if s = l then r else l) | _ \<Rightarrow> r)" |
+(*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Action_Structure*) "partial_goal_complement s (Structure_Action_Structure oper ac struct) = struct" | (*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Agent_Structure*) "partial_goal_complement s (Structure_Agent_Structure oper ag struct) = struct" | (*uncommentR?Structure_Agent_Structure*)*)
+"partial_goal_complement s x = x"
 
 
-export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut expandProoftree polarity_Sequent in Scala
+lemma partial_goal:
+  fixes oper x y s
+  shows "((partial_goal s (Structure_Bin x oper y)) = x) \<or> (partial_goal s (Structure_Bin x oper y)) = y"
+proof auto
+assume "s = x" "(case polarity_Structure x x of +p \<Rightarrow> x | _ \<Rightarrow> x) \<noteq> y"
+then show "(case polarity_Structure x x of +p \<Rightarrow> x | _ \<Rightarrow> x) = x" by (metis polarity.exhaust polarity.simps(7) polarity.simps(8) polarity.simps(9))
+next
+assume "s \<noteq> x" "(case polarity_Structure s x of N \<Rightarrow> y | _ \<Rightarrow> x) \<noteq> y"
+then show "(case polarity_Structure s x of N \<Rightarrow> y | _ \<Rightarrow> x) = x" by (metis polarity.exhaust polarity.simps(7) polarity.simps(8) polarity.simps(9))
+qed
+
+lemma partial_goal_complement:
+  fixes oper x y s
+  shows "((partial_goal_complement s (Structure_Bin x oper y)) = x) \<or> (partial_goal_complement s (Structure_Bin x oper y)) = y"
+proof auto
+assume "s = x" "(case polarity_Structure x x of +p \<Rightarrow> y | _ \<Rightarrow> y) \<noteq> y"
+then show "(case polarity_Structure x x of +p \<Rightarrow> y | _ \<Rightarrow> y) = x"
+  by (metis polarity.exhaust polarity.simps(7) polarity.simps(8) polarity.simps(9))
+next
+assume "s \<noteq> x" "(case polarity_Structure s x of N \<Rightarrow> x | _ \<Rightarrow> y) \<noteq> y"
+then show "(case polarity_Structure s x of N \<Rightarrow> x | _ \<Rightarrow> y) = x" by (metis polarity.exhaust polarity.simps(7) polarity.simps(8) polarity.simps(9))
+qed
+
+
+lemma partial_goal_and_complement:
+  fixes oper x y s
+  defines "struct \<equiv> Structure_Bin x oper y"
+  shows "( (partial_goal s struct) = x \<and> (partial_goal_complement s struct) = y ) \<or> 
+         ( (partial_goal_complement s struct) = x \<and> (partial_goal s struct) = y )"
+using struct_def
+apply auto
+apply (metis polarity.exhaust polarity.simps(7) polarity.simps(8) polarity.simps(9))+
+done
+
+
+fun position_in_Sequent :: "Structure \<Rightarrow> Sequent \<Rightarrow> polarity" where
+"position_in_Sequent s (Sequent l r) = (
+  if s = l then -p
+  else if (polarity_Structure s l) \<noteq> N then -p
+  else if s = r then +p 
+  else if (polarity_Structure s r) \<noteq> N then +p
+  else N )" |
+"position_in_Sequent s _ = N"
+
+
+
+
+fun fresh_name_aux :: "string list \<Rightarrow> string \<Rightarrow> string set \<Rightarrow> string" where
+"fresh_name_aux [] s _ = s" |
+"fresh_name_aux (x#xs) s full = (if (s@x) \<notin> full then s@x else (fresh_name_aux xs (s@x) full) )"
+
+
+definition fresh_name :: "string list \<Rightarrow> string" where
+"fresh_name list = fresh_name_aux list ''X'' (set list)"
+
+
+fun collect_SFAtprop_names :: "Structure \<Rightarrow> string list" where
+(*(*uncommentL?Structure_Formula?Formula_Atprop?Atprop*)  "collect_SFAtprop_names (Structure_Formula (Formula_Atprop (Atprop x))) = [x]" |(*uncommentR?Structure_Formula?Formula_Atprop?Atprop*)*)
+(*(*uncommentL?Structure_Bin*) "collect_SFAtprop_names (Structure_Bin l oper r) = (collect_SFAtprop_names l) @ (collect_SFAtprop_names r)" | (*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Action_Structure*) "collect_SFAtprop_names (Structure_Action_Structure oper ac struct) = collect_SFAtprop_names struct" | (*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Agent_Structure*) "collect_SFAtprop_names (Structure_Agent_Structure oper ag struct) = collect_SFAtprop_names struct" | (*uncommentR?Structure_Agent_Structure*)*)
+"collect_SFAtprop_names s = []"
+
+fun replace_SFAtprop_into_Structure :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure \<Rightarrow> Structure" where
+(*(*uncommentL?Structure_Bin*) "replace_SFAtprop_into_Structure sfa repl (Structure_Bin l oper r) = Structure_Bin (replace_SFAtprop_into_Structure sfa repl l) oper (replace_SFAtprop_into_Structure sfa repl r)" | (*uncommentR?Structure_Bin*)*)
+(*(*uncommentL?Structure_Action_Structure*) "replace_SFAtprop_into_Structure sfa repl (Structure_Action_Structure oper ac struct) = Structure_Action_Structure oper ac (replace_SFAtprop_into_Structure sfa repl struct)" | (*uncommentR?Structure_Action_Structure*)*)
+(*(*uncommentL?Structure_Agent_Structure*) "replace_SFAtprop_into_Structure sfa repl (Structure_Agent_Structure oper ag struct) = Structure_Agent_Structure oper ag (replace_SFAtprop_into_Structure sfa repl struct)" | (*uncommentR?Structure_Agent_Structure*)*)
+"replace_SFAtprop_into_Structure sfa repl s = (if sfa = s then repl else s)"
+
+
+fun replace_SFAtprop_into_Sequent :: "Structure \<Rightarrow> Structure \<Rightarrow> Sequent \<Rightarrow> Sequent" where
+"replace_SFAtprop_into_Sequent sfa repl (Sequent l r) = Sequent (replace_SFAtprop_into_Structure sfa repl l) (replace_SFAtprop_into_Structure sfa repl r)" |
+"replace_SFAtprop_into_Sequent sfa relp x = x"
+
+fun replace_SFAtprop_into_PT :: "Structure \<Rightarrow> Structure \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
+"replace_SFAtprop_into_PT sfa repl (Prooftree s r list) = (Prooftree (replace_SFAtprop_into_Sequent sfa repl s) r (map (replace_SFAtprop_into_PT sfa repl) list))"
+
+
+fun sequent_fresh_name :: "Sequent \<Rightarrow> Structure" where
+"sequent_fresh_name (Sequent l r) = (Structure_Formula (Formula_Atprop (Atprop (fresh_name ((collect_SFAtprop_names l)@(collect_SFAtprop_names r)) ))))" |
+"sequent_fresh_name _ = (Structure_Formula (Formula_Atprop (Atprop ''X'')))"
+
+(*find_theorems fresh_string
+
+thm fresh_name_aux.induct
+lemma fresh_name_is_really_fresh:
+  fixes str l
+  assumes "x = fresh_name l"
+  shows "x \<notin> set l"
+proof (rule ccontr)
+  assume x_in_l: "\<not> x \<notin> set l"
+  have fresh_aux_unfold: "fresh_name l = fresh_name_aux l ''X'' (set l)" using fresh_name_def by simp
+  have "(fresh_name_aux l '''' (set l)) \<notin> set l"
+  proof (induct l)
+  print_cases
+    case Nil
+    thus ?case by simp
+  next
+    case (Cons x xs)
+    { assume x_in_xs: "x \<in> set xs"
+      then have set_equiv: "set xs = set (x#xs)" by auto
+      then have "fresh_name_aux (x # xs) [] (set (x # xs)) = (fresh_name_aux xs x (set xs))" using x_in_xs by simp
+    }
+    { assume "x \<notin> set xs"
+      then have "fresh_name_aux (x # xs) [] (set (x # xs)) = (fresh_name_aux xs x (set (x#xs)))" by simp
+      with Cons have ?case sorry }
+    thus ?case sorry
+  qed
+  with assms x_in_l fresh_aux_unfold show False sorry
+qed
+*)
+
+
+export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut 
+expandProoftree polarity_Sequent position_in_Sequent partial_goal partial_goal_complement sequent_fresh_name replace_SFAtprop_into_PT in Scala
 module_name (*calc_name*) file (*export_path*)
 end

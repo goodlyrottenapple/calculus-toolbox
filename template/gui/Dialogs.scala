@@ -301,18 +301,22 @@ class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = tr
 
 }
 
-class SequentTreeViewDialog(owner: Window = null, sequent : Sequent) extends Dialog(owner) {
+class SequentTreeViewDialog(owner: Window = null, sequent : Sequent, selecting:Boolean = false) extends Dialog(owner) {
 
   preferredSize = new java.awt.Dimension(400, 300)
   
-  val seqPanel = new SequentViewPanel(sequent)
+  val seqPanel = new SequentViewPanel(sequent=sequent, editable=selecting)
   seqPanel.build()
 
-  modal = false
+  modal = selecting
+
+  lazy val fresh = sequent_fresh_name(seqPanel.sequent)
+  var tuple:Option[(DEAK.Sequent, Option[DEAK.Structure])] = None
 
   
   contents = new BorderPanel {
     layout(new ScrollPane(seqPanel){border = Swing.EmptyBorder(0, 0, 0, 0)}) = Center
+    if(selecting) layout( Button("Display Selected") { tuple = seqPanel.rebuildSeqent(seqPanel.tree.getRoot(), fresh); close() }  ) = South
   }
 
   centerOnScreen()
