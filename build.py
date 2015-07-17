@@ -18,6 +18,10 @@ PARSER_TEMPLATE = "Parser"
 PRINT_TEMPLATE = "Print"
 ISA_CORE_TEMPLATE = "Calc_Core"
 ISA_RULES_TEMPLATE = "Calc_Rules"
+ISA_CORE_SE_TEMPLATE = "Calc_Core_SE"
+ISA_RULES_SE_TEMPLATE = "Calc_Rules_SE"
+
+ISA_EQ_TEMPLATE = "Calc_Eq"
 
 #calculate relative path from path1 to path2 (assuming they are prefixed by the same path)
 def nav_to_folder(path1, path2):
@@ -251,6 +255,28 @@ def add_gui(flags):
     file = open(OUTPUT_PATH+'relAKA.txt', 'w')
     file.close()
 
+    return True
+    
+
+def add_se(flags):
+    paths = glob(TEMPLATE_FILES_PATH + '*.thy')
+    list = [p.split('/')[1].split('.')[0] for p in paths]
+    builder = isabuilder.IsabelleBuilder(CALC_TEMPLATE)
+    builder.add("export_path", nav_to_folder(ISABELLE_SRC_PATH, SCALA_SRC_PATH))
+    builder.add("parser_command", "scala -classpath {0}bin Parser".format(OUTPUT_PATH))
+    CALC_NAME = builder.get("calc_name")
+
+    if ISA_CORE_SE_TEMPLATE in list:
+        print "Generating the shallow embedding and equality proofs (stubs only!) ..."
+        # if not doBuild(builder, paths[list.index(ISA_CORE_SE_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_Core_SE.thy"): return False
+
+    # if ISA_RULES_SE_TEMPLATE in list:
+    #     if not doBuild(builder, paths[list.index(ISA_RULES_SE_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_SE.thy"): return False
+    
+    if ISA_EQ_TEMPLATE in list:
+        if not doBuild(builder, paths[list.index(ISA_EQ_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_Eq.thy"): return False
+
+    return True
 
 
 
@@ -315,8 +341,8 @@ def main(argv):
                 if rule_calc_gen(BUILD_FLAGS):
                     #recompile the core calculus (now with rules)
                     if calc_compile(BUILD_FLAGS):
-                        add_gui(BUILD_FLAGS)
-                        print CALC_NAME, "has been successfully built..."
+                        if add_gui(BUILD_FLAGS):
+                            print CALC_NAME, "has been successfully built..."
 
 if __name__ == "__main__":
     main(sys.argv[1:])

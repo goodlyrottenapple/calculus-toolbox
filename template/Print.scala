@@ -4,6 +4,7 @@ object PrintCalc{
 	val ASCII = "ascii"
 	val LATEX = "latex"
 	val ISABELLE = "isabelle"
+	val ISABELLE_SE = "isabelle_se"
 
 
 	def bracketIf(in:String, b: Boolean = true) : String = {
@@ -12,8 +13,7 @@ object PrintCalc{
 	}
 
 	def stringToString(x:List[Char], format:String = LATEX) : String = format match {
-		case ASCII => x.mkString
-		case LATEX => x.mkString
+		case ASCII | LATEX | ISABELLE_SE => x.mkString
 		case ISABELLE => "''" + x.mkString +"''"
 	}
 

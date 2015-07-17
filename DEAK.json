@@ -10,9 +10,11 @@
 			"Atprop_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>A _",
+				"isabelle_se" : "_",
 				"ascii" : "A? _",
 				"latex" : "? _",
-				"precedence": [320, 320]
+				"precedence": [320, 320],
+				"shallow" : false
 			}
 		},
 
@@ -24,9 +26,11 @@
 			"Agent_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>Ag _",
+				"isabelle_se" : "_",
 				"ascii" : "Ag? _",
 				"latex" : "? _",
-				"precedence": [320, 320]
+				"precedence": [320, 320],
+				"shallow" : false
 			}
 		},
 
@@ -38,9 +42,11 @@
 			"Action_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>Act _",
+				"isabelle_se" : "_",
 				"ascii" : "Act? _",
 				"latex" : "? _",
-				"precedence": [320, 320]
+				"precedence": [320, 320],
+				"shallow" : false
 			}
 		},
 
@@ -53,25 +59,30 @@
 
 			"Formula_Agent" : {
 				"type": "Agent",
-				"parsable" : false
+				"parsable" : false,
+				"shallow" : false
 			},
 			"Formula_Action" : {
 				"type": "Action",
-				"parsable" : false
+				"parsable" : false,
+				"shallow" : false
 			},
 
 			"Formula_Zer" : {
 				"type" : "Formula_Zer_Op",
 				"isabelle" : "Z\\<^sub>F",
+				"isabelle_se" : "_",
 				"precedence": [340, 340]
 			},
 
 			"Formula_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>F _",
+				"isabelle_se" : "_",
 				"ascii" : "F? _",
 				"latex" : "? _",
-				"precedence": [340, 330]
+				"precedence": [340, 330],
+				"shallow" : false
 			},
 			"Formula_Precondition" : {
 				"type" : "Action",
@@ -83,16 +94,19 @@
 			"Formula_Bin" : {
 				"type" : ["Formula", "Formula_Bin_Op", "Formula"],
 				"isabelle" : "B\\<^sub>F _",
+				"isabelle_se" : "_",
 				"precedence": [330,330,330, 331]
 			},
 			"Formula_Agent_Formula" : {
 				"type" : ["Formula_Agent_Formula_Op", "Agent", "Formula"],
 				"isabelle" : "AgF\\<^sub>F _",
+				"isabelle_se" : "_",
 				"precedence": [330,330,330, 331]
 			},
 			"Formula_Action_Formula" : {
 				"type" : ["Formula_Action_Formula_Op", "Action", "Formula"],
 				"isabelle" : "ActF\\<^sub>F _",
+				"isabelle_se" : "_",
 				"precedence": [330,330,330, 331]
 			}
 		},
@@ -198,20 +212,24 @@
 			"Structure_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>S _",
+				"isabelle_se" : "_",
 				"ascii" : "? _",
 				"latex" : "? _",
-				"precedence": [340, 340]
+				"precedence": [340, 340],
+				"shallow" : false
 			},
 
 			"Structure_Zer" : {
 				"type" : "Structure_Zer_Op",
 				"isabelle" : "Z\\<^sub>S",
+				"isabelle_se" : "_",
 				"precedence": [340, 340]
 			},
 
 			"Structure_Bin" : {
 				"type" : ["Structure", "Structure_Bin_Op", "Structure"],
 				"isabelle" : "B\\<^sub>S _",
+				"isabelle_se" : "_",
 				"precedence": [340,340,340, 341]
 			},
 			"Structure_Phi" : {
@@ -224,11 +242,13 @@
 			"Structure_Agent_Structure" : {
 				"type" : ["Structure_Agent_Structure_Op", "Agent", "Structure"],
 				"isabelle" : "AgS\\<^sub>S _",
+				"isabelle_se" : "_",
 				"precedence": [330,330,330, 331]
 			},
 			"Structure_Action_Structure" : {
 				"type" : ["Structure_Action_Structure_Op", "Action", "Structure"],
 				"isabelle" : "ActS\\<^sub>S _",
+				"isabelle_se" : "_",
 				"precedence": [330,330,330, 331]
 			},
 
@@ -296,7 +316,8 @@
 		"Sequent" : {
 			"Sequent_Structure" : {
 				"type": "Structure",
-				"parsable" : false
+				"parsable" : false,
+				"shallow" : false
 			},
 
 			"Sequent": {
@@ -326,14 +347,16 @@
 				"ascii" : "Prem",
 				"latex" : "Prem",
 				"condition" : "(\\<lambda>x. seq = x)",
-				"locale" : "Premise seq"
+				"locale" : "Premise seq",
+				"se" : false
 			},
 
 			"Partial" : {
 				"ascii" : "Partial",
 				"latex" : "Partial",
 				"condition" : "(\\<lambda>x. (case x of Sequent lhs rhs => struct = lhs \\<or> struct = rhs ))",
-				"locale" : "Part struct"
+				"locale" : "Part struct",
+				"se" : false
 			}
 		},
 
@@ -342,7 +365,8 @@
 				"ascii" : "Cut",
 				"latex" : "Cut",
 				"locale" : "CutFormula f",
-				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
+				"se_rule" : "l \\<turnstile>d (X \\<turnstile>\\<^sub>S f\\<^sub>S) \\<Longrightarrow> l \\<turnstile>d (f\\<^sub>S \\<turnstile>\\<^sub>S Y) \\<Longrightarrow> l \\<turnstile>d (X \\<turnstile>\\<^sub>S Y)"
 			}
 		},
 
@@ -793,7 +817,8 @@
 				"latex" : "Pre_L",
 				"condition" : "pre_l alpha",
 				"premise" : "(\\<lambda>x. Some [(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
-				"locale" : "PreFormula alpha f"
+				"locale" : "PreFormula alpha f",
+				"se_rule": "l \\<turnstile>d (f\\<^sub>S \\<turnstile>\\<^sub>S X) \\<Longrightarrow> l \\<turnstile>d ((One\\<^sub>F alpha)\\<^sub>S \\<turnstile>\\<^sub>S X)"
 			}
 		},
 
@@ -802,13 +827,15 @@
 				"ascii" : "swapin'L",
 				"latex" : "swapin'L",
 				"condition" : "swapin rel ((B\\<^sub>S (Phi\\<^sub>S (?\\<^sub>Act ''alpha'')) (;\\<^sub>S) (AgS\\<^sub>S (forwK\\<^sub>S) (?\\<^sub>Ag ''a'') (ActS\\<^sub>S (forwA\\<^sub>S) (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'')))) \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))",
-				"locale" : "RelAKA rel"
+				"locale" : "RelAKA rel",
+				"se_rule" : "l \\<turnstile>d (forwA\\<^sub>S alpha (forwK\\<^sub>S a X) \\<turnstile>\\<^sub>S Y) \\<Longrightarrow> beta \\<in> set (rel alpha a) \\<Longrightarrow> l \\<turnstile>d ((Phi\\<^sub>S alpha) ;\\<^sub>S (forwK\\<^sub>S a (forwA\\<^sub>S beta X)) \\<turnstile>\\<^sub>S Y)"
 			},
 			"Swapin_R" : {
 				"ascii" : "swapin'R",
 				"latex" : "swapin'R",
 				"condition" : "swapin rel ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S (B\\<^sub>S (Phi\\<^sub>S (?\\<^sub>Act ''alpha'')) (\\<rightarrow>\\<^sub>S) (AgS\\<^sub>S (forwK\\<^sub>S) (?\\<^sub>Ag ''a'') (ActS\\<^sub>S (forwA\\<^sub>S) (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'')))))",
-				"locale" : "RelAKA rel"
+				"locale" : "RelAKA rel",
+				"se_rule" : "l \\<turnstile>d (Y \\<turnstile>\\<^sub>S forwA\\<^sub>S alpha (forwK\\<^sub>S a X)) \\<Longrightarrow> beta \\<in> set (rel alpha a) \\<Longrightarrow> l \\<turnstile>d (Y \\<turnstile>\\<^sub>S (Phi\\<^sub>S alpha) \\<rightarrow>\\<^sub>S (forwK\\<^sub>S a (forwA\\<^sub>S beta X)))"
 			}
 		},
 		"RuleSwapout" : {
@@ -816,13 +843,15 @@
 				"ascii" : "swapout'L",
 				"latex" : "swapout'L",
 				"locale" : "RelAKA rel",
-				"premise" : "swapout_L rel (AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))"
+				"premise" : "swapout_L rel (AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))",
+				"se_rule" : "(\\<forall> Y \\<in> (set Ys). \\<exists>beta \\<in> set (rel alpha a). (l \\<turnstile>d forwK\\<^sub>S a (forwA\\<^sub>S beta X) \\<turnstile>\\<^sub>S Y) ) \\<Longrightarrow> l \\<turnstile>d forwA\\<^sub>S alpha (forwK\\<^sub>S a X) \\<turnstile>\\<^sub>S ;;\\<^sub>S Ys"
 			},
 			"Swapout_R" : {
 				"ascii" : "Swapout'R",
 				"latex" : "Swapout'R",
 				"locale" : "RelAKA rel",
-				"premise" : "swapout_R rel ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X''))"
+				"premise" : "swapout_R rel ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X''))",
+				"se_rule" : "(\\<forall> Y \\<in> (set Ys). \\<exists>beta \\<in> set (rel alpha a). (l \\<turnstile>d Y \\<turnstile>\\<^sub>S forwK\\<^sub>S a (forwA\\<^sub>S beta X)) ) \\<Longrightarrow> l \\<turnstile>d  ;;\\<^sub>S Ys \\<turnstile>\\<^sub>S forwA\\<^sub>S alpha (forwK\\<^sub>S a X)"
 			}
 		},
 
@@ -846,22 +875,26 @@
 			"Bigcomma_Cons_L" : {
 				"ascii" : "Bigcomma_Cons_L",
 				"latex" : "Bigcomma_Cons_L",
-				"premise" : "bigcomma_cons_L"
+				"premise" : "bigcomma_cons_L",
+				"se_rule" : "l \\<turnstile>d (;;\\<^sub>S(X # Xs) \\<turnstile>\\<^sub>S Y) \\<Longrightarrow> l \\<turnstile>d (X ;\\<^sub>S (;;\\<^sub>S Xs) \\<turnstile>\\<^sub>S Y)"
 			},
 			"Bigcomma_Cons_L2" : {
 				"ascii" : "Bigcomma_Cons_L2",
 				"latex" : "Bigcomma_Cons_L",
-				"premise" : "bigcomma_cons_L2"
+				"premise" : "bigcomma_cons_L2",
+				"se_rule" : "l \\<turnstile>d (X ;\\<^sub>S (;;\\<^sub>S Xs) \\<turnstile>\\<^sub>S Y) \\<Longrightarrow> l \\<turnstile>d (;;\\<^sub>S(X # Xs) \\<turnstile>\\<^sub>S Y)"
 			},
 			"Bigcomma_Cons_R" : {
 				"ascii" : "Bigcomma_Cons_R",
 				"latex" : "Bigcomma_Cons_R",
-				"premise" : "bigcomma_cons_R"
+				"premise" : "bigcomma_cons_R",
+				"se_rule" : "l \\<turnstile>d (Y \\<turnstile>\\<^sub>S ;;\\<^sub>S(X # Xs)) \\<Longrightarrow> l \\<turnstile>d (Y \\<turnstile>\\<^sub>S X ;\\<^sub>S (;;\\<^sub>S Xs))"
 			},
 			"Bigcomma_Cons_R2" : {
 				"ascii" : "Bigcomma_Cons_R2",
 				"latex" : "Bigcomma_Cons_R",
-				"premise" : "bigcomma_cons_R2"
+				"premise" : "bigcomma_cons_R2",
+				"se_rule" : "l \\<turnstile>d (Y \\<turnstile>\\<^sub>S X ;\\<^sub>S (;;\\<^sub>S Xs)) \\<Longrightarrow> l \\<turnstile>d (Y \\<turnstile>\\<^sub>S ;;\\<^sub>S(X # Xs))"
 			}
 		}
 	},

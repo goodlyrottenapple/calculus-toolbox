@@ -82,7 +82,7 @@ def main(argv):
     PATTERNS = ["*.scala", "*.thy"]
     SOURCE = "."
     DEST = ""
-    RULES = [("scala/", ""), ("isabelle/", ""), ("DEAK_Core.thy", "Calc_Core.thy"), ("DEAK.thy", "Calc_Rules.thy")]
+    RULES = [("scala/", ""), ("isabelle/", ""), ("DEAK_Core.thy", "Calc_Core.thy"), ("DEAK_Core_SE.thy", "Calc_Core_SE.thy"), ("DEAK.thy", "Calc_Rules.thy"), ("DEAK_SE.thy", "Calc_Rules_SE.thy"), ("DEAK_Eq.thy", "Calc_Eq.thy")]
     IGNORE = ["scala/DEAK.scala", ".thy#", ".thy~", "ROOT"]
 
     for opt, arg in opts:

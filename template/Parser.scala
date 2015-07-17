@@ -50,6 +50,20 @@ object Parser extends JavaTokenParsers with OperatorPrecedenceParsers {
 				    print( JSONArray(buf.toList) )
 				case _ => print("[]")
 		    }
+		}
+		else if (args.length == 2){
+			Some(JSON.parseFull(args(1))) match {
+      			case Some(L(list)) =>
+      				val buf = new scala.collection.mutable.ListBuffer[String]()
+					for (e <- list) parseSequent(e) match {
+				    	case Some(r) => 
+				    		if(args(0) == "se") buf += PrintCalc.sequentToString(r, PrintCalc.ISABELLE_SE)
+				    		else buf += PrintCalc.sequentToString(r, PrintCalc.ISABELLE)
+				    	case None => buf += ""
+				    }
+				    print( JSONArray(buf.toList) )
+				case _ => print("[]")
+		    }
 		}  
 		else print("[]")
 /*uncommentR?Sequent*/*/

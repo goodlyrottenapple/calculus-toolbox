@@ -246,6 +246,17 @@ fun isProofTree :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" wher
   )) loc) False
 )"
 
+
+fun isProofTreeWoMacro :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" where
+"isProofTreeWoMacro loc (s \<Longleftarrow> PT(RuleMacro n pt) ptlist) = False"|
+"isProofTreeWoMacro loc (s \<Longleftarrow> PT(r) l) = ( 
+  foldr (op \<and>) (map (isProofTreeWoMacro loc) l) True \<and>
+  foldr (op \<or>) (map (\<lambda>x. (
+    set (Product_Type.snd (der x r s)) = set (map concl l) \<and> 
+    Fail \<noteq> Product_Type.fst (der x r s)
+  )) loc) False
+)"
+
 fun isProofTreeWithCut :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> bool" where
 "isProofTreeWithCut loc pt = isProofTree (append loc (collectCutFormulasToLocale pt)) pt"
 
@@ -466,11 +477,11 @@ fun polarity_weird_and :: "polarity \<Rightarrow> polarity \<Rightarrow> polarit
 "polarity_weird_and N _ = N"
 
 lemma polarity_weird_xor_comm: "a \<or>p b = b \<or>p a"
-apply (induct a, (induct b, auto)+)
+apply (cases a, (cases b, auto)+)
 done
 
 lemma polarity_weird_and_comm: "a \<and>p b = b \<and>p a"
-apply (induct a, (induct b, auto)+)
+apply (cases a, (cases b, auto)+)
 done
 
 fun structure_Op_polarity :: "Structure_Bin_Op \<Rightarrow> (polarity \<times> polarity)" where
@@ -630,7 +641,6 @@ proof (rule ccontr)
   with assms x_in_l fresh_aux_unfold show False sorry
 qed
 *)
-
 
 export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut 
 expandProoftree polarity_Sequent position_in_Sequent partial_goal partial_goal_complement sequent_fresh_name replace_SFAtprop_into_PT in Scala

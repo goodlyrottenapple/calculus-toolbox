@@ -185,8 +185,8 @@ begin
 (*(*uncommentL?Formula_Agent_Formula*)  | "freevars_Formula (Formula_Agent_Formula _ ag1 form1) = image (\<lambda>x. Formula_Agent x) (freevars ag1) \<union> (freevars form1)" (*uncommentR?Formula_Agent_Formula*)*)
 (*(*uncommentL?Formula_Precondition*)  | "freevars_Formula (Formula_Precondition act1) = image (\<lambda>x. Formula_Action x) (freevars act1)" (*uncommentR?Formula_Precondition*)*)
 (*(*uncommentL?Formula_Zer*)  | "freevars_Formula (Formula_Zer act1) = {}" (*uncommentR?Formula_Zer*)*)
-(*(*uncommentL?Formula_Agent*)  | "freevars_Formula (Formula_Agent act1) = {}" (*uncommentR?Formula_Agent*)*)
-(*(*uncommentL?Formula_Action*)  | "freevars_Formula (Formula_Action act1) = {}" (*uncommentR?Formula_Action*)*)
+(*(*uncommentL?Formula_Agent*)  | "freevars_Formula (Formula_Agent ag1) = {(Formula_Freevar ''ag'')}" (*uncommentR?Formula_Agent*)*)
+(*(*uncommentL?Formula_Action*)  | "freevars_Formula (Formula_Action act1) = {(Formula_Freevar ''act'')}" (*uncommentR?Formula_Action*)*)
 
   primrec replace_Formula_aux :: "Formula \<Rightarrow> Formula \<Rightarrow> Formula \<Rightarrow> Formula"
   where

@@ -430,6 +430,7 @@ class ScalaBuilder:
 		datatype = structure[name]
 		ret = "	def {0}ToString(in:{1}, format:String = LATEX) : String = format match {{\n".format(name.lower(), name)
 		isa_list = []
+		isa_se_list = []
 		latex_list = []
 		ascii_list = []
 
@@ -461,6 +462,28 @@ class ScalaBuilder:
 			# 	isa_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
 			# else : isa_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
 			isa_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
+
+
+
+			type_toString_isa_se_list = list(type_toString_list)
+			if "isabelle_se" in datatype[c]:
+				filtered_isa_se_symbs = [i for i in datatype[c]["isabelle_se"].split(" ") if i != "_"]
+				for filtered_isa_symb in filtered_isa_se_symbs:
+					type_toString_isa_se_list.insert(datatype[c]["isabelle_se"].split(" ").index(filtered_isa_symb), "\"{0}\"".format( repr(str(filtered_isa_symb))[1:-1] ))
+			else:
+				if "isabelle" in datatype[c] and [i for i in datatype[c]["isabelle"].split(" ") if i != "_"]:
+					filtered_isa_symbs = [i for i in datatype[c]["isabelle"].split(" ") if i != "_"]
+					for filtered_isa_symb in filtered_isa_symbs:
+						type_toString_isa_se_list.insert(datatype[c]["isabelle"].split(" ").index(filtered_isa_symb), "\"{0}\"".format( repr(str(filtered_isa_symb))[1:-1] ))
+				else:
+					type_toString_isa_se_list.insert(0, "\"{0}\"".format(c))
+					no_sugar = True
+			middle = " + \" \" + ".join( type_toString_isa_se_list )
+
+			if ScalaBuilder.__is_terminal(name, structure) or len(type_toString_isa_se_list) == 1:
+				isa_se_list.append ( "				case {0}({1}) => {2}".format(constructor, args, middle) )
+			else:
+				isa_se_list.append ( "				case {0}({1}) => \"(\" + {2} + \")\"".format(constructor, args, middle) )
 
 			#ascii formatting
 			type_toString_ascii_list = list(type_toString_list)
@@ -593,6 +616,8 @@ class ScalaBuilder:
 		ret += "\n".join(latex_list)
 		ret += "\n			}\n		case ISABELLE =>\n			in match {\n"
 		ret += "\n".join(isa_list)
+		ret += "\n			}\n		case ISABELLE_SE =>\n			in match {\n"
+		ret += "\n".join(isa_se_list)
 		ret += "\n			}\n	}\n"
 		return ret
 
