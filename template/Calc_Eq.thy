@@ -552,6 +552,14 @@ defer
   qed
 qed
 
+
+
+lemma replace_Bigcomma_list_no_freevars: 
+  fixes list x y
+  assumes "freevars (;;\<^sub>S list) = {}"
+  shows "replace_Structure_list_aux x y list = list"
+using assms DEAK_Eq.replace_Structure_no_freevars0 by(induct list, auto)
+
     
   
 lemma SE_to_DE:
@@ -602,7 +610,12 @@ case (Bigcomma_Nil_R Y)
   then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S (;;\<^sub>S []))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S I\<^sub>S))) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Nil_R) [aa]" add: assms)
-  sorry
+  proof -
+  case goal1 
+    then have "concl aa = SE_to_DE_Sequent (Y \<turnstile>\<^sub>S ;;\<^sub>S [])"
+      using DS_SD_Sequent_Id assms isProofTree_concl_freevars by blast
+    thus ?case by force
+  qed
 next
 case (Bigcomma_Nil_L2 Y)
   then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
@@ -614,7 +627,13 @@ case (Bigcomma_Nil_L Y)
   then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((;;\<^sub>S []) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((I\<^sub>S \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Nil_L) [aa]" add: assms)
-  sorry
+  proof -
+  case goal1
+    then have "concl aa = ;;\<^sub>S [] \<turnstile>\<^sub>S SE_to_DE_Structure Y"
+      using DS_SD_Sequent_Id assms isProofTree_concl_freevars
+      by (metis SE_to_DE_Sequent.simps SE_to_DE_Structure.simps(5) list.simps(8))
+    thus ?case by force
+  qed
 next
 
 
@@ -626,137 +645,137 @@ case (Comma_impL_disp X Y Z)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Comma_impR_disp2 Y X Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Z))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Z))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X ;\<^sub>S Y) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleDisp Comma_impR_disp2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpL_comma_disp2 Z Y X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((Z \<leftarrow>\<^sub>S Y) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((Z \<leftarrow>\<^sub>S Y) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S (X ;\<^sub>S Y)))) \<Longleftarrow>PT (RuleDisp ImpL_comma_disp2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpR_comma_disp2 X Z Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X \<rightarrow>\<^sub>S Z) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X \<rightarrow>\<^sub>S Z) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S (X ;\<^sub>S Y)))) \<Longleftarrow>PT (RuleDisp ImpR_comma_disp2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpR_comma_disp Z X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S (X ;\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S (X ;\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X \<rightarrow>\<^sub>S Z) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleDisp ImpR_comma_disp) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpL_comma_disp Z X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S (X ;\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S (X ;\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((Z \<leftarrow>\<^sub>S Y) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleDisp ImpL_comma_disp) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Comma_impR_disp X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X ;\<^sub>S Y) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X ;\<^sub>S Y) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Z)))) \<Longleftarrow>PT (RuleDisp Comma_impR_disp) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Comma_impL_disp2 X Z Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (Z \<leftarrow>\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (Z \<leftarrow>\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X ;\<^sub>S Y) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleDisp Comma_impL_disp2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (Back_forw_A X a Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwA\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwA\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backA\<^sub>S a X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleDispAct Back_forw_A) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Forw_back_A2 X a Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (backA\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (backA\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleDispAct Forw_back_A2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Forw_back_A a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwA\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwA\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (backA\<^sub>S a Y)))) \<Longleftarrow>PT (RuleDispAct Forw_back_A) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Back_forw_A2 a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((backA\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((backA\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (forwA\<^sub>S a Y)))) \<Longleftarrow>PT (RuleDispAct Back_forw_A2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (Back_forw_K2 a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((backK\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((backK\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (forwK\<^sub>S a Y)))) \<Longleftarrow>PT (RuleDispK Back_forw_K2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Back_forw_K X a Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwK\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwK\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backK\<^sub>S a X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleDispK Back_forw_K) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Forw_back_K2 X a Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (backK\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (backK\<^sub>S a Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwK\<^sub>S a X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleDispK Forw_back_K2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Forw_back_K a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwK\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwK\<^sub>S a X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (backK\<^sub>S a Y)))) \<Longleftarrow>PT (RuleDispK Forw_back_K) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (Grishin_R2 W X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S ((X \<rightarrow>\<^sub>S Y) ;\<^sub>S Z))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S ((X \<rightarrow>\<^sub>S Y) ;\<^sub>S Z))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((W \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S (Y ;\<^sub>S Z))))) \<Longleftarrow>PT (RuleGrish Grishin_R2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Grishin_R W X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S (Y ;\<^sub>S Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S (Y ;\<^sub>S Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((W \<turnstile>\<^sub>S ((X \<rightarrow>\<^sub>S Y) ;\<^sub>S Z)))) \<Longleftarrow>PT (RuleGrish Grishin_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Grishin_L X Y Z W)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X \<rightarrow>\<^sub>S (Y ;\<^sub>S Z)) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X \<rightarrow>\<^sub>S (Y ;\<^sub>S Z)) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((X \<rightarrow>\<^sub>S Y) ;\<^sub>S Z) \<turnstile>\<^sub>S W))) \<Longleftarrow>PT (RuleGrish Grishin_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Grishin_L2 X Y Z W)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((X \<rightarrow>\<^sub>S Y) ;\<^sub>S Z) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((X \<rightarrow>\<^sub>S Y) ;\<^sub>S Z) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X \<rightarrow>\<^sub>S (Y ;\<^sub>S Z)) \<turnstile>\<^sub>S W))) \<Longleftarrow>PT (RuleGrish Grishin_L2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (Bot_R X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (\<bottom>\<^sub>F \<^sub>S)))) \<Longleftarrow>PT (RuleOp Bot_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Top_L X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((\<top>\<^sub>F \<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleOp Top_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (DImpR_L A B Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((A \<^sub>S) \<rightarrow>\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((A \<^sub>S) \<rightarrow>\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((A >-\<^sub>F B) \<^sub>S) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleOp DImpR_L) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -765,7 +784,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((A \<^sub>S) 
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpL_R Z B A)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((B \<^sub>S) \<leftarrow>\<^sub>S (A \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((B \<^sub>S) \<leftarrow>\<^sub>S (A \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S ((B \<leftarrow>\<^sub>F A) \<^sub>S)))) \<Longleftarrow>PT (RuleOp ImpL_R) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -774,7 +793,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (DImpL_R Y B A X)
-then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> (isProofTreeWoMacro [DEAK.Locale.Empty] aa)" "DE_to_SE_Sequent (concl bb) = Some ((Y \<turnstile>\<^sub>S (B \<^sub>S))) \<and> (isProofTreeWoMacro [DEAK.Locale.Empty] bb)" by auto
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> (isProofTreeWoMacro [DEAK.Locale.Empty] aa)" "DE_to_SE_Sequent (concl bb) = Some ((Y \<turnstile>\<^sub>S (B \<^sub>S))) \<and> (isProofTreeWoMacro [DEAK.Locale.Empty] bb)" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent (((Y \<leftarrow>\<^sub>S X) \<turnstile>\<^sub>S ((B -<\<^sub>F A) \<^sub>S)))) \<Longleftarrow>PT (RuleOp DImpL_R) [aa, bb]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -783,7 +802,7 @@ then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (And_L A B Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((A \<^sub>S) ;\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((A \<^sub>S) ;\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((A \<and>\<^sub>F B) \<^sub>S) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleOp And_L) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -792,7 +811,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((A \<^sub>S) 
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpR_R Z A B)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((A \<^sub>S) \<rightarrow>\<^sub>S (B \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((A \<^sub>S) \<rightarrow>\<^sub>S (B \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S ((A \<rightarrow>\<^sub>F B) \<^sub>S)))) \<Longleftarrow>PT (RuleOp ImpR_R) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -801,7 +820,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Or_L B Y A X)
-then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some (((B \<^sub>S) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some (((B \<^sub>S) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((A \<or>\<^sub>F B) \<^sub>S) \<turnstile>\<^sub>S (X ;\<^sub>S Y)))) \<Longleftarrow>PT (RuleOp Or_L) [aa, bb]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -810,7 +829,7 @@ then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Or_R Z A B)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((A \<^sub>S) ;\<^sub>S (B \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((A \<^sub>S) ;\<^sub>S (B \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S ((A \<or>\<^sub>F B) \<^sub>S)))) \<Longleftarrow>PT (RuleOp Or_R) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -819,7 +838,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpR_L B Y X A)
-then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some (((B \<^sub>S) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some (((B \<^sub>S) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((A \<rightarrow>\<^sub>F B) \<^sub>S) \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Y)))) \<Longleftarrow>PT (RuleOp ImpR_L) [aa, bb]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -828,7 +847,7 @@ then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnsti
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (DImpL_L B A Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((B \<^sub>S) \<leftarrow>\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((B \<^sub>S) \<leftarrow>\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((B -<\<^sub>F A) \<^sub>S) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleOp DImpL_L) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -837,7 +856,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((B \<^sub>S) 
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (And_R Y B X A)
-then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some ((Y \<turnstile>\<^sub>S (B \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some ((Y \<turnstile>\<^sub>S (B \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent (((X ;\<^sub>S Y) \<turnstile>\<^sub>S ((A \<and>\<^sub>F B) \<^sub>S)))) \<Longleftarrow>PT (RuleOp And_R) [aa, bb]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -846,7 +865,7 @@ then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnsti
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (DImpR_R Y B A X)
-then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some ((Y \<turnstile>\<^sub>S (B \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some ((Y \<turnstile>\<^sub>S (B \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent (((X \<rightarrow>\<^sub>S Y) \<turnstile>\<^sub>S ((A >-\<^sub>F B) \<^sub>S)))) \<Longleftarrow>PT (RuleOp DImpR_R) [aa, bb]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -855,7 +874,7 @@ then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S
 	using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpL_L B Y X A)
-then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some (((B \<^sub>S) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" "DE_to_SE_Sequent (concl bb) = Some (((B \<^sub>S) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] bb" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((B \<leftarrow>\<^sub>F A) \<^sub>S) \<turnstile>\<^sub>S (Y \<leftarrow>\<^sub>S X)))) \<Longleftarrow>PT (RuleOp ImpL_L) [aa, bb]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -877,7 +896,7 @@ case (Bot_L )
 next
 
 case (FdiamA_L a A X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwA\<^sub>S a (A \<^sub>S)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwA\<^sub>S a (A \<^sub>S)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (rule exI [where x="(SE_to_DE_Sequent ((((fdiamA\<^sub>F a A) \<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleOpAct FdiamA_L) [aa]"])
   apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
@@ -891,7 +910,7 @@ case (One_R a)
   by (se_to_de_tac "(SE_to_DE_Sequent (((Phi\<^sub>S a) \<turnstile>\<^sub>S ((One\<^sub>F a) \<^sub>S)))) \<Longleftarrow>PT (RuleOpAct One_R) []" add: assms)
 next
 case (FboxA_R X a A)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwA\<^sub>S a (A \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwA\<^sub>S a (A \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S ((fboxA\<^sub>F a A) \<^sub>S)))) \<Longleftarrow>PT (RuleOpAct FboxA_R) [aa]" add: assms)
   apply (metis (no_types, lifting) DE_to_SE_Formula.simps(1) DE_to_SE_Formula_freevars DE_to_SE_Structure.simps(10) SE_to_DE_Action.simps SE_to_DE_Formula.simps(1) SE_to_DE_Structure.simps(9) option.simps(5))
@@ -900,7 +919,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>
   next
 
 case (FboxA_L A X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((fboxA\<^sub>F a A) \<^sub>S) \<turnstile>\<^sub>S (forwA\<^sub>S a X)))) \<Longleftarrow>PT (RuleOpAct FboxA_L) [aa]" add: assms)
   using SE_to_DE_Formula_freevars replace_Formula_no_freevars0 apply auto
@@ -908,13 +927,13 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (One_L a X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((Phi\<^sub>S a) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((Phi\<^sub>S a) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((One\<^sub>F a) \<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleOpAct One_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FdiamA_R X A a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a X) \<turnstile>\<^sub>S ((fdiamA\<^sub>F a A) \<^sub>S)))) \<Longleftarrow>PT (RuleOpAct FdiamA_R) [aa]" add: assms)
   using SE_to_DE_Formula_freevars replace_Formula_no_freevars0 apply auto
@@ -923,7 +942,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>
 next
 
 case (FboxK_L A X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((fboxK\<^sub>F a A) \<^sub>S) \<turnstile>\<^sub>S (forwK\<^sub>S a X)))) \<Longleftarrow>PT (RuleOpK FboxK_L) [aa]" add: assms)
   using SE_to_DE_Formula_freevars replace_Formula_no_freevars0 apply auto
@@ -931,7 +950,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((A \<^sub>S) \
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FdiamK_R X A a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (A \<^sub>S))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwK\<^sub>S a X) \<turnstile>\<^sub>S ((fdiamK\<^sub>F a A) \<^sub>S)))) \<Longleftarrow>PT (RuleOpK FdiamK_R) [aa]" add: assms)
   using SE_to_DE_Formula_freevars replace_Formula_no_freevars0 apply auto
@@ -939,7 +958,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FboxK_R X a A)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwK\<^sub>S a (A \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (forwK\<^sub>S a (A \<^sub>S)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S ((fboxK\<^sub>F a A) \<^sub>S)))) \<Longleftarrow>PT (RuleOpK FboxK_R) [aa]" add: assms)
   using SE_to_DE_Formula_freevars replace_Formula_no_freevars0 apply auto
@@ -947,7 +966,7 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FdiamK_L a A X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwK\<^sub>S a (A \<^sub>S)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwK\<^sub>S a (A \<^sub>S)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((fdiamK\<^sub>F a A) \<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleOpK FdiamK_L) [aa]" add: assms)
   using SE_to_DE_Formula_freevars replace_Formula_no_freevars0 apply auto
@@ -956,310 +975,310 @@ then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwK\<^sub>S
 next
 
 case (W_impL_R X Z Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X \<leftarrow>\<^sub>S Z) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct W_impL_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpL_I X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X \<leftarrow>\<^sub>S Y) \<turnstile>\<^sub>S I\<^sub>S))) \<Longleftarrow>PT (RuleStruct ImpL_I) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (W_impL_L X Z Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S (Z \<leftarrow>\<^sub>S X)))) \<Longleftarrow>PT (RuleStruct W_impL_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpR_I2 Y X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((Y \<rightarrow>\<^sub>S X) \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((Y \<rightarrow>\<^sub>S X) \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct ImpR_I2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (E_R X Y1 Y2)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (Y1 ;\<^sub>S Y2))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (Y1 ;\<^sub>S Y2))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (Y2 ;\<^sub>S Y1)))) \<Longleftarrow>PT (RuleStruct E_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (IW_R X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct IW_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (IW_L Y X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct IW_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_L2 X Y Z W)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X ;\<^sub>S (Y ;\<^sub>S Z)) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X ;\<^sub>S (Y ;\<^sub>S Z)) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((X ;\<^sub>S Y) ;\<^sub>S Z) \<turnstile>\<^sub>S W))) \<Longleftarrow>PT (RuleStruct A_L2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (E_L X1 X2 Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X1 ;\<^sub>S X2) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X1 ;\<^sub>S X2) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X2 ;\<^sub>S X1) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct E_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_R W X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S ((X ;\<^sub>S Y) ;\<^sub>S Z))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S ((X ;\<^sub>S Y) ;\<^sub>S Z))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((W \<turnstile>\<^sub>S (X ;\<^sub>S (Y ;\<^sub>S Z))))) \<Longleftarrow>PT (RuleStruct A_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (W_impR_R X Z Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Z)))) \<Longleftarrow>PT (RuleStruct W_impR_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (C_L X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X ;\<^sub>S X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X ;\<^sub>S X) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct C_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (C_R X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (Y ;\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S (Y ;\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct C_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpR_I X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((Y \<rightarrow>\<^sub>S X) \<turnstile>\<^sub>S I\<^sub>S))) \<Longleftarrow>PT (RuleStruct ImpR_I) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (W_impR_L X Z Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((Z \<rightarrow>\<^sub>S X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct W_impR_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_L X Y Z W)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((X ;\<^sub>S Y) ;\<^sub>S Z) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((X ;\<^sub>S Y) ;\<^sub>S Z) \<turnstile>\<^sub>S W)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((X ;\<^sub>S (Y ;\<^sub>S Z)) \<turnstile>\<^sub>S W))) \<Longleftarrow>PT (RuleStruct A_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_R2 W X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S (X ;\<^sub>S (Y ;\<^sub>S Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((W \<turnstile>\<^sub>S (X ;\<^sub>S (Y ;\<^sub>S Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((W \<turnstile>\<^sub>S ((X ;\<^sub>S Y) ;\<^sub>S Z)))) \<Longleftarrow>PT (RuleStruct A_R2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (I_impR2 X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Y))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct I_impR2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (I_impL X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((I\<^sub>S \<turnstile>\<^sub>S (Y \<leftarrow>\<^sub>S X)))) \<Longleftarrow>PT (RuleStruct I_impL) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (I_impR X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((I\<^sub>S \<turnstile>\<^sub>S (X \<rightarrow>\<^sub>S Y)))) \<Longleftarrow>PT (RuleStruct I_impR) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (ImpL_I2 X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X \<leftarrow>\<^sub>S Y) \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((X \<leftarrow>\<^sub>S Y) \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct ImpL_I2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (I_impL2 Y X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S (Y \<leftarrow>\<^sub>S X))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S (Y \<leftarrow>\<^sub>S X))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStruct I_impL2) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (A_nec_L X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backA\<^sub>S a I\<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructAct A_nec_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_mon_L a X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backA\<^sub>S a X) ;\<^sub>S (backA\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backA\<^sub>S a X) ;\<^sub>S (backA\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backA\<^sub>S a (X ;\<^sub>S Y)) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleStructAct A_mon_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Mon_A_R Z a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((forwA\<^sub>S a X) ;\<^sub>S (forwA\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((forwA\<^sub>S a X) ;\<^sub>S (forwA\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S (forwA\<^sub>S a (X ;\<^sub>S Y))))) \<Longleftarrow>PT (RuleStructAct Mon_A_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Nec_A_L X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a I\<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructAct Nec_A_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FS_A_L a Y Z X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwA\<^sub>S a Y) \<rightarrow>\<^sub>S (forwA\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwA\<^sub>S a Y) \<rightarrow>\<^sub>S (forwA\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a (Y \<rightarrow>\<^sub>S Z)) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructAct FS_A_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FS_A_R X a Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((forwA\<^sub>S a Y) \<rightarrow>\<^sub>S (forwA\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((forwA\<^sub>S a Y) \<rightarrow>\<^sub>S (forwA\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (forwA\<^sub>S a (Y \<rightarrow>\<^sub>S Z))))) \<Longleftarrow>PT (RuleStructAct FS_A_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_mon_R Z a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((backA\<^sub>S a X) ;\<^sub>S (backA\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((backA\<^sub>S a X) ;\<^sub>S (backA\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S (backA\<^sub>S a (X ;\<^sub>S Y))))) \<Longleftarrow>PT (RuleStructAct A_mon_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_FS_R X a Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((backA\<^sub>S a Y) \<rightarrow>\<^sub>S (backA\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((backA\<^sub>S a Y) \<rightarrow>\<^sub>S (backA\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (backA\<^sub>S a (Y \<rightarrow>\<^sub>S Z))))) \<Longleftarrow>PT (RuleStructAct A_FS_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Nec_A_R X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (forwA\<^sub>S a I\<^sub>S)))) \<Longleftarrow>PT (RuleStructAct Nec_A_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Mon_A_L a X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwA\<^sub>S a X) ;\<^sub>S (forwA\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwA\<^sub>S a X) ;\<^sub>S (forwA\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a (X ;\<^sub>S Y)) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleStructAct Mon_A_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_FS_L a Y Z X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backA\<^sub>S a Y) \<rightarrow>\<^sub>S (backA\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backA\<^sub>S a Y) \<rightarrow>\<^sub>S (backA\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backA\<^sub>S a (Y \<rightarrow>\<^sub>S Z)) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructAct A_FS_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (A_nec_R X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (backA\<^sub>S a I\<^sub>S)))) \<Longleftarrow>PT (RuleStructAct A_nec_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (Reduce_R Y a X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S ((Phi\<^sub>S a) \<rightarrow>\<^sub>S (forwA\<^sub>S a X)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S ((Phi\<^sub>S a) \<rightarrow>\<^sub>S (forwA\<^sub>S a X)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S (forwA\<^sub>S a X)))) \<Longleftarrow>PT (RuleStructEA Reduce_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (CompA_R Y a X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S (forwA\<^sub>S a (backA\<^sub>S a X)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S (forwA\<^sub>S a (backA\<^sub>S a X)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S ((Phi\<^sub>S a) \<rightarrow>\<^sub>S X)))) \<Longleftarrow>PT (RuleStructEA CompA_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Balance X Y a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a X) \<turnstile>\<^sub>S (forwA\<^sub>S a Y)))) \<Longleftarrow>PT (RuleStructEA Balance) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (CompA_L a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwA\<^sub>S a (backA\<^sub>S a X)) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (((forwA\<^sub>S a (backA\<^sub>S a X)) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((((Phi\<^sub>S a) ;\<^sub>S X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStructEA CompA_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Reduce_L a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((Phi\<^sub>S a) ;\<^sub>S (forwA\<^sub>S a X)) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((Phi\<^sub>S a) ;\<^sub>S (forwA\<^sub>S a X)) \<turnstile>\<^sub>S Y)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwA\<^sub>S a X) \<turnstile>\<^sub>S Y))) \<Longleftarrow>PT (RuleStructEA Reduce_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 
 case (K_nec_R X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (backK\<^sub>S a I\<^sub>S)))) \<Longleftarrow>PT (RuleStructK K_nec_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Nec_K_L X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwK\<^sub>S a I\<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructK Nec_K_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (K_mon_L a X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backK\<^sub>S a X) ;\<^sub>S (backK\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backK\<^sub>S a X) ;\<^sub>S (backK\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backK\<^sub>S a (X ;\<^sub>S Y)) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleStructK K_mon_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Mon_K_L a X Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwK\<^sub>S a X) ;\<^sub>S (forwK\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwK\<^sub>S a X) ;\<^sub>S (forwK\<^sub>S a Y)) \<turnstile>\<^sub>S Z)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwK\<^sub>S a (X ;\<^sub>S Y)) \<turnstile>\<^sub>S Z))) \<Longleftarrow>PT (RuleStructK Mon_K_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FS_K_L a Y Z X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwK\<^sub>S a Y) \<rightarrow>\<^sub>S (forwK\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((forwK\<^sub>S a Y) \<rightarrow>\<^sub>S (forwK\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((forwK\<^sub>S a (Y \<rightarrow>\<^sub>S Z)) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructK FS_K_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (FS_K_R X a Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((forwK\<^sub>S a Y) \<rightarrow>\<^sub>S (forwK\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((forwK\<^sub>S a Y) \<rightarrow>\<^sub>S (forwK\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (forwK\<^sub>S a (Y \<rightarrow>\<^sub>S Z))))) \<Longleftarrow>PT (RuleStructK FS_K_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Mon_K_R Z a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((forwK\<^sub>S a X) ;\<^sub>S (forwK\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((forwK\<^sub>S a X) ;\<^sub>S (forwK\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S (forwK\<^sub>S a (X ;\<^sub>S Y))))) \<Longleftarrow>PT (RuleStructK Mon_K_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (K_mon_R Z a X Y)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((backK\<^sub>S a X) ;\<^sub>S (backK\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Z \<turnstile>\<^sub>S ((backK\<^sub>S a X) ;\<^sub>S (backK\<^sub>S a Y)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((Z \<turnstile>\<^sub>S (backK\<^sub>S a (X ;\<^sub>S Y))))) \<Longleftarrow>PT (RuleStructK K_mon_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (K_FS_L a Y Z X)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backK\<^sub>S a Y) \<rightarrow>\<^sub>S (backK\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((((backK\<^sub>S a Y) \<rightarrow>\<^sub>S (backK\<^sub>S a Z)) \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backK\<^sub>S a (Y \<rightarrow>\<^sub>S Z)) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructK K_FS_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (Nec_K_R X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (forwK\<^sub>S a I\<^sub>S)))) \<Longleftarrow>PT (RuleStructK Nec_K_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (K_FS_R X a Y Z)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((backK\<^sub>S a Y) \<rightarrow>\<^sub>S (backK\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((X \<turnstile>\<^sub>S ((backK\<^sub>S a Y) \<rightarrow>\<^sub>S (backK\<^sub>S a Z)))) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent ((X \<turnstile>\<^sub>S (backK\<^sub>S a (Y \<rightarrow>\<^sub>S Z))))) \<Longleftarrow>PT (RuleStructK K_FS_R) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
 next
 case (K_nec_L X a)
-then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((I\<^sub>S \<turnstile>\<^sub>S X)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
   show ?case
   apply (se_to_de_tac "(SE_to_DE_Sequent (((backK\<^sub>S a I\<^sub>S) \<turnstile>\<^sub>S X))) \<Longleftarrow>PT (RuleStructK K_nec_L) [aa]" add: assms)
   using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
@@ -1302,7 +1321,5 @@ qed
 next
 
 (*SE_to_DE_Empty_lemma*)
-
-
 
 end
