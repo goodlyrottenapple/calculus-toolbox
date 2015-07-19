@@ -368,6 +368,7 @@ apply (induction "[Empty]" t rule:derivable.induct)
 by (auto intro: derivable.intros)
 
 
+
 lemma SE_to_DE_subset_loc :
   fixes t l l'
   assumes "l \<turnstile>d t" "set l \<subseteq> set l'"
@@ -561,44 +562,13 @@ lemma replace_Bigcomma_list_no_freevars:
 using assms DEAK_Eq.replace_Structure_no_freevars0 by(induct list, auto)
 
     
-  
+
 lemma SE_to_DE:
   fixes t
   assumes "[Empty] \<turnstile>d t"
   shows "\<exists>pt. DE_to_SE_Sequent (concl pt) = Some t \<and> isProofTreeWoMacro [DEAK.Empty] pt"
 using assms
 proof (induction "[Empty]" t)
-(*case (Id p) thus ?case
-   by (base_case "(Atprop p \<^sub>F \<^sub>S \<turnstile>\<^sub>S Atprop p \<^sub>F \<^sub>S) \<Longleftarrow> PT (RuleZer Id) []" add: assms)
-next
-
-case (I_impR X Y)
-  then obtain pt X' Y' where assms: "DE_to_SE_Sequent (concl pt) = Some (X \<turnstile>\<^sub>S Y)" "isProofTreeWoMacro [DEAK.Locale.Empty] pt" "(concl pt) = X' \<turnstile>\<^sub>S Y'" using DS_SD_Sequent_Id by force
-  show ?case
-  by (base_case "((Z\<^sub>S I\<^sub>S) \<turnstile>\<^sub>S (B\<^sub>S X' \<rightarrow>\<^sub>S Y')) \<Longleftarrow>PT (RuleStruct I_impR) [pt]" add: assms)
-next
-
-case (I_impR2 X Y)
-  then obtain pt where assms: "DE_to_SE_Sequent (concl pt) = Some (I\<^sub>S \<turnstile>\<^sub>S X \<rightarrow>\<^sub>S Y) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] pt" by auto
-  show ?case
-  apply (rule exI [where x="(SE_to_DE_Sequent (X \<turnstile>\<^sub>S Y)) \<Longleftarrow>PT (RuleStruct I_impR2) [pt]"])
-  apply (auto simp add: assms ruleMatch_def m_clash_def replace_Structure_aux_freevars_unchanged)
-  using SD_DS_Structure_Id apply auto
-  using DS_SD_Sequent_Id assms isProofTree_concl_freevars by (fastforce, fastforce, fastforce)
-
-next
-
-case (Bigcomma_Nil_R2 X)
-  then obtain pt X' where assms: "DE_to_SE_Sequent (concl pt) = Some (X \<turnstile>\<^sub>S I\<^sub>S)" "isProofTreeWoMacro [DEAK.Locale.Empty] pt" "(concl pt) = X' \<turnstile>\<^sub>S (Z\<^sub>S I\<^sub>S)" using DS_SD_Sequent_Id by force
-  show ?case
-  by (base_case "(X' \<turnstile>\<^sub>S (;;\<^sub>S [])) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Nil_R2) [pt]" add: assms)
-
-next
-
-
-case SingleCut thus ?case by simp
-next
-*)
 
 case (Bigcomma_Nil_R2 Y)
   then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
@@ -1320,6 +1290,125 @@ case goal4 with atom_SE_to_DE_equiv show ?case using Atom.hyps by auto
 qed
 next
 
-(*SE_to_DE_Empty_lemma*)
+case (Bigcomma_Cons_R2 Y X Xs)
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (Y \<turnstile>\<^sub>S X ;\<^sub>S (;;\<^sub>S Xs)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  show ?case
+  apply (se_to_de_tac "(SE_to_DE_Sequent (Y \<turnstile>\<^sub>S ;;\<^sub>S (X # Xs))) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Cons_R2) [aa]" add: assms) 
+  apply (metis DEAK_Core_SE.Structure.simps(125) SE_to_DE_Structure.simps(5) option.simps(5))
+  proof -
+  case goal1
+    then have 0: "replace_Structure_list_aux (?\<^sub>S ''X'') (SE_to_DE_Structure Y) (map SE_to_DE_Structure Xs) = map SE_to_DE_Structure Xs" by(induct Xs, auto)
+    from goal1 have "freevars (;;\<^sub>S (map SE_to_DE_Structure Xs)) = {}" by (induct Xs, auto)
+    with goal1 0 replace_Bigcomma_list_no_freevars have "(replace_Structure_list_aux (?\<^sub>S ''Y'') (;;\<^sub>S (SE_to_DE_Structure X # map SE_to_DE_Structure Xs))
+      (replace_Structure_list_aux (?\<^sub>S ''X'') (SE_to_DE_Structure Y) (map SE_to_DE_Structure Xs))) = (map SE_to_DE_Structure Xs)" by simp
+    thus ?case using DS_SD_Sequent_Id assms isProofTree_concl_freevars by fastforce
+  qed
+next
+case (Bigcomma_Cons_R Y X Xs)
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (Y \<turnstile>\<^sub>S ;;\<^sub>S (X # Xs)) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  show ?case
+  apply (se_to_de_tac "(SE_to_DE_Sequent (Y \<turnstile>\<^sub>S X ;\<^sub>S (;;\<^sub>S Xs))) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Cons_R) [aa]" add: assms)
+  apply (metis SE_to_DE_Structure.simps(5) option.simps(5))
+  proof -
+  case goal1
+    then have 0: "replace_Structure_list_aux (?\<^sub>S ''X'') (SE_to_DE_Structure Y) (map SE_to_DE_Structure Xs) = map SE_to_DE_Structure Xs" by(induct Xs, auto)
+    from goal1 have "freevars (;;\<^sub>S (map SE_to_DE_Structure Xs)) = {}" by (induct Xs, auto)
+    with goal1 0 replace_Bigcomma_list_no_freevars have "replace_Structure_list_aux (?\<^sub>S ''Y'') (B\<^sub>S SE_to_DE_Structure X ;\<^sub>S (;;\<^sub>S map SE_to_DE_Structure Xs))
+      (replace_Structure_list_aux (?\<^sub>S ''X'') (SE_to_DE_Structure Y) (map SE_to_DE_Structure Xs)) =  map SE_to_DE_Structure Xs" by simp
+    thus ?case using DS_SD_Sequent_Id assms isProofTree_concl_freevars by fastforce
+  qed
+next
+case (Bigcomma_Cons_L2 X Xs Y)
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (X ;\<^sub>S (;;\<^sub>S Xs) \<turnstile>\<^sub>S Y) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  show ?case
+  apply (se_to_de_tac "(SE_to_DE_Sequent (;;\<^sub>S (X # Xs) \<turnstile>\<^sub>S Y)) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Cons_L2) [aa]" add: assms)
+  apply (metis DEAK_Core_SE.Structure.simps(125) SE_to_DE_Structure.simps(5) option.simps(5))
+  using replace_Bigcomma_list_no_freevars apply auto
+  proof -
+  case goal1 
+    then have "freevars (;;\<^sub>S (map SE_to_DE_Structure Xs)) = {}" by (induct Xs, auto)
+    with replace_Bigcomma_list_no_freevars have 0: "(replace_Structure_list_aux (?\<^sub>S ''X'') (;;\<^sub>S (SE_to_DE_Structure X # map SE_to_DE_Structure Xs)) (map SE_to_DE_Structure Xs)) = map SE_to_DE_Structure Xs" by simp
+    thus ?case using DS_SD_Sequent_Id assms goal1(1) isProofTree_concl_freevars by fastforce
+  qed
+next
+case (Bigcomma_Cons_L X Xs Y)
+  then obtain aa where assms: "DE_to_SE_Sequent (concl aa) = Some (;;\<^sub>S (X # Xs) \<turnstile>\<^sub>S Y) \<and> isProofTreeWoMacro [DEAK.Locale.Empty] aa" by auto
+  show ?case
+  apply (se_to_de_tac "(SE_to_DE_Sequent (X ;\<^sub>S (;;\<^sub>S Xs) \<turnstile>\<^sub>S Y)) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Cons_L) [aa]" add: assms)
+  apply (metis SE_to_DE_Structure.simps(5) option.simps(5))
+  using replace_Bigcomma_list_no_freevars apply auto
+  proof -
+  case goal1 
+    then have "freevars (;;\<^sub>S (map SE_to_DE_Structure Xs)) = {}" by (induct Xs, auto)
+    with replace_Bigcomma_list_no_freevars have 0: "(replace_Structure_list_aux (?\<^sub>S ''X'') (B\<^sub>S SE_to_DE_Structure X ;\<^sub>S (;;\<^sub>S map SE_to_DE_Structure Xs)) (map SE_to_DE_Structure Xs)) = map SE_to_DE_Structure Xs" by simp
+    thus ?case using DS_SD_Sequent_Id assms goal1(1) isProofTree_concl_freevars by fastforce
+  qed
+next
+
+case SingleCut thus ?case by simp
+next
+
+case Pre_L thus ?case by simp
+next
+
+case Swapin_L thus ?case by simp
+next
+case Swapin_R thus ?case by simp
+next
+
+case Swapout_L thus ?case by simp
+next
+case Swapout_R thus ?case by simp
+qed
+
+lemma foldr_loc:
+fixes X::bool and loc
+assumes "loc \<noteq> []"
+shows "foldr op \<or> (map ((\<lambda>x. X) \<circ> SE_to_DE_Locale) loc) False = X"
+using assms apply(induction loc)
+apply simp
+by fastforce
+
+
+lemma SE_to_DE:
+  fixes t loc
+  assumes "loc \<turnstile>d t" and "loc \<noteq> []"
+  shows "\<exists>pt. DE_to_SE_Sequent (concl pt) = Some t \<and> isProofTreeWoMacro (map SE_to_DE_Locale loc) pt"
+using assms
+proof (induction loc t)
+case (Bigcomma_Nil_R2 loc Y)
+  then obtain aa where assms: "loc \<noteq> []" "DE_to_SE_Sequent (concl aa) = Some ((Y \<turnstile>\<^sub>S I\<^sub>S)) \<and> isProofTreeWoMacro (map SE_to_DE_Locale loc) aa" by auto
+  show ?case
+  apply (se_to_de_tac "(SE_to_DE_Sequent ((Y \<turnstile>\<^sub>S (;;\<^sub>S [])))) \<Longleftarrow>PT (RuleBigcomma Bigcomma_Nil_R2) [aa]" add: assms)
+  using assms apply (auto simp add:foldr_loc )
+  using SE_to_DE_Action.simps SE_to_DE_Agent.simps SE_to_DE_Structure.simps SE_to_DE_Sequent.simps by (metis DS_SD_Sequent_Id assms isProofTree_concl_freevars)+
+
+  (*case goal1 
+    have "SE_to_DE_Structure Y \<turnstile>\<^sub>S Z\<^sub>S I\<^sub>S = concl aa"
+using DS_SD_Sequent_Id assms isProofTree_concl_freevars by fastforce
+with foldr_loc Bigcomma_Nil_R2 show ?case by simp
+next*)
+(*using foldr_loc DS_SD_Sequent_Id assms Bigcomma_Nil_R2(3) isProofTree_concl_freevars 
+*)
+
+lemma SE_to_DE2:
+  fixes t f
+  assumes "[CutFormula f] \<turnstile>d t"
+  shows "\<exists>pt. DE_to_SE_Sequent (concl pt) = Some t \<and> isProofTreeWoMacro [SE_to_DE_Locale (CutFormula f)] pt"
+using assms 
+apply (induction "[CutFormula f]" t)
+proof -
+case Swapin_L thus?case by simp
+next
+case (SingleCut form X Y) 
+  then obtain aa bb where assms: "DE_to_SE_Sequent (concl aa) = Some (X \<turnstile>\<^sub>S f \<^sub>S) \<and> isProofTreeWoMacro [SE_to_DE_Locale (DEAK_SE.Locale.CutFormula f)] aa" "DE_to_SE_Sequent (concl bb) = Some (f \<^sub>S \<turnstile>\<^sub>S Y) \<and> isProofTreeWoMacro [SE_to_DE_Locale (DEAK_SE.Locale.CutFormula f)] bb" by auto
+  show ?case
+  apply (se_to_de_tac "(SE_to_DE_Sequent (X  \<turnstile>\<^sub>S Y)) \<Longleftarrow>PT (RuleCut SingleCut) [aa, bb]" add: assms)
+  using assms apply auto[2]
+  using DS_SD_Sequent_Id assms isProofTree_concl_freevars by (metis SE_to_DE_Sequent.simps SE_to_DE_Structure.simps(9))+
+
+qed
+
+
 
 end
