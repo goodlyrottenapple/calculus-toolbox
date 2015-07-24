@@ -268,13 +268,13 @@ def add_se(flags):
 
     if ISA_CORE_SE_TEMPLATE in list:
         print "Generating the shallow embedding and equality proofs (stubs only!) ..."
-        # if not doBuild(builder, paths[list.index(ISA_CORE_SE_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_Core_SE.thy"): return False
+        if not doBuild(builder, paths[list.index(ISA_CORE_SE_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_Core_SE.thy"): return False
 
-    # if ISA_RULES_SE_TEMPLATE in list:
-    #     if not doBuild(builder, paths[list.index(ISA_RULES_SE_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_SE.thy"): return False
+    if ISA_RULES_SE_TEMPLATE in list:
+        if not doBuild(builder, paths[list.index(ISA_RULES_SE_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_SE.thy"): return False
     
-    if ISA_EQ_TEMPLATE in list:
-        if not doBuild(builder, paths[list.index(ISA_EQ_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_Eq.thy"): return False
+    # if ISA_EQ_TEMPLATE in list:
+    #     if not doBuild(builder, paths[list.index(ISA_EQ_TEMPLATE)], OUTPUT_PATH+ISABELLE_SRC_PATH+CALC_NAME+"_Eq.thy"): return False
 
     return True
 
@@ -342,7 +342,8 @@ def main(argv):
                     #recompile the core calculus (now with rules)
                     if calc_compile(BUILD_FLAGS):
                         if add_gui(BUILD_FLAGS):
-                            print CALC_NAME, "has been successfully built..."
+                            if add_se(BUILD_FLAGS):
+                                print CALC_NAME, "has been successfully built..."
 
 if __name__ == "__main__":
     main(sys.argv[1:])
