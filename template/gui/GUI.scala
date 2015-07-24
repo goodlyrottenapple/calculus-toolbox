@@ -168,10 +168,34 @@ object GUI extends SimpleSwingApplication {
   })
   popup.add(menuItem4);
 
+
+
+  val menuItem4a = new MenuItem(swing.Action("Copy as Isabelle SE") {
+    session.ptListView.selection.items.head  match {
+      case (icn, pt) => 
+        // adapted from http://www.avajava.com/tutorials/lessons/how-do-i-copy-a-string-to-the-clipboard.html
+        val str = prooftreeToString(pt, PrintCalc.ISABELLE_SE)
+        val toolkit = Toolkit.getDefaultToolkit()
+        val clipboard = toolkit.getSystemClipboard()
+        val strSel = new StringSelection(str)
+        clipboard.setContents(strSel, null)
+    }
+
+  })
+  popup.add(menuItem4a);
+
   val menuItem5 = new MenuItem(swing.Action("Create Rule Macro") {
     session.rulifyPT()
   })
   popup.add(menuItem5);
+
+  val menuItem6 = new MenuItem(swing.Action("Remove macros") {
+    session.removeMacros()
+  })
+  popup.add(menuItem6);
+
+
+
 
 
 

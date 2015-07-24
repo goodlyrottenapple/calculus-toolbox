@@ -157,6 +157,10 @@ case class CalcSession() extends Publisher {
 		//if (!loadPTButton.enabled) loadPTButton.enabled = true
 	}
 
+	def removeMacros(pt:Prooftree = currentPT) = {
+		addPT(expandProoftree(pt))
+	}
+
 	def savePT(ptSel: Int = currentPTsel, pt : Prooftree = currentPT) = {
 		if (ptSel >= 0) {
 			println("Saving")

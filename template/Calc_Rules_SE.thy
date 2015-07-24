@@ -32,6 +32,13 @@ fun atom :: "Sequent \<Rightarrow> bool" where
 "atom (l \<turnstile>\<^sub>S r) = ( (is_act_mod l) \<noteq> None \<and> (is_act_mod l) = (is_act_mod r) )"
 (*uncommentR?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)*)
 
+
+fun pairs :: "'a list \<Rightarrow> 'b list \<Rightarrow> ('a \<times> 'b) list" where
+"pairs [] [] = []" |
+"pairs [] Y = []" |
+"pairs X [] = []" |
+"pairs (X#Xs) (Y#Ys) = (X, Y)#(pairs Xs Ys)"
+
 (*calc_structure_rules_se*)
 
 end

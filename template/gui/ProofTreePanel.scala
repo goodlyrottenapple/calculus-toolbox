@@ -194,6 +194,20 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	})
 	popup.add(copy);
 
+	val copy_isa_se = new MenuItem(Action("Copy (Isabelle SE)") {
+		selectedSequentInPt match {
+			case Some(seqIPT) => 
+				// adapted from http://www.avajava.com/tutorials/lessons/how-do-i-copy-a-string-to-the-clipboard.html
+				val str = sequentToString(seqIPT.seq, PrintCalc.ISABELLE_SE)
+				val toolkit = Toolkit.getDefaultToolkit()
+				val clipboard = toolkit.getSystemClipboard()
+				val strSel = new StringSelection(str)
+				clipboard.setContents(strSel, null)
+		}
+		
+	})
+	popup.add(copy_isa_se);
+
 	
 	val addAssm = new MenuItem(Action("Add as assm") {
 		selectedSequentInPt match {

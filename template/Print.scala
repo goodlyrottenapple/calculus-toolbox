@@ -37,6 +37,7 @@ object PrintCalc{
 	def prooftreeListToString(in:List[Prooftree], format:String = LATEX, sequentLatexPrint: Sequent => String = sequentToLatexString) : String = format match {
 		case ASCII | ISABELLE => "[" + in.map(x => prooftreeToString(x, format, sequentLatexPrint)).mkString(", ") + "]"
 		case LATEX => in.map(x => prooftreeToString(x, format, sequentLatexPrint)).mkString("\n")
+		case ISABELLE_SE => in.map(x => prooftreeToString(x, format)).mkString("\n")
 	}
 
 
@@ -57,6 +58,10 @@ object PrintCalc{
 		case ISABELLE =>
 			in match {
 				case Prooftreea(a,b,c) => "(" + sequentToString(a, format) + " " + "\\<Longleftarrow>" + " " + "PT" + " " + ruleToString(b, format) + " " + prooftreeListToString(c, format, sequentLatexPrint) + ")"
+			}
+		case ISABELLE_SE =>
+			in match {
+				case Prooftreea(a,b,c) => "apply (rule_tac derivable." + ruleToString(b, format) + ")\n" + prooftreeListToString(c, format, sequentLatexPrint)
 			}
 	}
 	

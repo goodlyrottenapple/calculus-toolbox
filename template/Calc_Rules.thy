@@ -89,6 +89,17 @@ fun swapout_L :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequ
     swapout_L_aux relAKA (betaList relAKA (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X))) seq ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) " |
 "swapout_L _ _ _ = None"
 
+fun swapout_L' :: "Action list \<Rightarrow> Action \<Rightarrow> Agent \<Rightarrow> Structure \<Rightarrow> Structure list \<Rightarrow> Sequent list option" where
+"swapout_L' [] alpha a X [] = Some ([])" |
+"swapout_L' (beta#actionList) alpha a X [] = None" |
+"swapout_L' [] alpha a X (Y # Ys) = None" |
+"swapout_L' (beta#actionList) alpha a X (Y # Ys) = (case swapout_L' actionList alpha a X Ys of 
+   Some list \<Rightarrow> Some ((AgS\<^sub>S forwK\<^sub>S a ActS\<^sub>S forwA\<^sub>S beta X \<turnstile>\<^sub>S Y) #list) | None \<Rightarrow> None )"
+
+fun swapout_L'' :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
+"swapout_L'' relAKA ( ActS\<^sub>S forwA\<^sub>S alpha (AgS\<^sub>S forwK\<^sub>S a X ) \<turnstile>\<^sub>S ;;\<^sub>S list ) = swapout_L' (relAKA alpha a) alpha a X list" |
+"swapout_L'' _ _ = None"
+
 
 fun swapout_R_aux :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> (Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
 "swapout_R_aux relAKA [] seq ( ;;\<^sub>S [] \<turnstile>\<^sub>S X ) = Some []" |
