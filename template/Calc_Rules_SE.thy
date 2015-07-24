@@ -17,6 +17,9 @@ datatype Locale = (*(*uncommentL?Formula?RuleCut*)
                   (*(*uncommentL?Action?Formula*)
                   PreFormula Action Formula |
                   (*uncommentR?Action?Formula*)*)
+                  (*(*uncommentL?Agent*)
+                  LAgent Agent |
+                  (*uncommentR?Agent*)*)
                   Empty
 
 

@@ -293,6 +293,7 @@ fun SE_to_DE_Locale :: "Locale \<Rightarrow> DEAK.Locale" where
 "SE_to_DE_Locale (Part s) = DEAK.Part (SE_to_DE_Structure s)" |
 "SE_to_DE_Locale (RelAKA a) = DEAK.RelAKA (\<lambda>ac. \<lambda>ag. (map (SE_to_DE_Action) (a (the (DE_to_SE_Action ac)) (the (DE_to_SE_Agent ag)))))" |
 "SE_to_DE_Locale (PreFormula a f) = DEAK.PreFormula (SE_to_DE_Action a) (SE_to_DE_Formula f)" |
+"SE_to_DE_Locale (LAgent a) = DEAK.LAgent (SE_to_DE_Agent a)" |
 "SE_to_DE_Locale Empty = DEAK.Empty"
 
 

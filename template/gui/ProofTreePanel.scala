@@ -448,6 +448,35 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	})
 	popup.add(cutt);
 
+
+	val refl_forwK = new MenuItem(new Action("Apply Refl_forwK") {
+      	def apply = {
+      		selectedSequentInPt match {
+				case Some(selSeq) =>
+					if(tree.isLeaf(selSeq)) {
+						new AgentInputDialog().agent match {
+				      		case Some(a) =>
+				      			val list = derAll(LAgent(a)::session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r == RuleKnowledgea(Refl_ForwK())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
+				      			list match {
+				      				case (rule, derList)::Nil =>
+										val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
+										val pt = rule match {
+											case RuleZera(r) => m(0)
+											case Fail() => m(0)
+											case ru => Prooftreea( selSeq.seq, ru, m )
+										}
+										session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
+										session.savePT()
+										update()
+									case Nil => 
+				      			}
+				      	}
+				    }
+      		}
+      	}
+	})
+	popup.add(refl_forwK);
+
 	val displaySeqTree = new MenuItem(new Action("Display Sequent tree") {
 		accelerator = Some(getKeyStroke('t'))
       	def apply = {

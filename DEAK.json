@@ -938,7 +938,9 @@
 		"RuleKnowledge" : {
 			"Refl_ForwK" : {
 				"ascii" : "Refl_ForwK",
-				"latex" : "Refl_FboxK"
+				"latex" : "Refl_FboxK",
+				"locale" : "LAgent a",
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S (AgS\\<^sub>S (forwK\\<^sub>S) a (?\\<^sub>S ''Y'')))])"
 			}
 		}
 	},

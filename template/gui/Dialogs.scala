@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import Parser.{parseSequent, parseFormula}
+import Parser._
 import PrintCalc._
 import Proofsearch.derTree
 
@@ -88,6 +88,47 @@ class FormulaInputDialog(owner: Window = null) extends Dialog(owner) {
     }) = Center
 
     layout(new FlowPanel(FlowPanel.Alignment.Right)( Button("Use Formula") { close() } )) = South
+  }
+
+  centerOnScreen()
+  open()
+}
+
+
+
+class AgentInputDialog(owner: Window = null) extends Dialog(owner) {
+  var agent:Option[Agent] = None
+  modal = true
+
+  val in = new TextField { 
+    text = ""
+    columns = 25
+    //horizontalAlignment = Alignment.Right
+  }
+  
+  val inL = new Label
+
+  listenTo(in.keys)
+  reactions += {
+    case KeyReleased(`in`, k, _, _) =>
+      parseAgent(in.text) match {
+        case Some(r) =>
+          agent = Some(r)
+          val latex = agentToString(r)
+          inL.icon = new TeXFormula(latex).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
+        case None => ;
+      }
+  }
+
+  contents = new BorderPanel {
+    layout(new BoxPanel(Orientation.Horizontal) {
+      border = Swing.EmptyBorder(5,5,5,5)
+
+      contents += in
+      contents += inL
+    }) = Center
+
+    layout(new FlowPanel(FlowPanel.Alignment.Right)( Button("Use Agent") { close() } )) = South
   }
 
   centerOnScreen()
