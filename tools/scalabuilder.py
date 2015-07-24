@@ -676,7 +676,7 @@ class ScalaBuilder:
 		linesIsa.append( "             case RuleMacro(a, pt) => rulemacroToString(a, pt, format)" )
 		ret += "		case ASCII =>\n			in match {\n"
 		ret += "\n".join(lines)
-		ret += "\n			}\n		case LATEX =>\n			in match {\n"
+		ret += "\n			}\n		case LATEX | ISABELLE_SE =>\n			in match {\n"
 		ret += "\n".join(lines)
 		ret += "\n			}\n		case ISABELLE =>\n			in match {\n"
 		ret += "\n".join(linesIsa)

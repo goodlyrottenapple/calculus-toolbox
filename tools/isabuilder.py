@@ -550,7 +550,7 @@ class IsabelleBuilder:
 
 				if k not in dependencies.keys():
 					#print "adding", k
-					list.append ( IsabelleBuilder.__calc_structure_datatype(k, rules[k]) )
+					list.append ( IsabelleBuilder.__calc_structure_datatype(k, rules[k], rules) )
 					for i in dependencies.keys():
 						if k in dependencies[i]: dependencies[i].remove(k)
 						if dependencies[i] == [] : del dependencies[i]
