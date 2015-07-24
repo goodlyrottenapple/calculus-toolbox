@@ -782,6 +782,23 @@
 			"FboxK_R" : {
 				"ascii" : "FboxK_R",
 				"latex" : "FboxK_R"
+			},
+
+			"BdiamK_L" : {
+				"ascii" : "BdiamK_L",
+				"latex" : "BdiamK_L"
+			},
+			"BdiamK_R" : {
+				"ascii" : "BdiamK_R",
+				"latex" : "BdiamK_R"
+			},
+			"BboxK_L" : {
+				"ascii" : "BboxK_L",
+				"latex" : "BboxK_L"
+			},
+			"BboxK_R" : {
+				"ascii" : "BboxK_R",
+				"latex" : "BboxK_R"
 			}
 		},
 
@@ -803,6 +820,26 @@
 				"ascii" : "FboxA_R",
 				"latex" : "FboxA_R"
 			},
+
+
+			"BdiamA_L" : {
+				"ascii" : "BdiamA_L",
+				"latex" : "BdiamA_L"
+			},
+			"BdiamA_R" : {
+				"ascii" : "BdiamA_R",
+				"latex" : "BdiamA_R"
+			},
+			"BboxA_L" : {
+				"ascii" : "BboxA_L",
+				"latex" : "BboxA_L"
+			},
+			"BboxA_R" : {
+				"ascii" : "BboxA_R",
+				"latex" : "BboxA_R"
+			},
+
+
 			"One_L" : {
 				"ascii" : "One_L",
 				"latex" : "One_L"
@@ -818,7 +855,7 @@
 				"condition" : "pre_l alpha",
 				"premise" : "(\\<lambda>x. Some [(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
 				"locale" : "PreFormula alpha f",
-				"se_rule": "l \\<turnstile>d (f\\<^sub>S \\<turnstile>\\<^sub>S X) \\<Longrightarrow> l \\<turnstile>d ((One\\<^sub>F alpha)\\<^sub>S \\<turnstile>\\<^sub>S X)"
+				"se_rule": "l \\<turnstile>d (f \\<^sub>S \\<turnstile>\\<^sub>S X) \\<Longrightarrow> l \\<turnstile>d ((One\\<^sub>F alpha)\\<^sub>S \\<turnstile>\\<^sub>S X)"
 			}
 		},
 
@@ -895,6 +932,13 @@
 				"latex" : "Bigcomma_Cons_R",
 				"premise" : "bigcomma_cons_R2",
 				"se_rule" : "l \\<turnstile>d (Y \\<turnstile>\\<^sub>S X ;\\<^sub>S (;;\\<^sub>S Xs)) \\<Longrightarrow> l \\<turnstile>d (Y \\<turnstile>\\<^sub>S ;;\\<^sub>S(X # Xs))"
+			}
+		},
+
+		"RuleKnowledge" : {
+			"Refl_ForwK" : {
+				"ascii" : "Refl_ForwK",
+				"latex" : "Refl_FboxK"
 			}
 		}
 	},
@@ -1046,7 +1090,12 @@
 			"FdiamK_L" :		["fdiamK Ag?a F?A |- ?X",	"forwK Ag?a F?A |- ?X"],
 			"FdiamK_R" :		["forwK Ag?a ?X |- fdiamK Ag?a F?A",	"?X |- F?A"],
 			"FboxK_L" :			["fboxK Ag?a F?A |- forwK Ag?a ?X",		"F?A |- ?X"],
-			"FboxK_R" :			["?X |- fboxK Ag?a F?A",	"?X |- forwK Ag?a F?A"]
+			"FboxK_R" :			["?X |- fboxK Ag?a F?A",	"?X |- forwK Ag?a F?A"],
+
+			"BdiamK_L" :		["bdiamK Ag?a F?A |- ?X",	"backK Ag?a F?A |- ?X"],
+			"BdiamK_R" :		["backK Ag?a ?X |- bdiamK Ag?a F?A",	"?X |- F?A"],
+			"BboxK_L" :			["bboxK Ag?a F?A |- backK Ag?a ?X",		"F?A |- ?X"],
+			"BboxK_R" :			["?X |- bboxK Ag?a F?A",	"?X |- backK Ag?a F?A"]
 		},
 
 		"RuleOpAct" : {
@@ -1054,6 +1103,12 @@
 			"FdiamA_R" :		["forwA Act?alpha ?X |- fdiamA Act?alpha F?A",	"?X |- F?A"],
 			"FboxA_L" :			["fboxA Act?alpha F?A |- forwA Act?alpha ?X",	"F?A |- ?X"],
 			"FboxA_R" :			["?X |- fboxA Act?alpha F?A",					"?X |- forwA Act?alpha F?A"],
+
+			"BdiamA_L" :		["bdiamA Act?alpha F?A |- ?X",					"backA Act?alpha F?A |- ?X"],
+			"BdiamA_R" :		["backA Act?alpha ?X |- bdiamA Act?alpha F?A",	"?X |- F?A"],
+			"BboxA_L" :			["bboxA Act?alpha F?A |- backA Act?alpha ?X",	"F?A |- ?X"],
+			"BboxA_R" :			["?X |- bboxA Act?alpha F?A",					"?X |- backA Act?alpha F?A"],
+
 			"One_L" :			["One Act?alpha |- ?X",							"Phi Act?alpha |- ?X"],
 			"One_R" :			["Phi Act?alpha |- One Act?alpha",				""],
 			"Pre_L" :			["?X |- ?Y",	""]
@@ -1074,6 +1129,9 @@
 		},
 		"RuleCut" : {
 			"SingleCut" :		["?X |- ?Y",	""]
+		},
+		"RuleKnowledge" : {
+			"Refl_ForwK" : 		["?X |- ?Y",	"?X |- forwK Ag?a ?Y"]
 		}
 	}
 }
