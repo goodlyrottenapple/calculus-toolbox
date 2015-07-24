@@ -248,12 +248,15 @@ def add_gui(flags):
         shutil.copyfile(libs[list.index(l)], OUTPUT_PATH + "lib/"+l+".jar")
 
     # adds a file abbrev.txt - this should probably be temporary!!
-    file = open(OUTPUT_PATH+'abbrev.txt', 'w')
-    file.close()
-    file = open(OUTPUT_PATH+'preform.txt', 'w')
-    file.close()
-    file = open(OUTPUT_PATH+'relAKA.txt', 'w')
-    file.close()
+    if not os.path.exists(OUTPUT_PATH + 'abbrev.txt'):
+        file = open(OUTPUT_PATH+'abbrev.txt', 'w')
+        file.close()
+    if not os.path.exists(OUTPUT_PATH + 'preform.txt'):
+        file = open(OUTPUT_PATH+'preform.txt', 'w')
+        file.close()
+    if not os.path.exists(OUTPUT_PATH + 'relAKA.txt'):
+        file = open(OUTPUT_PATH+'relAKA.txt', 'w')
+        file.close()
 
     return True
     
