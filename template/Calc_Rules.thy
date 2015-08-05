@@ -126,7 +126,11 @@ fun pre_l :: "Action \<Rightarrow> Sequent \<Rightarrow> bool" where
 "pre_l a _ = False"
 (*uncommentR?Pre_L*)*)
 
-
+(*(*uncommentL?Pre_R*)
+fun pre_r :: "Action \<Rightarrow> Sequent \<Rightarrow> bool" where
+"pre_r a (X \<turnstile>\<^sub>S (One\<^sub>F alpha)\<^sub>S) = (a = alpha)"|
+"pre_r a _ = False"
+(*uncommentR?Pre_R*)*)
 
 (*
 fun relAKAA :: "Action \<Rightarrow> Agent \<Rightarrow> Action \<Rightarrow> bool" where

@@ -376,8 +376,9 @@ lemma SE_to_DE_subset_loc :
   assumes "l \<turnstile>d t" "set l \<subseteq> set l'"
   shows "l' \<turnstile>d t"
 using assms apply (induction l t rule:derivable.induct)
-by (auto intro: derivable.intros)
-
+apply (auto intro: derivable.intros)
+apply (meson Swapout_L subsetCE)
+by (meson Swapout_R subsetCE)
 
 lemma DS_SD_Sequent_Id :
   fixes seq seq'
@@ -622,6 +623,7 @@ shows "\<forall>seq \<in> set x. freevars seq = {}"
 proof -
 have "\<forall>seq \<in> set x. \<exists>beta \<in> set actionList. \<exists>Y \<in> set Ys. seq = (AgS\<^sub>S forwK\<^sub>S a ActS\<^sub>S forwA\<^sub>S beta X \<turnstile>\<^sub>S Y)" sorry
 thus ?thesis using assms sorry
+qed
 
 lemma map_list_len:
   fixes l1 l2

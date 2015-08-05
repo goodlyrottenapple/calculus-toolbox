@@ -856,6 +856,15 @@
 				"premise" : "(\\<lambda>x. Some [(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
 				"locale" : "PreFormula alpha f",
 				"se_rule": "l \\<turnstile>d (f \\<^sub>S \\<turnstile>\\<^sub>S X) \\<Longrightarrow> l \\<turnstile>d ((One\\<^sub>F alpha)\\<^sub>S \\<turnstile>\\<^sub>S X)"
+			},
+
+			"Pre_R" : {
+				"ascii" : "Pre_R",
+				"latex" : "Pre_R",
+				"condition" : "pre_r alpha",
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S f \\<^sub>S)])",
+				"locale" : "PreFormula alpha f",
+				"se_rule": "l \\<turnstile>d (X \\<turnstile>\\<^sub>S f \\<^sub>S) \\<Longrightarrow> l \\<turnstile>d (X \\<turnstile>\\<^sub>S (One\\<^sub>F alpha)\\<^sub>S)"
 			}
 		},
 
@@ -1113,7 +1122,8 @@
 
 			"One_L" :			["One Act?alpha |- ?X",							"Phi Act?alpha |- ?X"],
 			"One_R" :			["Phi Act?alpha |- One Act?alpha",				""],
-			"Pre_L" :			["?X |- ?Y",	""]
+			"Pre_L" :			["?X |- ?Y",	""],
+			"Pre_R" :			["?X |- ?Y",	""]
 		},
 		"RuleBigcomma" : {
 			"Bigcomma_Nil_L" :	["I |- ?Y",		";;[] |- ?Y"],
