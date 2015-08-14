@@ -1,4 +1,3 @@
-
 import swing.{Button, ListView, FileChooser, Publisher}
 import swing.event.Event
 
@@ -12,8 +11,8 @@ import java.io.PrintWriter
 import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants, TeXIcon}
 
 /*calc_import*/
-import PrintCalc.{sequentToString, prooftreeToString}
-import Parser.{parseSequent}
+import PrintCalc._
+import Parser._
 
 case class PTChanged(valid : Boolean) extends Event
 case class MacroAdded() extends Event
@@ -22,31 +21,107 @@ case class CalcSession() extends Publisher {
 
 	/*/*uncommentL?Action?Agent*/
 
-	var relAKAMap : Map[Tuple2[Action, Agent], List[Action]] = Map()
+	var relAKAMap : scala.collection.mutable.Map[Tuple2[Action, Agent], List[Action]] = scala.collection.mutable.Map()
 
 	var preFormulaMap : scala.collection.mutable.Map[Action, Formula] = scala.collection.mutable.Map()
 
-	/*def relAKAOld(alpha : Action)(a : Agent)(beta: Action) : Boolean = (alpha, a, beta) match {
-		// case (Actiona(List('e','p')), Agenta(List('c')), Actiona(List('e','w'))) => true
-		// should we have this one as well? :
-		// case (Actiona(List('e','w')), Agenta(List('c')), Actiona(List('e','p'))) => true
-		case (Actiona(x), Agenta(a), Actiona(y)) => 
-			if (x == y) true
-			else {
-				relAKAMap.get((Actiona(x), Agenta(a))) match {
-					case Some(list) => list.indexOf(Actiona(y)) != -1
-					case None => false
-				}
-			}
-		case _ => false
-	}*/
+	var relAKAreflexive = true
 
 	def relAKA(alpha : Action)(a : Agent) : List[Action] = relAKAMap.get((alpha, a)) match {
 		case Some(h::list) =>
-		// makes sure relAKA(a, x, a) is always true
-		if(alpha != h && list.indexOf(alpha) == -1) alpha::h::list
-		else h::list
+			// makes sure relAKA(a, x, a) is always true if relAKAreflexive is true
+			if(alpha != h && list.indexOf(alpha) == -1 && relAKAreflexive) alpha::h::list
+			else h::list
 		case None => List(alpha)
+	}
+
+	def clearRelAKA() = {
+		relAKAMap.clear()
+	}
+
+	def addRelAKA(a:Action, ag:Agent, a2:Action) = {
+		val list = relAKAMap.getOrElse((a, ag), Nil)
+		if(!list.contains(a2)) relAKAMap.put((a, ag), list++List(a2))
+		println(relAKAMap((a, ag)))
+
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
+	}
+
+	def removeRelAKA(a:Action, ag:Agent, a2:Action):Unit = {
+		val list = relAKAMap.getOrElse((a, ag), Nil)
+		relAKAMap.put((a, ag), list.filter(_ != a2))
+		println(relAKAMap((a, ag)))
+
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
+	}
+
+	def removeRelAKA(a:String, ag:String, a2:String):Unit = {
+		val a_p = parseAction(a)
+		val ag_p = parseAgent(ag)
+		val a2_p = parseAction(a2)
+		if(a_p != None && ag_p != None && a2_p != None) removeRelAKA(a_p.get, ag_p.get, a2_p.get)
+	}
+
+	//this function is used for dispalying relAKA in a table (typeset in latex)
+	def flattenRelAKA():Array[Array[String]] = {
+		val ret = new ListBuffer[Array[String]]()
+		relAKAMap.foreach{
+			case((a, ag), list) => 
+				for (e <- list){
+					ret += Array(actionToString(a), agentToString(ag), actionToString(e))
+				}
+		}
+		ret.toArray
+	}
+
+	//this one is used for saving relAKA into json file
+	def flattenRelAKAStr():List[List[String]] = {
+		val ret = new ListBuffer[List[String]]()
+		relAKAMap.foreach{
+			case((a, ag), list) => 
+				for (e <- list){
+					ret += List(actionToString(a, PrintCalc.ASCII), agentToString(ag, PrintCalc.ASCII), actionToString(e, PrintCalc.ASCII))
+				}
+		}
+		ret.toList
+	}
+
+
+	def clearPreForm() = {
+		preFormulaMap.clear()
+	}
+
+	def addPreForm(a:Action, f:Formula) = {
+		preFormulaMap.put(a, f)
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
+	}
+
+	def removePreForm(a:Action):Unit = {
+		preFormulaMap -= a
+		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
+	}
+
+	def removePreForm(a:String):Unit = {
+		val a_p = parseAction(a)
+		if(a_p != None) removePreForm(a_p.get)
+	}
+
+	//this function is used for dispalying preFormMap in a table (typeset in latex)
+	def flattenPreForm():Array[Array[String]] = {
+		val ret = new ListBuffer[Array[String]]()
+		preFormulaMap.foreach{
+			case(a, f) =>  ret += Array(actionToString(a), formulaToString(f))
+		}
+		ret.toArray
+	}
+
+	//this function is used for saving preFormMap in a JSON file
+	def flattenPreFormStr():List[List[String]] = {
+		val ret = new ListBuffer[List[String]]()
+		preFormulaMap.foreach{
+			case(a, f) =>  ret += List(actionToString(a, PrintCalc.ASCII), formulaToString(f, PrintCalc.ASCII))
+		}
+		ret.toList
 	}
 
 	/*uncommentR?Action?Agent*/*/
@@ -90,11 +165,18 @@ case class CalcSession() extends Publisher {
     	renderer = ListView.Renderer(_._1)
     }
 
-    def currentLocale : List[Locale] = List(
-		Empty() 
-		/*/*uncommentL?Action?Agent*/ , RelAKA(relAKA) /*uncommentR?Action?Agent*/*/
-	) ++ assmsBuffer.toList.map({case (i,s) => Premise(s)}) /*/*uncommentL?Action?Formula*/ ++ preFormulaMap.keys.toList.map{case a => PreFormula(a,preFormulaMap(a))} /*uncommentR?Action?Formula*/*/
-
+    def currentLocale : List[Locale] = {
+    	val buff = ListBuffer[Locale]()
+		buff ++= assmsBuffer.toList.map({case (i,s) => Premise(s)}) 
+    	/*/*uncommentL?Action?Agent*/
+    	if (relAKAreflexive) buff += RelAKA(relAKA) 
+    	/*uncommentR?Action?Agent*/*/
+		/*/*uncommentL?Action?Formula*/
+		buff ++= preFormulaMap.keys.toList.map{case a => PreFormula(a,preFormulaMap(a))}
+		/*uncommentR?Action?Formula*/*/
+		if(buff.isEmpty) buff += Empty()
+		buff.toList
+    }
 
     var proofDepth = 5
 	/*val addAssmButton = new Button {
@@ -145,6 +227,7 @@ case class CalcSession() extends Publisher {
 
 	def clearAssms() = {
 		assmsBuffer.clear()
+		listView.listData = assmsBuffer
 		publish(PTChanged(isProofTreeWithCut(currentLocale, currentPT)))
 	}
 

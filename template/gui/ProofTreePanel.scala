@@ -1,5 +1,5 @@
-import swing.{Action, Component, Dialog, Swing, MenuItem, Graphics2D, ListView}
-import swing.event.{ButtonClicked, MouseClicked, KeyReleased, Key}
+import swing.{Action, Component, Dialog, Swing, MenuItem, Graphics2D, ListView, PopupMenu}
+import swing.event.{ButtonClicked, MouseClicked, KeyPressed, KeyReleased, Key}
 
 import javax.swing.KeyStroke.getKeyStroke
 import java.awt.event.KeyEvent
@@ -19,11 +19,13 @@ import org.abego.treelayout.TreeLayout
 import org.abego.treelayout.util.{DefaultConfiguration, DefaultTreeForTreeLayout}
 
 /*calc_import*/
-import PrintCalc.sequentToString
+import PrintCalc._
+import Parser._
+
 import Proofsearch._
 
 
-class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 80, editable : Boolean = true) extends scala.swing.Panel {
+class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetweenNodes:Int = 80, editable : Boolean = true, popupPanel:Option[PopupPanel] = None) extends scala.swing.Panel {
 	val configuration = new DefaultConfiguration[SequentInPt](gapBetweenLevels, gapBetweenNodes, org.abego.treelayout.Configuration.Location.Bottom)
 	val nodeExtentProvider = new SequentInPtNodeExtentProvider()
 
@@ -32,15 +34,32 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	//println(session.abbrevMap.toMap)
 	var treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
 
-	val OFFSET_X = 20
-	val OFFSET_Y = 20
+
+    val b1 = boundsOfNode(tree.getRoot())
+    def OFFSET_X : Int = {
+    	val s = treeLayout.getBounds().getBounds().getSize()
+        val pSize = peer.getSize()
+		return (pSize.width - s.width)/2
+	}
+
+	def OFFSET_Y : Int = {
+        val s = treeLayout.getBounds().getBounds().getSize()
+        val pSize = peer.getSize()
+		return (pSize.height - s.height - 50)
+	}
 
 	peer.setLayout(null)
 	border = Swing.EmptyBorder(10, 10, 10, 10)
 
+	
+
 	var selectedSequentInPt : Option[SequentInPt] = None
 
-	preferredSize = new Dimension(treeLayout.getBounds().getBounds().getSize().width+2*OFFSET_X, treeLayout.getBounds().getBounds().getSize().height+2*OFFSET_Y)
+	def prefSize : Dimension = {
+		return new Dimension(treeLayout.getBounds().getBounds().getSize().width + 150 , treeLayout.getBounds().getBounds().getSize().height + 100)		
+	}
+
+	preferredSize = prefSize
 
 	var seqTreeViewDialog : Option[SequentTreeViewDialog] = None//new SequentTreeViewDialog(null, concl(session.currentPT))
 
@@ -82,35 +101,38 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	}
 
 
+	listenTo(keys)
+    reactions += {
+        case KeyPressed(_, Key.Up, _, _) =>
+            println("Up is down")
+        case KeyReleased(_, Key.Up, _, _) =>
+            println("Up is up")
+    }
+    focusable = true
+
+
 	protected def add(comp: SequentInPt, x: Int, y: Int): Unit = {
 		val p = comp.peer
 		p.setLocation(x+OFFSET_X, y+OFFSET_Y)
-		//comp.ruleButton.peer.setLocation(x+p.getPreferredSize.width+OFFSET_X, y+OFFSET_Y-p.getPreferredSize.height/2)
 		comp.ruleButton.peer.setSize(comp.ruleButton.peer.getPreferredSize)
 		p.setSize(p.getPreferredSize)
+		
 		peer.add(p)
 		peer.add(comp.ruleButton.peer)
 
-
-//parent:SequentInPt) : Unit = {
 		val b1 = boundsOfNode(comp)
 		val yy = (b1.getMinY()).toInt-3
 		var xmin = (b1.getMinX()).toInt
 		var xmax = (b1.getMaxX()).toInt //+15
-
 
 		for (child <- children(comp)) { 
 			val b2 = boundsOfNode(child)
 			if( (b2.getMinX()).toInt < xmin) xmin = (b2.getMinX()).toInt
 			if( (b2.getMaxX()).toInt > xmax) xmax = (b2.getMaxX()).toInt
 		}
-
-		//g.drawLine( xmin, y, xmax+15, y )
-		//g.drawLine( xmin+OFFSET_X, y+OFFSET_Y, xmax+OFFSET_X, y+OFFSET_Y )
 		comp.ruleButton.peer.setLocation(xmax+5+OFFSET_X, yy-(comp.ruleIcon.getIconHeight/2)+OFFSET_Y)
 		listenTo(comp.seqButton)
 		listenTo(comp.ruleButton)
-
 	}
 
 	protected def add(comp: Component, x: Int, y: Int): Unit = {
@@ -121,7 +143,6 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		p.setSize(p.getPreferredSize)
 		peer.add(p)
 		listenTo(comp)
-
 	}
 
 
@@ -132,25 +153,22 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case "rule" =>
 					val pressed = b.asInstanceOf[RuleInPtButton]
 					if(pressed.parent.seqButton.visible){
-						println("old bounds: " + boundsOfNode(pressed.parent))
-						println("old height: " + pressed.parent.height)
-
+						// println("old bounds: " + boundsOfNode(pressed.parent))
+						// println("old height: " + pressed.parent.height)
 						pressed.parent.contents -= pressed.parent.seqButton
 						pressed.parent.preferredSize = pressed.parent.macroPtPanel.get.preferredSize
 						pressed.parent.contents += pressed.parent.macroPtPanel.get
-						println("new bounds: " + boundsOfNode(pressed.parent))
-						println("new height: " + pressed.parent.height)
+						// println("new bounds: " + boundsOfNode(pressed.parent))
+						// println("new height: " + pressed.parent.height)
 
 					} else {
-						println("old bounds: " + boundsOfNode(pressed.parent))
-						println("old height: " + pressed.parent.height)
-
+						// println("old bounds: " + boundsOfNode(pressed.parent))
+						// println("old height: " + pressed.parent.height)
 						pressed.parent.contents -= pressed.parent.macroPtPanel.get
 						pressed.parent.preferredSize = pressed.parent.seqButton.preferredSize
 						pressed.parent.contents += pressed.parent.seqButton
-						println("new bounds: " + boundsOfNode(pressed.parent))
-						println("new height: " + pressed.parent.height)
-
+						// println("new bounds: " + boundsOfNode(pressed.parent))
+						// println("new height: " + pressed.parent.height)
 					}
 					pressed.parent.seqButton.visible = !pressed.parent.seqButton.visible
 
@@ -159,36 +177,35 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 
 				case "sequent" if editable =>
-					unselect()
 					val pressed = b.asInstanceOf[SequentInPtButton]
-					/*println(b.text)
-					println("Children:")
-					for (child <- children(pressed)) { 
-						println(child.text)
-					}*/
-
-					selectedSequentInPt = Some(pressed.parent)
+					select(pressed.parent)
 
 					seqTreeViewDialog match {
 						case Some(dialog) => 
 							dialog.seqPanel.currentSequent = pressed.parent.seq
 							dialog.seqPanel.rebuild()
-						case None => 
+						case None => ;
 					}
 
-					pressed.border = Swing.LineBorder(Color.black)
-					pressed.parent.sel = true
-					//val b1 = boundsOfNode(pressed)
-					popup.peer.show(b.peer, OFFSET_X, OFFSET_Y)
+					popup.peer.show(b.peer, 20, 20)
 				case _ =>
-					unselect()
+					println("what could this possibly be????")
+					//unselect()
 
 			}
-		case m : MouseClicked => ;
-			// selectedSequentInPt = None
-			// println("unselect")
-			// unselect()
+		case m : MouseClicked => 
+			requestFocus
+			unselect()
 
+	}
+
+
+	def addCallback(panel:scala.swing.Panel)(callback: () => Unit){
+	    listenTo(panel)
+	    reactions += { case scala.swing.event.UIElementHidden(`panel`) => 	    	
+	        callback()
+	       	deafTo(panel)
+	    }
 	}
 
 	val popup = new PopupMenu
@@ -205,7 +222,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		}
 		
 	})
-	popup.add(copy);
+	popup.contents += copy
 
 	val copy_isa_se = new MenuItem(Action("Copy (Isabelle SE)") {
 		selectedSequentInPt match {
@@ -219,7 +236,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		}
 		
 	})
-	popup.add(copy_isa_se);
+	popup.contents += copy_isa_se
 
 	
 	val addAssm = new MenuItem(Action("Add as assm") {
@@ -228,7 +245,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		}
 		
 	})
-	popup.add(addAssm);
+	popup.contents += addAssm
 
 	val merge = new MenuItem(Action("Merge above") {
 		selectedSequentInPt match {
@@ -247,7 +264,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		}
 		
 	})
-	popup.add(merge);
+	popup.contents += merge
 
 	val findPT = new MenuItem(new Action("FindPT") {
 		accelerator = Some(getKeyStroke('f'))
@@ -256,41 +273,48 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 				case Some(selSeq) =>
 					tree.isLeaf(selSeq) match {
 						case true =>
-            				new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=selSeq.seq).pt match {
-	              				case Some(r) => 
-	              					session.currentPT = session.mergePTs(r, selSeq, tree.getRoot(), children)
-	              					session.savePT()
-
-	            					update()
-	            				case None =>
-	            					Dialog.showMessage(null, "PT couldn't be found", "Error")
-	            			}
+							popupPanel match {
+								case None => 
+									new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=selSeq.seq).pt match {
+			              				case Some(r) => 
+			              					session.currentPT = session.mergePTs(r, selSeq, tree.getRoot(), children)
+			              					session.savePT()
+			            					update()
+			            				case None =>
+			            					Dialog.showMessage(null, "PT couldn't be found", "Error")
+			            			}
+			            		case Some(panel) =>
+			            			val ps = new ProofSearchPopup(depth=session.proofDepth, locale=session.currentLocale, seq=selSeq.seq)
+			            			ps.open()
+			            			panel.displayPopup(ps)
+			            			addCallback(ps)(()=>{
+			            				ps.pt match {
+				            				case Some(r) => 
+				              					session.currentPT = session.mergePTs(r, selSeq, tree.getRoot(), children)
+				              					session.savePT()
+				            					update()
+				            				case None =>
+				            					if(!ps.cancelled) panel.displayPopup(new ErrorPopup("Proof tree couldn't be found"))
+				            			}
+			            			})
+							}
 						case false => Dialog.showMessage(null, "Sequent not a premise", "Error")
 					}
 					
 			}
 		}
 	})
-	popup.add(findPT);
+	popup.contents += findPT
 
 
 	def addAbove() = {
 		selectedSequentInPt match {
 			case Some(selSeq) =>
-				if(tree.isLeaf(selSeq)) {
-					val list = derAll(session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
-					new SequentListDialog(list=list, session=session).pair match {
-					/*new SequentInputDialog().sequent match {
-						case Some(s) =>
-							//println(selSeq.seq)
-							//println(derAll(selSeq.seq).filter{ case (r,l) => l.exists(_ == s)})
-							val pair = derAll(session.currentLocale, selSeq.seq).filter{ case (r,l) => l.exists(_ == s)} match {
-								case List() => None
-								case List((rule, derList)) => Some(rule, derList)
-								case list => new RuleSelectDialog(list=list).pair 
-							}
-
-							pair match {*/
+				popupPanel match {
+					case None =>
+						if(tree.isLeaf(selSeq)) {
+							val list = derAll(session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
+							new SequentListDialog(list=list, session=session).pair match {
 								case None => ;
 								case Some((rule, derList)) =>
 									val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), Nil) )
@@ -303,11 +327,36 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 									session.savePT()
 									update()
 
-						//	}
-						//case None => Dialog.showMessage(null, "Invalid sequent entered", "Error")
-					}
-				} 
-				else Dialog.showMessage(null, "The sequent is not a leaf please delete pt above to proceed", "Error")
+							}
+						} 
+						else Dialog.showMessage(null, "The sequent is not a leaf please delete pt above to proceed", "Error")
+
+					case Some(panel) =>
+						if(tree.isLeaf(selSeq)){
+							val list = derAll(session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
+							val ruleList = new SequentListPopup(list)
+							panel.displayPopup(ruleList, true)
+							ruleList.ruleListTable.requestFocus
+  							//ruleList.ruleListTable.peer.changeSelection(0, 0, false, false)
+							
+							addCallback(ruleList)(()=>{
+								ruleList.pair match {
+				            		case None => ;
+									case Some((rule, derList)) =>
+										val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), Nil) )
+										val pt = rule match {
+											case RuleZera(r) => if (m.length > 0) m(0) else Prooftreea( selSeq.seq, RuleZera(r), Nil )
+											case Fail() => m(0)
+											case r => Prooftreea( selSeq.seq, r, m )
+										}
+										session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
+										session.savePT()
+										update()
+								}
+			            	})
+						}
+						else panel.displayPopup(new ErrorPopup("The selected sequent is not a leaf. Please use 'Delete above' to proceed."))
+				}
 		}
 	}
 
@@ -317,7 +366,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		accelerator = Some(getKeyStroke('a'))
       	def apply = addAbove()
 	})
-	popup.add(add1);
+	popup.contents += add1
 
 	def addBelow() = {
 		selectedSequentInPt match {
@@ -359,7 +408,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		accelerator = Some(getKeyStroke('A'))
       	def apply = addBelow()		
 	})
-	popup.add(add2);
+	//popup.contents += add2
 
 	val delete1 = new MenuItem(new Action("Delete above") {
 		accelerator = Some(getKeyStroke('d'))
@@ -372,7 +421,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			}
 		}
 	})
-	popup.add(delete1);
+	popup.contents += delete1
 
 	val delete2 = new MenuItem(new Action("Delete below") {
 		accelerator = Some(getKeyStroke('D'))
@@ -386,7 +435,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			}
 		}
 	})
-	popup.add(delete2);
+	popup.contents += delete2
 
 
 	def cut() = {
@@ -460,36 +509,64 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		accelerator = Some(getKeyStroke('c'))
       	def apply = cut()
 	})
-	popup.add(cutt);
+	//popup.contents += cutt
 
 
 	val refl_forwK = new MenuItem(new Action("Apply Refl_forwK") {
       	def apply = {
       		selectedSequentInPt match {
 				case Some(selSeq) =>
-					if(tree.isLeaf(selSeq)) {
-						new AgentInputDialog().agent match {
-				      		case Some(a) =>
-				      			val list = derAll(LAgent(a)::session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r == RuleKnowledgea(Refl_ForwK())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
-				      			list match {
-				      				case (rule, derList)::Nil =>
-										val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
-										val pt = rule match {
-											case RuleZera(r) => m(0)
-											case Fail() => m(0)
-											case ru => Prooftreea( selSeq.seq, ru, m )
-										}
-										session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
-										session.savePT()
-										update()
-									case Nil => 
-				      			}
-				      	}
+					if(tree.isLeaf(selSeq)) { popupPanel match {
+						case None =>
+							new AgentInputDialog().agent match {
+					      		case Some(a) =>
+					      			val list = derAll(LAgent(a)::session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r == RuleKnowledgea(Refl_ForwK())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
+					      			list match {
+					      				case (rule, derList)::Nil =>
+											val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
+											val pt = rule match {
+												case RuleZera(r) => m(0)
+												case Fail() => m(0)
+												case ru => Prooftreea( selSeq.seq, ru, m )
+											}
+											session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
+											session.savePT()
+											update()
+										case Nil => ;
+					      			}
+					      	}
+					    case Some(panel) => 
+					    	def agentToString_Aux(in:Agent) = agentToString(in) 
+					    	val agentInputPopup = new ParsePopup[Agent](parseAgent, agentToString_Aux,  "AGENT")
+					    	panel.displayPopup(agentInputPopup)
+							
+							addCallback(agentInputPopup)(()=>{
+								agentInputPopup.parsed match {
+									case Some(a) =>
+										val list = derAll(LAgent(a)::session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r == RuleKnowledgea(Refl_ForwK())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
+						      			list match {
+						      				case (rule, derList)::Nil =>
+												val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
+												val pt = rule match {
+													case RuleZera(r) => m(0)
+													case Fail() => m(0)
+													case ru => Prooftreea( selSeq.seq, ru, m )
+												}
+												session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
+												session.savePT()
+												update()
+											case Nil => 
+						      			}
+									case None => ;
+
+								}
+			            	})
+						}
 				    }
       		}
       	}
 	})
-	popup.add(refl_forwK);
+	//popup.contents += refl_forwK
 
 	val displaySeqTree = new MenuItem(new Action("Display Sequent tree") {
 		accelerator = Some(getKeyStroke('t'))
@@ -506,7 +583,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
       		}
       	}
 	})
-	popup.add(displaySeqTree);
+	popup.contents += displaySeqTree
 
 	val displayX = new MenuItem(new Action("Display X") {
 		accelerator = Some(getKeyStroke('x'))
@@ -534,7 +611,13 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
       		}*/
      	}
 	})
-	popup.add(displayX);
+	//popup.contents += displayX
+
+	popup.contents += new swing.Menu("Apply Rule") {
+		contents += cutt
+    	contents += refl_forwK
+    	contents += displayX
+  	}
 
 	/*val replaceIntPT = new MenuItem(new Action("Replace into PT") {
       	def apply = {
@@ -554,57 +637,68 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			}
 		}
 	})
-	popup.add(replaceIntPT);*/
+	popup.contents += replaceIntPT*/
 
 
-	def unselect(root:SequentInPt = tree.getRoot) : Unit = {
-		root.seqButton.border = Swing.EmptyBorder(0,0,0,0)
-		root.sel = false
+	def unselect() : Unit = {
+		//root.sel = false
 
-		for (child <- children(root)) {
-			//child.border = Swing.EmptyBorder(0,0,0,0)
-			//child.sel = false
-			unselect(child)
+		selectedSequentInPt match {
+			case Some(seq) => seq.seqButton.border = Swing.EmptyBorder(0,0,0,0)
+			case None => ;
 		}
+		selectedSequentInPt = None
+	}
 
+	def select(seq:SequentInPt = tree.getRoot) : Unit = {
+		unselect()
+		seq.seqButton.border = Swing.LineBorder(Color.black)
+		selectedSequentInPt = Some(seq)
 	}
 
 	def update() = {
+		println("update")
 		peer.removeAll()
 		treeLayout = new TreeLayout[SequentInPt](createPTree(session.currentPT), nodeExtentProvider, configuration)
 		build()
 		peer.revalidate()
 		peer.repaint()
 		val s = treeLayout.getBounds().getBounds().getSize()
-		preferredSize = new java.awt.Dimension(s.width + OFFSET_X*8, s.height + OFFSET_Y*2)
-		selectedSequentInPt match {
-			case Some(selSeq) =>
-				selSeq.seqButton.border = Swing.LineBorder(Color.black)
-				selSeq.sel = true
-			case None => ;
-		}
-	}
-
-	override def repaint() = {
-		peer.removeAll()
-		val old = treeLayout.getTree()
-		treeLayout = new TreeLayout[SequentInPt](old, nodeExtentProvider, configuration)
-		build()
-		peer.revalidate()
-		peer.repaint()
-		val s = treeLayout.getBounds().getBounds().getSize()
-		preferredSize = new java.awt.Dimension(s.width + OFFSET_X*8, s.height + OFFSET_Y*2)
+		preferredSize = prefSize
 	}
 
 	def build() = {
 		for (sequentInPt <- treeLayout.getNodeBounds().keySet()) {
-			selectedSequentInPt match {
-				case Some(sel) => if(sequentInPt.seq == sel.seq) selectedSequentInPt = Some(sequentInPt)
-				case None => ;
-			}
-			
 			val box = boundsOfNode(sequentInPt)
 			add(sequentInPt, (box.x).toInt, (box.y).toInt)
+		}
+	}
+
+	def paintSequentInPt(comp: SequentInPt, x: Int, y: Int): Unit = {
+		val p = comp.peer
+		p.setLocation(x+OFFSET_X, y+OFFSET_Y)
+
+		val b1 = boundsOfNode(comp)
+		val yy = (b1.getMinY()).toInt-3
+		var xmin = (b1.getMinX()).toInt
+		var xmax = (b1.getMaxX()).toInt //+15
+
+
+		for (child <- children(comp)) { 
+			val b2 = boundsOfNode(child)
+			if( (b2.getMinX()).toInt < xmin) xmin = (b2.getMinX()).toInt
+			if( (b2.getMaxX()).toInt > xmax) xmax = (b2.getMaxX()).toInt
+		}
+
+		comp.ruleButton.peer.setLocation(xmax+5+OFFSET_X, yy-(comp.ruleIcon.getIconHeight/2)+OFFSET_Y)
+	}
+
+	
+	override def repaint() = {
+		println("repaint!!!")
+		for (sequentInPt <- treeLayout.getNodeBounds().keySet()) {
+			val box = boundsOfNode(sequentInPt)
+			paintSequentInPt(sequentInPt, (box.x).toInt, (box.y).toInt)
 		}
 	}
 
@@ -614,7 +708,6 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		var xmin = (b1.getMinX()).toInt
 		var xmax = (b1.getMaxX()).toInt //+15
 
-
 		for (child <- children(parent)) { 
 			val b2 = boundsOfNode(child)
 			if( (b2.getMinX()).toInt < xmin) xmin = (b2.getMinX()).toInt
@@ -622,17 +715,20 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 			paintEdges(g, child)
 		}
-
-		//g.drawLine( xmin, y, xmax+15, y )
 		g.drawLine( xmin+OFFSET_X, y+OFFSET_Y, xmax+OFFSET_X, y+OFFSET_Y )
-		//parent.ruleIcon.paintIcon(null, g, xmax+5+OFFSET_X, y-(parent.ruleIcon.getIconHeight/2)+OFFSET_Y)
-		//g.drawString(parent.strule, xmax+5+OFFSET_X, y+5+OFFSET_Y)
 	}
 
-
+	var OFFSET_X_old = OFFSET_X
+	var OFFSET_Y_old = OFFSET_Y
 	override def paintComponent(g: Graphics2D) = {
 		super.paintComponent(g)
 		paintEdges(g, tree.getRoot())
+		//only repaints labels (ie repositions on peer) positioning if the OFFSET_X or OFFSET_Y changed
+		if(OFFSET_X_old != OFFSET_X || OFFSET_Y_old != OFFSET_Y){
+			repaint()
+			OFFSET_X_old = OFFSET_X
+			OFFSET_Y_old = OFFSET_Y
+		}
     }
 }
 

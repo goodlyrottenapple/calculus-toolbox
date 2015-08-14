@@ -1,12 +1,6 @@
-/*
-TODO:
-
--- reimplement printCalcDef
-*/
-
 import swing.{FileChooser, Orientation, Publisher, BoxPanel, FlowPanel, 
   Button, Dialog, Component, Swing, SimpleSwingApplication, TextField, Label, MenuBar, MenuItem, 
-  Menu, BorderPanel, MainFrame, ScrollPane, Separator, Dimension, CheckMenuItem}
+  Menu, BorderPanel, MainFrame, ScrollPane, Separator, Dimension, CheckMenuItem, PopupMenu}
 import swing.event.{ButtonClicked, MouseClicked, KeyReleased, Key}
 
 import swing.BorderPanel.Position._
@@ -142,19 +136,19 @@ object GUI extends SimpleSwingApplication {
   val menuItem = new MenuItem(swing.Action("Add as assm") {
     session.addAssmFromSelPT()
   })
-  popup.add(menuItem);
+  popup.contents += menuItem
   val menuItem2 = new MenuItem(swing.Action("Delete") {
     session.removePTs()
     session.ptListView.revalidate()
     session.ptListView.repaint()
   })
-  popup.add(menuItem2);
+  popup.contents += menuItem2
 
   val menuItem3 = new MenuItem(swing.Action("Export to LaTeX") {
     session.exportLatexFromSelPT()
 
   })
-  popup.add(menuItem3);
+  popup.contents += menuItem3
 
   val menuItem4 = new MenuItem(swing.Action("Copy as Isabelle") {
     session.ptListView.selection.items.head  match {
@@ -168,7 +162,7 @@ object GUI extends SimpleSwingApplication {
     }
 
   })
-  popup.add(menuItem4);
+  popup.contents += menuItem4
 
 
 
@@ -184,17 +178,17 @@ object GUI extends SimpleSwingApplication {
     }
 
   })
-  popup.add(menuItem4a);
+  popup.contents += menuItem4a
 
   val menuItem5 = new MenuItem(swing.Action("Create Rule Macro") {
     session.rulifyPT()
   })
-  popup.add(menuItem5);
+  popup.contents += menuItem5
 
   val menuItem6 = new MenuItem(swing.Action("Remove macros") {
     session.removeMacros()
   })
-  popup.add(menuItem6);
+  popup.contents += menuItem6
 
 
 
@@ -229,7 +223,7 @@ object GUI extends SimpleSwingApplication {
     else
       println("Cancelled")
   })
-  popupMacro.add(macroItem)
+  popupMacro.contents += macroItem
   
 
   // ptPanel stuff here
@@ -347,7 +341,7 @@ object GUI extends SimpleSwingApplication {
 
         }
       }
-      session.relAKAMap = buff.toMap
+      session.relAKAMap = buff
       // for (l <- scala.io.Source.fromFile("relAKA.txt").getLines){
       //   val arr = l.split(",")
       //   if (arr.length == 3) {
@@ -804,15 +798,15 @@ def readPTold(map : Map[String, Any]):Prooftree = {
   }
 }
 
-class CSFilter extends java.io.FilenameFilter {
-  def accept(directory: java.io.File, filename : String): Boolean = {
-    if (filename.endsWith(".cs")) return true
-    return false
-  }
-}
+// class CSFilter extends java.io.FilenameFilter {
+//   def accept(directory: java.io.File, filename : String): Boolean = {
+//     if (filename.endsWith(".cs")) return true
+//     return false
+//   }
+// }
 
-object S extends CC[String]
-object LL extends CC[List[Any]]
-object LLL extends CC[List[Map[String,Any]]]
-object M extends CC[Map[String, Any]]
-object MM extends CC[Map[String, String]]
+// object S extends CC[String]
+// object LL extends CC[List[Any]]
+// object LLL extends CC[List[Map[String,Any]]]
+// object M extends CC[Map[String, Any]]
+// object MM extends CC[Map[String, String]]

@@ -12,14 +12,15 @@ import Parser.parseSequent
 class SequentInPt(val seq:Sequent, val rule:Rule, size:Int = 15, val cutFormula:Option[Formula] = None, 
   session:CalcSession = CalcSession()) extends GridPanel(1,1)
  {
-
+  opaque = false
 	//val latXForm = new TeXFormula(sequentToString(seq))
     //icon = latXForm.createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
   val icon = session.sequentToIcon(seq)
 
   val seqButton = new SequentInPtButton(p=this)
-  seqButton.peer.setIcon(icon)
   seqButton.peer.setBorder(Swing.EmptyBorder(0, 0, 0, 0))
+  seqButton.peer.setOpaque(false)
+  seqButton.peer.setIcon(icon)
 
   contents+= seqButton
 
@@ -54,21 +55,11 @@ class SequentInPt(val seq:Sequent, val rule:Rule, size:Int = 15, val cutFormula:
     case _ => new RuleInPtButton(enabled=false)
   }
 
-  ruleButton.peer.setIcon(ruleIcon)
   ruleButton.peer.setBorder(Swing.EmptyBorder(0, 0, 0, 0))
-
-
-	var sel = false
+  ruleButton.peer.setOpaque(false)
+  ruleButton.peer.setIcon(ruleIcon)
 	
-	//text = seq.toString
 	border = Swing.EmptyBorder(0, 0, 0, 0)
-	// val s = new Dimension(width, height)
-	// //minimumSize = s
- //  //maximumSize = s
- //  preferredSize = s
-  //peer.setHorizontalAlignment(SwingConstants.LEFT)
-
-  //preferredSize.width = icon.getIconWidth
 
   def width: Int = {
     if (contents.contains(seqButton)) icon.getIconWidth//+ruleIcon.getIconWidth//()//+5
@@ -84,14 +75,15 @@ class SequentInPt(val seq:Sequent, val rule:Rule, size:Int = 15, val cutFormula:
 }
 
 class SequentInPtButton(enabled: Boolean = true, p:SequentInPt = null) extends Button {
+  opaque = false
   val parent = p
   text = "sequent"
   peer.setHorizontalAlignment(SwingConstants.LEFT)
-  //val str = "aaaa"
   peer.setEnabled(enabled)
 }
 
 class RuleInPtButton(val pt:Option[Prooftree] = None, enabled: Boolean = true, p:SequentInPt = null) extends Button {
+  opaque = false
   val parent = p
   text = "rule"
   peer.setHorizontalAlignment(SwingConstants.LEFT)
