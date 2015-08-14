@@ -225,6 +225,27 @@ def add_gui(flags):
     for l in list:
         if not doBuild(builder,paths[list.index(l)], OUTPUT_PATH+SCALA_SRC_PATH+"gui/"+l+".scala"): return False
 
+
+    # build any .java files needed
+    paths = glob(TEMPLATE_FILES_PATH + 'gui/*.java')
+    list = [p.split('/')[-1] for p in paths]
+
+    print "Building toobox GUI (Java)..."
+    print list
+
+    for l in list:
+        shutil.copyfile(paths[list.index(l)], OUTPUT_PATH+SCALA_SRC_PATH+"gui/"+l)
+
+    if os.path.exists(TEMPLATE_FILES_PATH+"gui/img/"):
+        if not os.path.exists(OUTPUT_PATH +SCALA_SRC_PATH+"gui/img/"):
+            os.makedirs(OUTPUT_PATH +SCALA_SRC_PATH+"gui/img/")
+        print "Copying gui/img folder..."
+        imgs = glob(TEMPLATE_FILES_PATH+"gui/img/*")
+        list = [p.split('/')[-1] for p in imgs]
+        print list, imgs
+        for l in list:
+            shutil.copyfile(imgs[list.index(l)], OUTPUT_PATH+SCALA_SRC_PATH+"gui/img/"+l)
+
     if os.path.exists(TEMPLATE_FILES_PATH+"build.py"):
         print "Copying build.py script ..."
         shutil.copyfile(TEMPLATE_FILES_PATH+"build.py", OUTPUT_PATH+"build.py")
@@ -247,16 +268,19 @@ def add_gui(flags):
     for l in list:
         shutil.copyfile(libs[list.index(l)], OUTPUT_PATH + "lib/"+l+".jar")
 
+
+
+
     # adds a file abbrev.txt - this should probably be temporary!!
-    if not os.path.exists(OUTPUT_PATH + 'abbrev.txt'):
-        file = open(OUTPUT_PATH+'abbrev.txt', 'w')
-        file.close()
-    if not os.path.exists(OUTPUT_PATH + 'preform.txt'):
-        file = open(OUTPUT_PATH+'preform.txt', 'w')
-        file.close()
-    if not os.path.exists(OUTPUT_PATH + 'relAKA.txt'):
-        file = open(OUTPUT_PATH+'relAKA.txt', 'w')
-        file.close()
+    # if not os.path.exists(OUTPUT_PATH + 'abbrev.txt'):
+    #     file = open(OUTPUT_PATH+'abbrev.txt', 'w')
+    #     file.close()
+    # if not os.path.exists(OUTPUT_PATH + 'preform.txt'):
+    #     file = open(OUTPUT_PATH+'preform.txt', 'w')
+    #     file.close()
+    # if not os.path.exists(OUTPUT_PATH + 'relAKA.txt'):
+    #     file = open(OUTPUT_PATH+'relAKA.txt', 'w')
+    #     file.close()
 
     return True
     
