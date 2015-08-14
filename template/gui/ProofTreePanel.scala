@@ -1,5 +1,5 @@
 import swing.{Action, Component, Dialog, Swing, MenuItem, Graphics2D, ListView}
-import swing.event.{ButtonClicked, MouseClicked}
+import swing.event.{ButtonClicked, MouseClicked, KeyReleased, Key}
 
 import javax.swing.KeyStroke.getKeyStroke
 import java.awt.event.KeyEvent
@@ -47,6 +47,20 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	def tree = treeLayout.getTree()
 
 	def children(parent:SequentInPt) : Iterable[SequentInPt] = tree.getChildren(parent)
+
+	def parent(child:SequentInPt, root:SequentInPt = tree.getRoot()) : Option[SequentInPt] = {
+		for (c <- children(root)){
+			if(child == c) return Some(root)
+			else {
+				parent(child, c) match {
+					case Some(res) => return Some(res)
+					case None => ;
+				}
+			}
+		}
+		return None
+	}
+
 
 	def boundsOfNode(node:SequentInPt) : Rectangle2D.Double = treeLayout.getNodeBounds().get(node)
 
@@ -110,6 +124,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	}
 
+
 	listenTo(mouse.clicks)
 	reactions += {
 		case ButtonClicked(b) =>
@@ -169,14 +184,12 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 					unselect()
 
 			}
-		case m : MouseClicked => 
-			selectedSequentInPt = None
-			println("unselect")
-			unselect()
+		case m : MouseClicked => ;
+			// selectedSequentInPt = None
+			// println("unselect")
+			// unselect()
 
 	}
-
-	
 
 	val popup = new PopupMenu
 
@@ -280,15 +293,16 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 							pair match {*/
 								case None => ;
 								case Some((rule, derList)) =>
-									val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), List()) )
+									val m = derList.map(x => Prooftreea(x, RuleZera(Prem()), Nil) )
 									val pt = rule match {
-										case RuleZera(r) => m(0)
+										case RuleZera(r) => if (m.length > 0) m(0) else Prooftreea( selSeq.seq, RuleZera(r), Nil )
 										case Fail() => m(0)
-										case ru => Prooftreea( selSeq.seq, ru, m )
+										case r => Prooftreea( selSeq.seq, r, m )
 									}
 									session.currentPT = session.mergePTs(pt, selSeq, tree.getRoot(), children)
 									session.savePT()
 									update()
+
 						//	}
 						//case None => Dialog.showMessage(null, "Invalid sequent entered", "Error")
 					}
@@ -563,6 +577,12 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		peer.repaint()
 		val s = treeLayout.getBounds().getBounds().getSize()
 		preferredSize = new java.awt.Dimension(s.width + OFFSET_X*8, s.height + OFFSET_Y*2)
+		selectedSequentInPt match {
+			case Some(selSeq) =>
+				selSeq.seqButton.border = Swing.LineBorder(Color.black)
+				selSeq.sel = true
+			case None => ;
+		}
 	}
 
 	override def repaint() = {
@@ -578,6 +598,11 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	def build() = {
 		for (sequentInPt <- treeLayout.getNodeBounds().keySet()) {
+			selectedSequentInPt match {
+				case Some(sel) => if(sequentInPt.seq == sel.seq) selectedSequentInPt = Some(sequentInPt)
+				case None => ;
+			}
+			
 			val box = boundsOfNode(sequentInPt)
 			add(sequentInPt, (box.x).toInt, (box.y).toInt)
 		}

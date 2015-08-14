@@ -15,7 +15,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.util.parsing.json.{JSON, JSONObject, JSONArray}
 
-import java.awt.FileDialog
+import java.awt.{FileDialog, Color}
 import java.awt.event.MouseEvent
 import javax.swing.{Icon, SpinnerNumberModel, JSpinner}
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -56,7 +56,9 @@ object GUI extends SimpleSwingApplication {
   
   val parsedStr = new Label { 
     val formula = new TeXFormula("a \\vdash a")
-    icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)    
+    icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15) 
+    foreground = new java.awt.Color(101,163,44)
+  
   }
 
   //val log = new Label()
@@ -269,18 +271,26 @@ object GUI extends SimpleSwingApplication {
           // val formula = new TeXFormula(latex)
           // parsedStr.icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 15)
           parsedStr.icon = session.sequentToIcon(r)
+          parsedStr.foreground = new java.awt.Color(101,163,44)
 
           if(k == Key.Enter){
-            println("ASCII: " + sequentToString(session.currentSequent, PrintCalc.ASCII))
-            println("LATEX: " + sequentToString(session.currentSequent, PrintCalc.LATEX))
-            println("ISABELLE: " + sequentToString(session.currentSequent, PrintCalc.ISABELLE))
-            println("RULE: " + sequentToString(rulifySequent(session.currentSequent), PrintCalc.ASCII))
+            // println("ASCII: " + sequentToString(session.currentSequent, PrintCalc.ASCII))
+            // println("LATEX: " + sequentToString(session.currentSequent, PrintCalc.LATEX))
+            // println("ISABELLE: " + sequentToString(session.currentSequent, PrintCalc.ISABELLE))
+            // println("RULE: " + sequentToString(rulifySequent(session.currentSequent), PrintCalc.ASCII))
             //val currentValue:Int = (ptSearchHeightSpinner.getValue).asInstanceOf[Int] //nasty hack!!
             //val currentAssm = session.assmsBuffer.toList.map({case (i,s) => Premise(s)})
             //derTree(currentValue, session.currentLocale++currentAssm, session.currentSequent) match {
             
 
-            new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=session.currentSequent, useRules=session.currentRuleList).pt match {
+            session.currentPT = Prooftreea( session.currentSequent, RuleZera(Prem()), Nil )
+            ptPanel.update()
+
+            if(globalPrefs(AUTO_ADD_PT) == true){
+              session.addPT()
+              if(globalPrefs(AUTO_ADD_ASSM) == true) session.addAssm()
+            }
+            /*new PSDialog(depth=session.proofDepth, locale=session.currentLocale, seq=session.currentSequent, useRules=session.currentRuleList).pt match {
               case Some(r) =>
                 session.currentPT = r
                 //display prooftree r in the PTPanel
@@ -293,11 +303,12 @@ object GUI extends SimpleSwingApplication {
                   if(globalPrefs(AUTO_ADD_ASSM) == true) session.addAssm()
                 } //else session.currentPTsel = None
                 case None => Dialog.showMessage(null, "No Prooftree could be found...", "Error")
-            }
+            }*/
+
           }
         }
           
-        case None => ;
+        case None => parsedStr.foreground = new java.awt.Color(211,51,63);
       }
     
     case ButtonClicked(`addPtButton`) => session.addPT()
@@ -388,7 +399,11 @@ object GUI extends SimpleSwingApplication {
 
   lazy val ui = new BorderPanel{
     layout (topPanel) = North
-    layout (new ScrollPane(ptPanel){border = Swing.EmptyBorder(0, 0, 0, 0)}) = Center
+    layout (new ScrollPane(ptPanel){
+      border = Swing.EmptyBorder(0, 0, 0, 0)
+      peer.getVerticalScrollBar().setUnitIncrement(20)
+      peer.getHorizontalScrollBar().setUnitIncrement(20)
+    }) = Center
     layout (bottomPanel) = South
     layout (assmsPanel) = East
 

@@ -629,35 +629,7 @@ fun sequent_fresh_name :: "Sequent \<Rightarrow> Structure" where
 "sequent_fresh_name (Sequent l r) = (Structure_Formula (Formula_Atprop (Atprop (fresh_name ((collect_SFAtprop_names l)@(collect_SFAtprop_names r)) ))))" |
 "sequent_fresh_name _ = (Structure_Formula (Formula_Atprop (Atprop ''X'')))"
 
-(*find_theorems fresh_string
 
-thm fresh_name_aux.induct
-lemma fresh_name_is_really_fresh:
-  fixes str l
-  assumes "x = fresh_name l"
-  shows "x \<notin> set l"
-proof (rule ccontr)
-  assume x_in_l: "\<not> x \<notin> set l"
-  have fresh_aux_unfold: "fresh_name l = fresh_name_aux l ''X'' (set l)" using fresh_name_def by simp
-  have "(fresh_name_aux l '''' (set l)) \<notin> set l"
-  proof (induct l)
-  print_cases
-    case Nil
-    thus ?case by simp
-  next
-    case (Cons x xs)
-    { assume x_in_xs: "x \<in> set xs"
-      then have set_equiv: "set xs = set (x#xs)" by auto
-      then have "fresh_name_aux (x # xs) [] (set (x # xs)) = (fresh_name_aux xs x (set xs))" using x_in_xs by simp
-    }
-    { assume "x \<notin> set xs"
-      then have "fresh_name_aux (x # xs) [] (set (x # xs)) = (fresh_name_aux xs x (set (x#xs)))" by simp
-      with Cons have ?case sorry }
-    thus ?case sorry
-  qed
-  with assms x_in_l fresh_aux_unfold show False sorry
-qed
-*)
 
 export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut 
 expandProoftree polarity_Sequent position_in_Sequent partial_goal partial_goal_complement sequent_fresh_name replace_SFAtprop_into_PT in Scala
