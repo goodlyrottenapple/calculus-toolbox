@@ -9,9 +9,8 @@ import org.scilab.forge.jlatexmath.{TeXFormula, TeXConstants}
 import PrintCalc.{sequentToString, formulaToString, ruleToString}
 import Parser.parseSequent
 
-class SequentInPt(val seq:Sequent, val rule:Rule, size:Int = 15, val cutFormula:Option[Formula] = None, 
-  session:CalcSession = CalcSession()) extends GridPanel(1,1)
- {
+class SequentInPt(val seq:Sequent, val rule:Rule, val id:Int, size:Int = 15, val cutFormula:Option[Formula] = None, 
+  session:CalcSession = CalcSession()) extends GridPanel(1,1) {
   opaque = false
 	//val latXForm = new TeXFormula(sequentToString(seq))
     //icon = latXForm.createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
@@ -71,6 +70,10 @@ class SequentInPt(val seq:Sequent, val rule:Rule, size:Int = 15, val cutFormula:
   }
 
   seqButton.preferredSize = new Dimension(width, height)
+
+  def eq(s: SequentInPt):Boolean = {
+    return s.seq == seq && s.id == id
+  }
 
 }
 
