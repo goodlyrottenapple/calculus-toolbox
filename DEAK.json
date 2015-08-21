@@ -324,7 +324,7 @@
 				"type" : ["Structure", "Structure"],
 				"isabelle" : "_ \\<turnstile>\\<^sub>S _",
 				"ascii" : "_ |- _",
-				"latex" : "_ \\vdash _",
+				"latex" : "_ {\\ {\\textcolor{magenta}\\boldsymbol{\\vdash}\\ } _",
 				"precedence": [311,311, 310]
 			}
 		}
