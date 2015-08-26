@@ -245,6 +245,12 @@ case class CalcSession() extends Publisher {
 		addPT(expandProoftree(pt))
 	}
 
+
+	def removeMacrosLV() = {
+		for (i <- macroListView.selection.items) macroBuffer -= i
+		macroListView.listData = macroBuffer
+	}
+
 	def savePT(ptSel: Int = currentPTsel, pt : Prooftree = currentPT) = {
 		if (ptSel >= 0) {
 			println("Saving")

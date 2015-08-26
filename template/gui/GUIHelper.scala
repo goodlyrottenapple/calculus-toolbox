@@ -179,12 +179,32 @@ object GUIHelper {
   }
 
 
+def openMacroFile(file:java.io.File, session:CalcSession) = {
+    val jsonStr = scala.io.Source.fromFile(file).getLines.mkString
+    Some(JSON.parseFull(jsonStr)) match {
+      case Some(M(map))  =>
+        map.get("macros") match {
+          case MM(macros) =>
+            val mac = macros.map{case (k, v) => (k, parseProoftree(v))}
+            //session.clearAssms
+            for ((k, Some(m)) <- mac){
+              //println(m)
+              session.macroBuffer += Tuple2(k, m)
+            }
+            session.macroListView.listData = session.macroBuffer
+          case _ => ;
+        }
+      case _ => ;
+    }
+  }
+
+
 
 
 // save ----------------------------
 
-def fileSaveDialog():Option[java.io.File] = {
-    val fd = new FileDialog(null: java.awt.Dialog, "Save a session file", FileDialog.SAVE)
+def fileSaveDialog(title:String = "Save a session file"):Option[java.io.File] = {
+    val fd = new FileDialog(null: java.awt.Dialog, title, FileDialog.SAVE)
     fd.setDirectory(".")
     fd.setFilenameFilter(new CSFilter())
     fd.setVisible(true)
@@ -232,6 +252,20 @@ def savePT(pt:Prooftree):Map[String, Any] = pt match {
         "rule"-> ruleToString(r, PrintCalc.ASCII),
         "pts"-> JSONArray( pts.map(x => JSONObject(savePT(x)) ) )   )
 }
+
+
+def saveMacroFile(file:java.io.File, session:CalcSession) = {  
+    Some(new PrintWriter(file)).foreach{p =>
+      p.write(
+        JSONObject( 
+          Map( 
+            "macros" -> JSONObject(session.macroBuffer.map{case (n, pt) => (n, prooftreeToString(pt, PrintCalc.ASCII))}.toMap)
+            //"pts"   -> JSONArray( session.ptBuffer.toList.map{case (i,s) => prooftreeToString(s, PrintCalc.ASCII)} )   
+          ) ).toString())
+      p.close
+    }
+  }
+
 
 }
 
