@@ -103,6 +103,23 @@ object GUIHelper {
           case _ => 
         }
         /*uncommentR?Action?Agent*/*/
+
+        map.get("abbrev") match {
+          case LLS(abbrev) =>
+            session.clearAbbrev
+            for (a <- abbrev){
+              if(a.length == 2) {
+                val name = a(0)
+                val structure = parseStructure(a(1))
+                if (structure != None) {
+                  print("abbrev:")
+                  println(a)
+                  session.addAbbrev(name, structure.get)
+                }
+              }
+            }
+          case _ => 
+        }
       case _ => 
     }
   }
@@ -224,11 +241,13 @@ def saveCSFile(file:java.io.File, session:CalcSession) = {
           Map( 
             "assms" -> JSONArray( session.assmsBuffer.toList.map{case (i,s) => sequentToString(s, PrintCalc.ASCII)} )
             ,"pts"   -> JSONArray( session.ptBuffer.toList.map{ case (i,s) => JSONObject(savePT(s)) } )
+            ,"abbrev"  -> JSONArray( session.flattenAbbrevStr.map(JSONArray) )
             /*/*uncommentL?Action?Agent*/
             ,"relAKA"  -> JSONArray( session.flattenRelAKAStr.map(JSONArray) )
             ,"preForm"  -> JSONArray( session.flattenPreFormStr.map(JSONArray) )
-            /*uncommentR?Action?Agent*/*/ ) )
-          .toString())
+            /*uncommentR?Action?Agent*/*/
+          ) 
+        ).toString())
       p.close
       // session.ptBuffer.toList(0) match {
       //   case (i,s) => println(JSONObject(savePT(s)).toString())

@@ -41,7 +41,7 @@ object GUI extends SimpleSwingApplication {
 
   val session = CalcSession()
 
-  openAbbrevFile()
+  //openAbbrevFile()
   //UI elements
   val inStr = new TextField { 
     text = "a |- a"
@@ -249,11 +249,11 @@ object GUI extends SimpleSwingApplication {
       ptPanel.update
 
     case KeyReleased(`inStr`, k, _, _) =>
-      openAbbrevFile();
+      //openAbbrevFile();
       var text = inStr.text
       for(k <- session.abbrevMap.keys.toList.sortBy(_.length).reverse){
         //println("currently looking at: " +k)
-        if(text contains k) text = text.replaceAllLiterally(k, session.abbrevMap(k))
+        if(text contains k) text = text.replaceAllLiterally(k, session.stripBrackets(structureToString(session.abbrevMap(k))))
         //println("text now reads: " +text)
       }
       println(session.abbrevMap.keys.toList.sortBy(_.length).reverse)
@@ -548,39 +548,39 @@ def readPTold(map : Map[String, Any]):Prooftree = {
     }
   }
 
-  def openAbbrevFile() = {
-    session.abbrevMap.clear
-    for (l <- scala.io.Source.fromFile("abbrev.txt").getLines){
-      val arr = l.split("=")
-      session.abbrevMap.put(arr(0).trim, arr(1).trim);
-    }
-    //println(session.abbrevMap);
+  // def openAbbrevFile() = {
+  //   session.abbrevMap.clear
+  //   for (l <- scala.io.Source.fromFile("abbrev.txt").getLines){
+  //     val arr = l.split("=")
+  //     session.abbrevMap.put(arr(0).trim, arr(1).trim);
+  //   }
+  //   //println(session.abbrevMap);
 
     
 
-    var modified = false
-    do {
-      modified = false
-      for (k <- session.abbrevMap.keys){
-        for (k1 <- session.abbrevMap.keys){
-          if(session.abbrevMap(k) contains k1){
-            session.abbrevMap(k) = session.abbrevMap(k).replaceAllLiterally(k1, session.abbrevMap(k1))
-            modified = true
-            //println(session.abbrevMap(k))
-          }
-        }
-      }
-    } while(modified)
+  //   var modified = false
+  //   do {
+  //     modified = false
+  //     for (k <- session.abbrevMap.keys){
+  //       for (k1 <- session.abbrevMap.keys){
+  //         if(session.abbrevMap(k) contains k1){
+  //           session.abbrevMap(k) = session.abbrevMap(k).replaceAllLiterally(k1, session.abbrevMap(k1))
+  //           modified = true
+  //           //println(session.abbrevMap(k))
+  //         }
+  //       }
+  //     }
+  //   } while(modified)
 
-    for (k <- session.abbrevMap.keys){
-        parseStructure(session.abbrevMap(k)) match {
-          case Some(res) => session.abbrevMap(k) = structureToString(res, PrintCalc.ASCII)
-          case None => session.abbrevMap.remove(k)
-        }
-      }
+  //   for (k <- session.abbrevMap.keys){
+  //       parseStructure(session.abbrevMap(k)) match {
+  //         case Some(res) => session.abbrevMap(k) = structureToString(res, PrintCalc.ASCII)
+  //         case None => session.abbrevMap.remove(k)
+  //       }
+  //     }
     
-    //session.abbrevMap.foreach{println}
-  }
+  //   //session.abbrevMap.foreach{println}
+  // }
 
   /*/*uncommentL?Action?Formula*/
   def openPreFormulaFile() = {

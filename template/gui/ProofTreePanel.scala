@@ -744,12 +744,44 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		accelerator = Some(getKeyStroke('x'))
 		def apply = displayXa
 	})
+
+
+
+	def idTaca = {
+		selectedSequentInPt match {
+			case Some(selSeq) =>
+				idTactic( selSeq.seq ) match {
+					case Some(pt) =>
+						//val mPT = replace_SFAtprop_into_PT(dialog.fresh, struct, pt)
+						session.currentPT = session.mergePTs(pt, selectedSequentInPt.get, tree.getRoot(), children)
+						session.savePT()
+						update()
+					case None =>
+						popupPanel match {
+							case Some(panel) => 
+								val error = new ErrorPopup("This tactic cannot be applied on the selected sequent")
+								panel.displayPopup(error)
+								error.requestFocus
+								addCallback(error)(()=> requestFocus)
+							case None => ;
+						}
+				}
+			case None => ;
+		}
+		requestFocus
+	}
+
+	val idTac = new MenuItem(new Action("Id tac") {
+		accelerator = Some(getKeyStroke('x'))
+		def apply = idTaca
+	})
 	//popup.contents += displayX
 
 	popup.contents += new swing.Menu("Apply Rule") {
 		contents += cutt
 		contents += refl_forwK
 		contents += displayX
+		contents += idTac
 	}
 
 	/*val replaceIntPT = new MenuItem(new Action("Replace into PT") {

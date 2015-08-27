@@ -21,8 +21,9 @@ class SequentListDialog(owner: Window = null, list : List[(Rule, List[Sequent])]
   var pair:Option[(Rule, List[Sequent])] = None
   modal = true
 
-  val listView = new ListView[(Icon, Rule, List[Sequent])]() {   
-    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( session.sequentToIconStr(_, session.abbrevMap.toMap) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
+  val listView = new ListView[(Icon, Rule, List[Sequent])]() {
+    val m = session.abbrevMap.toMap.map{case (k,v) => (k, session.stripBrackets(structureToString(v, PrintCalc.ASCII)))}
+    listData = for((r,l) <- list) yield (new TeXFormula(ruleToString(r) + " - "+ l.map( session.sequentToIconStr(_, m) ).mkString(", ")).createTeXIcon(TeXConstants.STYLE_DISPLAY, 15), r, l)
     renderer = ListView.Renderer(_._1)
     selection.intervalMode = IntervalMode.Single
   }
@@ -294,7 +295,7 @@ class PSDialog(owner: Window = null, locale : List[Locale] = List(Empty()), seq 
 
 
 
-class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = true, macroName : String = "", abbrevs : Option[Map[String, String]] = None, editable : Boolean = false) extends Dialog(owner) {
+class MacroAddDialog(owner: Window = null, pt : Prooftree, adding : Boolean = true, macroName : String = "", abbrevs : Option[Map[String, Structure]] = None, editable : Boolean = false) extends Dialog(owner) {
 
   var rule : Option[String] = None
 

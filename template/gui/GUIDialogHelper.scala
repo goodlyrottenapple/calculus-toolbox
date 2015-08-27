@@ -521,6 +521,119 @@ class PreFormParsePopup extends BorderPanel with Popup  {
 	layout(new FlowPanel(FlowPanel.Alignment.Right)( cancelButton, okButton ){opaque = false}) = South //{ cancel(); close() } )) = South
 }
 
+
+
+class AbbrevParsePopup extends BorderPanel with Popup  {
+	override def close() = {
+		visible = false
+	}
+
+	val parsedBottomBarColor = new Color(51,172,113)
+	val unParsedBottomBarColor = new Color(255,139,129)
+
+	background = parsedBottomBarColor
+	border = Swing.EmptyBorder(15,15,15,15)
+
+	val inputFieldA = new TextField {
+		columns = 25
+		opaque = false
+		font = new Font("Roboto-Bold", Font.BOLD, 12)
+		foreground = Color.white
+		border = BorderFactory.createMatteBorder(0, 0, 1, 0, Color.white)
+	}
+
+	val inputFieldS = new TextField {
+		columns = 25
+		opaque = false
+		font = new Font("Roboto-Bold", Font.BOLD, 12)
+		foreground = Color.white
+		border = BorderFactory.createMatteBorder(0, 0, 1, 0, Color.white)
+	}
+
+	lazy val barA = new BoxPanel(Orientation.Horizontal) {
+		contents += new Label("Name:        ") {
+			font = new Font("Roboto-Bold", Font.BOLD, 12)
+			foreground = Color.white
+			border = Swing.EmptyBorder(0, 0, 0, 10)
+		}
+		contents += inputFieldA
+		//opaque = false
+		background = parsedBottomBarColor
+		border = Swing.EmptyBorder(10, 0, 10, 0)
+	}
+
+	lazy val barF = new BoxPanel(Orientation.Horizontal) {
+		contents += new Label("Abbreviation: ") {
+			font = new Font("Roboto-Bold", Font.BOLD, 12)
+			foreground = Color.white
+			border = Swing.EmptyBorder(0, 0, 0, 10)
+	 }
+		contents += inputFieldS
+		background = parsedBottomBarColor
+		border = Swing.EmptyBorder(10, 0, 10, 0)
+	}
+	
+	var abbrevName:Option[String] = None
+	var parsedS:Option[Structure] = None
+
+	listenTo(inputFieldA.keys, inputFieldS.keys)
+	reactions += {
+		case KeyReleased(`inputFieldA`, k, _, _) =>
+			parseAtprop(inputFieldA.text) match {
+				case Some(r) =>
+					abbrevName = Some(inputFieldA.text)
+					barA.background = parsedBottomBarColor
+
+					if(k == Key.Enter && parsedS != None) close()
+				case None => 
+					barA.background = unParsedBottomBarColor
+					abbrevName = None
+			}
+		case KeyReleased(`inputFieldS`, k, _, _) =>
+			parseStructure(inputFieldS.text) match {
+				case Some(r) =>
+					parsedS = Some(r)
+					barF.background = parsedBottomBarColor
+
+					if(k == Key.Enter && name != None) close()
+				case None => 
+					barF.background = unParsedBottomBarColor
+					parsedS = None
+			}
+	}
+		
+	layout(new FlowPanel(FlowPanel.Alignment.Left)(new Label("INPUT A PREFORM") {
+		font = new Font("Roboto-Bold", Font.BOLD, 16)
+		foreground = Color.white
+	}){opaque = false}) = North
+
+	layout(new BoxPanel(Orientation.Vertical) {
+		contents += barA
+		contents += barF
+		opaque = false
+	}) = Center
+
+	val okButton = new Button(swing.Action("Close popup") { close() }) {
+		text = "OK"
+		font = new Font("Roboto-Bold", Font.BOLD, 12)
+		border = Swing.EmptyBorder(0, 0, 0, 0)
+		foreground = Color.white
+	}
+
+	val cancelButton = new Button(swing.Action("Cancel popup") { 
+		abbrevName = None
+		parsedS = None
+		close() 
+	}) {
+		text = "CANCEL"
+		font = new Font("Roboto-Bold", Font.BOLD, 12)
+		border = Swing.EmptyBorder(0, 0, 0, 10)
+		foreground = Color.white
+	}
+
+	layout(new FlowPanel(FlowPanel.Alignment.Right)( cancelButton, okButton ){opaque = false}) = South //{ cancel(); close() } )) = South
+}
+
 class SequentListPopup(ruleList : List[(Rule, List[Sequent])], session:CalcSession = CalcSession()) extends BorderPanel with Popup {
 	override def close() = {
 		visible = false

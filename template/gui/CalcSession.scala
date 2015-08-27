@@ -144,7 +144,9 @@ case class CalcSession() extends Publisher {
 	val ptBuffer = ListBuffer[(Icon, Prooftree)]()
 
 	val macroBuffer = ListBuffer[(String, Prooftree)]()
-	val abbrevMap = scala.collection.mutable.Map[String, String]()
+	val abbrevMap = scala.collection.mutable.Map[String, Structure]()
+
+
 	var abbrevsOn = true
 
 
@@ -179,26 +181,35 @@ case class CalcSession() extends Publisher {
     }
 
     var proofDepth = 5
-	/*val addAssmButton = new Button {
-		text = "Add assm"
-	}
-	val removeAssmButton = new Button {
-		text = "Remove assm"
-		enabled = false
+	
+
+	def clearAbbrev() = {
+		abbrevMap.clear()
 	}
 
-	val addPtButton = new Button {
-		text = "Add PT"
-		visible = false
+	def addAbbrev(n:String, s:Structure) = {
+		abbrevMap.put(n, s)
 	}
-	val loadPTButton = new Button {
-		text = "Load PT"
-		enabled = false
+
+	def removeAbbrev(n:String):Unit = {
+		abbrevMap -= n
 	}
-	val removePTsButton = new Button {
-		text = "Remove PTs"
-		enabled = false
-	}*/
+
+	def flattenAbbrev():Array[Array[String]] = {
+		val ret = new ListBuffer[Array[String]]()
+		abbrevMap.foreach{ case(n, v) => ret += Array(n, stripBrackets(structureToString(v))) }
+		ret.toArray
+	}
+
+	//this one is used for saving abbrevs into json file
+	def flattenAbbrevStr():List[List[String]] = {
+		val ret = new ListBuffer[List[String]]()
+		abbrevMap.foreach{
+			case(n, v) => 
+				ret += List(n, structureToString(v, PrintCalc.ASCII))
+		}
+		ret.toList
+	}
 
     def addAssm(seq:Sequent = currentSequent) = {
 		val newAssm = (sequentToIcon(seq), seq)
@@ -318,7 +329,8 @@ case class CalcSession() extends Publisher {
 			Some(new PrintWriter(file)).foreach{p =>
 				//addPT(DEAK.expandProoftree(sel._2))
 				if(abbrevsOn){
-					def seqToStr(s:Sequent) = sequentToIconStr(s, abbrevMap.toMap)
+					val m = abbrevMap.toMap.map{case (k,v) => (k, stripBrackets(structureToString(v, PrintCalc.ASCII)))}
+					def seqToStr(s:Sequent) = sequentToIconStr(s, m)
 					p.write(prooftreeToString(expandProoftree(sel._2), PrintCalc.LATEX, seqToStr) + "\\DisplayProof")
 				}
 		    	else p.write(prooftreeToString(expandProoftree(sel._2)) + "\\DisplayProof")
@@ -357,25 +369,35 @@ case class CalcSession() extends Publisher {
 		sequentToIcon(concl(pt))
 	}
 
+	def stripBrackets(in:String) : String = {
+		if (in.head == "(" && in.tail == ")") return stripBrackets(in.drop(1).dropRight(1))
+		return in
+	}
+
 	def sequentToIcon(seq:Sequent, usingAbbrevs:Boolean = abbrevsOn, size:Int = 15) : TeXIcon = usingAbbrevs match {
 		case false =>
 			new TeXFormula(sequentToIconStr(seq)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
 		case true =>
-			new TeXFormula(sequentToIconStr(seq, abbrevMap.toMap)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
+			val m = abbrevMap.toMap.map{case (k,v) => (k, stripBrackets(structureToString(v, PrintCalc.ASCII)))}
+			new TeXFormula(sequentToIconStr(seq, m)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size)
 	}
 		
     def sequentToIconStr(seq:Sequent, abbrevMap:Map[String, String] = Map()) : String = {
+    	println(abbrevMap)
 		var text = sequentToString(seq, PrintCalc.ASCII)
-    	for(k <- abbrevMap.keys.toList.sortBy(abbrevMap(_).length).reverse)
-    		if(text contains abbrevMap(k)) text = text.replaceAllLiterally(abbrevMap(k), k)
+    	for(k <- abbrevMap.keys.toList.sortBy(abbrevMap(_).length).reverse){
+    		if(text contains abbrevMap(k)) {
+    			text = text.replaceAllLiterally(abbrevMap(k), scramble(k))
+    		}
+    	}
 
 	    parseSequent(text) match {
 	   		case Some(seq) => 
 	   			var ret = sequentToString(seq)
 	   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
-	   				if(ret contains k) ret = ret.replaceAllLiterally(k, "\\boldsymbol{"+scramble(k)+"}")
-	   			for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
-	   				if(ret contains scramble(k)) ret = ret.replaceAllLiterally(scramble(k), k)
+	   				if(ret contains scramble(k)) ret = ret.replaceAllLiterally(scramble(k), "\\boldsymbol{"+k+"}")
+	   			// for(k <- abbrevMap.keys.toList.sortBy(_.length).reverse)
+	   			// 	if(ret contains scramble(k)) ret = ret.replaceAllLiterally(scramble(k), k)
 	   			ret
 	   		case None => "error"
 	   	}

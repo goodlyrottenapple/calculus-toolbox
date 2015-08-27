@@ -245,6 +245,7 @@ object GUI2 extends SimpleSwingApplication {
 					GUIHelper.openCSFile(file, session)
 					relAKAtable.reload
 					preFormTable.reload
+					abbrevTable.reload
 				case None => ;
 			}
 
@@ -403,6 +404,87 @@ object GUI2 extends SimpleSwingApplication {
 	// macros & abbrevs ----------------------------
 
 
+	val abbrevAdd = new Button("ADD"){
+		border = Swing.EmptyBorder(0,0,0,0)
+		font = new Font("Roboto-BOLD", Font.BOLD, 12)
+		foreground = sideBarColor
+		//preferredSize = new Dimension(50, 25)
+	}
+
+	val abbrevTable = new Table(1, 2){
+		selection.elementMode = Table.ElementMode.Row
+		background = sideBarColorLight
+		opaque = false
+		peer.getTableHeader().setOpaque(false)
+		peer.getTableHeader().setFont(new Font("Roboto-Bold", Font.BOLD, 12))
+		peer.setDefaultRenderer(classOf[String], new TexRenderer())
+
+		val headers = List("Name", "Abbrevation")
+
+		def reload() = {
+			model = new MyTableModel( session.flattenAbbrev , headers )
+
+			session.reloadAssms
+            session.reloadPTs
+            if(ptPanel != null) ptPanel.update
+
+			revalidate
+			repaint
+		}
+
+		reload
+	}
+
+	val abbrevEnabled = new CheckBox("abbreviaitions enabled"){
+		border = Swing.EmptyBorder(10,10,10,10)
+		font = new Font("Roboto-Light", Font.PLAIN, 12)
+		foreground = textColor2
+		selected = true
+	}
+
+	val abbrevBar = new BorderPanel {
+		layout(new BoxPanel(Orientation.Horizontal) {
+			contents+= new Label("Abbreviations"){
+				font = new Font("Roboto-Light", Font.PLAIN, 16)
+				foreground = textColor2
+				border = Swing.EmptyBorder(15, 10, 15, 20)
+			}
+			contents+= abbrevAdd
+		}) = North
+		layout(new PrettyScrollPane(abbrevTable){scrollPane.peer.getViewport().setBackground(sideBarColorLight)}) = Center
+		layout(abbrevEnabled) = South
+
+		border = BorderFactory.createMatteBorder(1, 0, 0, 0, sideBarColorLight)
+
+	}
+
+	val abbrevAddPopup = new AbbrevParsePopup
+	listenTo(abbrevAdd, abbrevTable.keys, abbrevEnabled)
+
+	reactions += {
+		case ButtonClicked(`abbrevEnabled`) => 
+			session.abbrevsOn = abbrevEnabled.selected
+			session.reloadAssms
+            session.reloadPTs
+            if(ptPanel != null) ptPanel.update
+            
+		case ButtonClicked(`abbrevAdd`) => 
+			popupPanel.displayPopup(abbrevAddPopup)
+			addCallback(abbrevAddPopup)(() =>{
+				if(abbrevAddPopup.abbrevName != None && abbrevAddPopup.parsedS != None) {
+					session.addAbbrev(abbrevAddPopup.abbrevName.get, abbrevAddPopup.parsedS.get)
+					abbrevTable.reload
+				}
+			})
+
+		case KeyReleased(`abbrevTable`, Key.BackSpace, _, _) | 
+			KeyReleased(`abbrevTable`, Key.Delete, _, _) => 
+			val selectedRowIndex = abbrevTable.peer.getSelectedRow
+			val a = abbrevTable.model.getValueAt(selectedRowIndex, 0).asInstanceOf[String]
+			session.removeAbbrev(a)
+			abbrevTable.reload
+	}
+
 	// val macroAdd = new Button("ADD"){
 	// 	border = Swing.EmptyBorder(0,0,0,20)
 	// 	font = new Font("Roboto-BOLD", Font.BOLD, 12)
@@ -439,8 +521,8 @@ object GUI2 extends SimpleSwingApplication {
 	}
 
 	val tab2 = new BoxPanel(Orientation.Vertical) {
-		contents+= macroBar
-		// contents+= preFormBar
+		contents += abbrevBar
+		contents += macroBar
 		background = sideBarColor2
 	}
 

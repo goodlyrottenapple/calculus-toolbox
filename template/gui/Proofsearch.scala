@@ -33,34 +33,11 @@ object Proofsearch{
 			println(polarity_Sequent(struct, seq))
 			println("POS: ")
 			println(position_in_Sequent(struct, seq))
-			val goal = //( polarity_Sequent(struct, seq) == position_in_Sequent(struct, seq) ) match {
-				//case true => 
-				position_in_Sequent(struct, seq) match {
-					case Minus() => partial_goal(struct, lhs)
-					case Plus() => partial_goal(struct, rhs)
-					case _ => return None
-				}
-
-			// 	case false => position_in_Sequent(struct, seq) match {
-			// 		case Minus() => partial_goal_complement(struct, lhs)
-			// 		case Plus() => partial_goal_complement(struct, rhs)
-			// 		case _ => return None
-			// 	}
-			// }
-
-			// val antigoal = ( polarity_Sequent(struct, seq) == position_in_Sequent(struct, seq) ) match {
-			// 	case true => position_in_Sequent(struct, seq) match {
-			// 		case Minus() => partial_goal_complement(struct, lhs)
-			// 		case Plus() => partial_goal_complement(struct, rhs)
-			// 		case _ => return None
-			// 	}
-
-			// 	case false => position_in_Sequent(struct, seq) match {
-			// 		case Minus() => partial_goal(struct, lhs)
-			// 		case Plus() => partial_goal(struct, rhs)
-			// 		case _ => return None
-			// 	}
-			// }
+			val goal = position_in_Sequent(struct, seq) match {
+				case Minus() => partial_goal(struct, lhs)
+				case Plus() => partial_goal(struct, rhs)
+				case _ => return None
+			}
 			println("SEQ: ")
 			println(PrintCalc.sequentToString(seq, PrintCalc.ASCII))
 			println("GOAL: ")
@@ -103,30 +80,64 @@ object Proofsearch{
 					
 				case _ =>
 			}
-
-			// tree = derTree(2, Part(antigoal) :: Nil, seq, 0, displayRules)
-			// tree match {
-			// 	case Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Partial()), List()) ) ) ) =>
-			// 		println("ALT-TREE: ")
-			// 		println(PrintCalc.prooftreeToString( Prooftreea(seq, rule, List(Prooftreea(nextGoal, RuleZera(Partial()), List()))) , PrintCalc.ASCII))
-
-			// 		nextGoal match {
-			// 			case Sequenta(l, r) => if (l == struct || r == struct) return Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) )
-			// 			case  _ =>
-			// 		}
-
-			// 		if(!history.contains(nextGoal)) {
-
-			// 			displayTactic(nextGoal, struct, seq::history) match {
-			// 				case Some(pt) => return Some( Prooftreea(seq, rule, List( pt ) ) )
-			// 				case None => return Some( Prooftreea(seq, rule, List( Prooftreea(nextGoal, RuleZera(Prem()), List()) ) ) )
-			// 			}
-			// 		}
-			// 	case None =>
-			// }
-			// println("\n\n\n")
 			return tree
 		case _ => None
+	}
+
+	def mergePTs(root: Prooftree, insert:Prooftree) : Prooftree = root match {
+		case Prooftreea( seq, rule, Nil ) => 
+			if (concl(insert) == seq) return insert
+			else return Prooftreea( seq, rule, Nil )
+		case Prooftreea( seq, rule, list ) => return Prooftreea( seq, rule, list.map(mergePTs(_, insert)) )
+	}
+
+
+	def idTactic(seq: Sequent) : Option[Prooftree] = seq match {
+		case Sequenta(lhs, rhs) => 
+			if(lhs == rhs) lhs match {
+				case Structure_Formula(f) => f match {
+					case Formula_Action_Formula(op, a, form) =>
+						val newGoal = Sequenta(Structure_Formula(form), Structure_Formula(form))
+						var tree = derTree(3, Premise(newGoal) :: Nil, seq, 0)
+						idTactic(newGoal) match {
+							case Some(res) => 
+								return Some(mergePTs(tree.get, res))
+							case None => return None
+						}
+					case Formula_Agent_Formula(op, a, form) =>
+						val newGoal = Sequenta(Structure_Formula(form), Structure_Formula(form))
+						var tree = derTree(3, Premise(newGoal) :: Nil, seq, 0)
+						idTactic(newGoal) match {
+							case Some(res) => 
+								return Some(mergePTs(tree.get, res))
+							case None => return None
+						}
+					case Formula_Atprop(a) =>
+						var tree = derTree(3, Empty()::Nil, seq, 0)
+						println(tree)
+						return tree
+					case Formula_Bin(l, op, r) =>
+						val newGoalL = Sequenta(Structure_Formula(l), Structure_Formula(l))
+						val newGoalR = Sequenta(Structure_Formula(r), Structure_Formula(r))
+						var tree = derTree(3, Premise(newGoalL) :: Premise(newGoalR) :: Nil, seq, 0)
+						idTactic(newGoalL) match {
+							case Some(resL) => idTactic(newGoalR) match {
+								case Some(resR) => return Some(mergePTs(mergePTs(tree.get, resL), resR))
+								case None => return None
+							}
+							case None => return None
+						}
+					case Formula_Precondition(p) =>
+						var tree = derTree(3, Empty()::Nil, seq, 0)
+						return tree
+					case Formula_Zer(z) =>
+						var tree = derTree(3, Empty()::Nil, seq, 0)
+						return tree
+				}
+				case _ => return None
+			}
+			else return None
+		case _ => return None
 	}
 
 	def restrictRules(rules : List[Rule], restr : List[Rule]) :  List[Rule] = {
