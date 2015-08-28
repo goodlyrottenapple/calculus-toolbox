@@ -462,7 +462,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 					case Some(panel) =>
 						if(tree.isLeaf(selSeq)){
 							val list = derAll(session.currentLocale, selSeq.seq, Nil, session.currentRuleList).filter{case (r, l) => r != RuleZera(Prem())} ++ derAllM(session.currentLocale, selSeq.seq, session.macroBuffer.toList)
-							val ruleList = new SequentListPopup(list)
+							val ruleList = new SequentListPopup(list, selSeq.seq, session)
 							panel.displayPopup(ruleList, true)
 							ruleList.ruleListTable.requestFocus
 							//ruleList.ruleListTable.peer.changeSelection(0, 0, false, false)

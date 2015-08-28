@@ -634,7 +634,7 @@ class AbbrevParsePopup extends BorderPanel with Popup  {
 	layout(new FlowPanel(FlowPanel.Alignment.Right)( cancelButton, okButton ){opaque = false}) = South //{ cancel(); close() } )) = South
 }
 
-class SequentListPopup(ruleList : List[(Rule, List[Sequent])], session:CalcSession = CalcSession()) extends BorderPanel with Popup {
+class SequentListPopup(ruleList : List[(Rule, List[Sequent])], sequent:Sequent, session:CalcSession = CalcSession()) extends BorderPanel with Popup {
 	override def close() = {
 		visible = false
 	}
@@ -662,22 +662,20 @@ class SequentListPopup(ruleList : List[(Rule, List[Sequent])], session:CalcSessi
 	def flattenedList:Array[Array[String]] = {
 		val ret = new ListBuffer[Array[String]]()
 		val columns = cols-1
+		val m = if (session.abbrevsOn) session.abbrevMap.toMap.map{case (k,v) => (k, session.stripBrackets(structureToString(v, PrintCalc.ASCII)))} else Map[String,String]()
 		ruleList.foreach{ 
 			case (a, list) => 
-				ret += ((ruleToString(a) :: list.map(sequentToString(_))) ++ padList(columns-list.length)).toArray
+				ret += ((ruleToString(a) :: list.map(session.sequentToIconStr(_, m))) ++ padList(columns-list.length)).toArray
 				if (GUIHelper.createTeXIcon(ruleToString(a)).getIconWidth > ruleColWidth(0)) ruleColWidth(0) = GUIHelper.createTeXIcon(ruleToString(a)).getIconWidth
 				for (i <- 0 to list.length-1) {
-					// print(i)
-					// print(" : ")
-					// println(list(i))
-					val icon = GUIHelper.createTeXIcon(sequentToString(list(i)))
+					val icon = GUIHelper.createTeXIcon(session.sequentToIconStr(list(i)))
 					if (icon.getIconWidth > ruleColWidth(i+1)) ruleColWidth(i+1) = icon.getIconWidth
 					if (icon.getIconHeight > ruleColHeight) ruleColHeight = icon.getIconHeight
 				}
 
-				println(((ruleToString(a) :: list.map(sequentToString(_))) ++ padList(columns-list.length)))
+				//println(((ruleToString(a) :: list.map(sequentToString(_))) ++ padList(columns-list.length)))
 		}
-		println(ruleColWidth)
+		//println(ruleColWidth)
 		return ret.toArray
 	}
 
@@ -759,11 +757,16 @@ class SequentListPopup(ruleList : List[(Rule, List[Sequent])], session:CalcSessi
 
 	ruleListTable.peer.setSelectionModel(new ForcedListSelectionModel())
 
-	layout(new FlowPanel(FlowPanel.Alignment.Left)(new Label("SELECT A RULE TO APPLY") {
+
+	val sequentLabel = new Label() {
+		icon = session.sequentToIcon(sequent)
+	}
+
+	layout(new FlowPanel(FlowPanel.Alignment.Left)(new Label("SELECT A RULE TO APPLY TO:") {
 		font = new Font("Roboto-Bold", Font.BOLD, 16)
 		foreground = new Color(33,33,33)
 		border = Swing.EmptyBorder(15, 15, 15, 15)
-	}){ opaque = false }) = North
+	}, sequentLabel){ opaque = false }) = North
 
 
 
