@@ -245,7 +245,7 @@ begin
 (*(*uncommentL?Structure_Agent_Structure*) | "freevars_Structure (Structure_Agent_Structure _ ag1 struct) = image (\<lambda>x. Structure_Formula (Formula_Agent x)) (freevars ag1) \<union> (freevars struct)" (*uncommentR?Structure_Agent_Structure*)*)
 (*(*uncommentL?Structure_Phi*) | "freevars_Structure (Structure_Phi act1) = image (\<lambda>x. Structure_Formula (Formula_Action x)) (freevars act1)" (*uncommentR?Structure_Phi*)*)
 (*(*uncommentL?Structure_Bigcomma*) | "freevars_Structure (Structure_Bigcomma list) = foldr (op \<union>) (map freevars list) {}" (*uncommentR?Structure_Bigcomma*)*)
-(*(*uncommentL?Structure_Zer*)  | "freevars_Formula (Structure_Zer _) = {}" (*uncommentR?Structure_Zer*)*)
+(*(*uncommentL?Structure_Zer*)  | "freevars_Structure (Structure_Zer _) = {}" (*uncommentR?Structure_Zer*)*)
 
 
   primrec replace_Structure_aux :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure \<Rightarrow> Structure" (*(*uncommentL?Structure_Bigcomma*)and replace_Structure_list_aux :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure list \<Rightarrow> Structure list"(*uncommentR?Structure_Bigcomma*)*)
