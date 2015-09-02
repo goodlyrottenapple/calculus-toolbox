@@ -10,23 +10,25 @@
 			"Atprop_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>A _",
+				"isabelle_se" : "_",
 				"ascii" : "A? _",
-				"latex" : "_",
-				"precedence": [320, 320]
+				"latex" : "? _",
+				"precedence": [320, 320],
+				"shallow" : false
 			}
 		},
 
 		"Formula" : {
 			"Formula_Atprop" : {
 				"type": "Atprop",
-				"isabelle" : "_ \\<^sub>F",
+				"isabelle" : "_ \\<^sub>A",
 				"precedence": [320, 330]
 			},
 			"Formula_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>F _",
 				"ascii" : "F? _",
-				"latex" : "_",
+				"latex" : "?_F _",
 				"precedence": [340, 330]
 			},
 
@@ -54,18 +56,21 @@
 		"Formula_Bin_Op" : {
 			"Formula_And" : {
 				"isabelle" : "\\<and>\\<^sub>F",
-				"ascii" : "^",
-				"latex" : "\\wedge"
+				"ascii" : "/\\",
+				"latex" : "\\wedge",
+				"ascii_precedence": [300, 301]
 			},
 			"Formula_Or" : {
 				"isabelle" : "\\<or>\\<^sub>F",
 				"ascii" : "\\/",
-				"latex" : "\\vee"
+				"latex" : "\\vee",
+				"ascii_precedence": [400, 401]
 			},
 			"Formula_ImpR" : {
 				"isabelle" : "\\<rightarrow>\\<^sub>F",
 				"ascii" : ">",
-				"latex" : "\\rightarrow"
+				"latex" : "\\rightarrow",
+				"ascii_precedence": [400, 401]
 			}
 		},
 
@@ -80,7 +85,7 @@
 				"type" : "string",
 				"isabelle" : "?\\<^sub>S _",
 				"ascii" : "? _",
-				"latex" : "_",
+				"latex" : "? _",
 				"precedence": [340, 340]
 			},
 
@@ -99,7 +104,7 @@
 
 		"Structure_Zer_Op" : {
 			"Structure_Empty" : {
-				"isabelle" : "I\\<^sub>S",
+				"isabelle" : "I",
 				"ascii" : "I",
 				"latex" : "I"
 			}
@@ -107,14 +112,9 @@
 
 		"Structure_Bin_Op" : {
 			"Structure_Comma" : {
-				"isabelle" : ";\\<^sub>S",
-				"ascii" : ";",
-				"latex" : ";"
-			},
-			"Structure_ImpR" : {
-				"isabelle" : "\\<rightarrow>\\<^sub>S",
-				"ascii" : ">>",
-				"latex" : ">>"
+				"isabelle" : ",\\<^sub>S",
+				"ascii" : ",",
+				"latex" : ","
 			}
 		},
 
@@ -159,173 +159,170 @@
 				"ascii" : "Cut",
 				"latex" : "Cut",
 				"locale" : "CutFormula f",
-				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S B\\<^sub>S (?\\<^sub>S ''Z'') ,\\<^sub>S (f \\<^sub>S)),( B\\<^sub>S (f \\<^sub>S) ,\\<^sub>S (?\\<^sub>S ''W'') \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
 			}
 		},
 
-
-		"RuleU" : {
-			"I_impR" : {
-				"ascii" : "I_impR",
-				"latex" : "I >_R"
+		"RuleL" : {
+			"And_L_1" : {
+				"ascii" : "And_L_1",
+				"latex" : "\\wedge L_1"
 			},
-
-			"I_impR2" : {
-				"ascii" : "I_impR2",
-				"latex" : "I >_R"
+			"And_L_2" : {
+				"ascii" : "And_L_2",
+				"latex" : "\\wedge L_2"
 			},
-			"ImpR_I" : {
-				"ascii" : "ImpR_I",
-				"latex" : ">_R I"
-			},
-
-			"ImpR_I2" : {
-				"ascii" : "ImpR_I2",
-				"latex" : ">_R I"
-			},
-
-			"IW_L"  : {
-				"ascii" : "IW_L",
-				"latex" : "\\textrm{I} W_{L}"
-			}, 	
-			"IW_R"  : {
-				"ascii" : "IW_R",
-				"latex" : "\\textrm{I} W_{R}"
-			}, 	
-			"W_impR_L"  : {
-				"ascii" : "W_impR_L",
-				"latex" : "W >_L"
-			},
-			"W_impR_R"  : {
-				"ascii" : "W_impR_R",
-				"latex" : "W >_R"
-			},
-			"C_L"  : {
-				"ascii" : "C_L",
-				"latex" : "C_L"
-			}, 		
-			"C_R"  : {
-				"ascii" : "C_R",
-				"latex" : "C_R"
-			}, 		
-			"E_L"  : {
-				"ascii" : "E_L",
-				"latex" : "E_L"
-			}, 		
-			"E_R"  : {
-				"ascii" : "E_R",
-				"latex" : "E_R"
-			}, 		
-			"A_R"  : {
-				"ascii" : "A_R",
-				"latex" : "A_R"
-			}, 		
-			"A_R2"  : {
-				"ascii" : "A_R2",
-				"latex" : "A_R"
-			}, 	
-			"A_L"  : {
-				"ascii" : "A_L",
-				"latex" : "A_L"
-			}, 		
-			"A_L2"  : {
-				"ascii" : "A_L2",
-				"latex" : "A_L"
-			}
-		},
-
-		"RuleDisp" : {
-			"Comma_impR_disp" : {
-				"ascii" : "Comma_impR_disp",
-				"latex" : "(;, >)"
-			}, 					
-			"Comma_impR_disp2" : {
-				"ascii" : "Comma_impR_disp2",
-				"latex" : "(;, >)"
-			}, 				
-			"ImpR_comma_disp" : {
-				"ascii" : "ImpR_comma_disp",
-				"latex" : "(>, ;)"
-			}, 					
-			"ImpR_comma_disp2" : {
-				"ascii" : "ImpR_comma_disp2",
-				"latex" : "(>, ;)"
-			} 				
-		},
-
-		"RuleOp" : {
-			"And_L" : {
-				"ascii" : "And_L",
-				"latex" : "\\wedge_L"
-			},				
-			"Or_R" : {
-				"ascii" : "Or_R",
-				"latex" : "\\vee_R"
-			},				
-			"ImpR_R" : {
-				"ascii" : "ImpR_R",
-				"latex" : "\\rightarrow_R"
-			}
-		},
-
-		"RuleBin" : {
 			"And_R" : {
 				"ascii" : "And_R",
-				"latex" : "\\wedge_R"
+				"latex" : "\\wedge R"
+			},
+			"Or_R_1" : {
+				"ascii" : "Or_R_1",
+				"latex" : "\\vee R_1"
+			},
+			"Or_R_2" : {
+				"ascii" : "Or_R_2",
+				"latex" : "\\vee R_2"
 			},
 			"Or_L" : {
 				"ascii" : "Or_L",
-				"latex" : "\\vee_L"
+				"latex" : "\\vee L"
 			},
 			"ImpR_L" : {
 				"ascii" : "ImpR_L",
-				"latex" : "\\rightarrow_L"
+				"latex" : "\\rightarrow L"
+			},
+			"ImpR_R" : {
+				"ascii" : "ImpR_R",
+				"latex" : "\\rightarrow R"
+			},
+			"Not_L" : {
+				"ascii" : "Not_L",
+				"latex" : "\\neg L"
+			},
+			"Not_R" : {
+				"ascii" : "Not_R",
+				"latex" : "\\neg R"
+			}
+		},
+
+
+		"RuleStruct" : {
+			"W_L"  : {
+				"ascii" : "W_L",
+				"latex" : "WL"
+			},
+			"W_R"  : {
+				"ascii" : "W_R",
+				"latex" : "WR"
+			},
+			"C_L"  : {
+				"ascii" : "C_L",
+				"latex" : "CL"
+			},
+			"C_R"  : {
+				"ascii" : "C_R",
+				"latex" : "CR"
+			}, 		
+			"P_L"  : {
+				"ascii" : "P_L",
+				"latex" : "PL"
+			},
+			"P_R"  : {
+				"ascii" : "P_R",
+				"latex" : "PR"
+			}, 		
+			"A_R"  : {
+				"ascii" : "A_R",
+				"latex" : "AR"
+			}, 		
+			"A_R2"  : {
+				"ascii" : "A_R2",
+				"latex" : "AR"
+			}, 	
+			"A_L"  : {
+				"ascii" : "A_L",
+				"latex" : "AL"
+			}, 		
+			"A_L2"  : {
+				"ascii" : "A_L2",
+				"latex" : "AL"
+			},
+			"I_L_L"  : {
+				"ascii" : "I_L_L",
+				"latex" : "IL_L"
+			},
+			"I_L_L2"  : {
+				"ascii" : "I_L_L2",
+				"latex" : "IL_L"
+			},
+			"I_L_R"  : {
+				"ascii" : "I_L_R",
+				"latex" : "IL_R"
+			},
+			"I_L_R2"  : {
+				"ascii" : "I_L_R2",
+				"latex" : "IL_R"
+			},
+			"I_R_L"  : {
+				"ascii" : "I_R_L",
+				"latex" : "IR_L"
+			},
+			"I_R_L2"  : {
+				"ascii" : "I_R_L2",
+				"latex" : "IR_L"
+			},
+			"I_R_R"  : {
+				"ascii" : "I_R_R",
+				"latex" : "IR_R"
+			},
+			"I_R_R2"  : {
+				"ascii" : "I_R_R2",
+				"latex" : "IR_R"
 			}
 		}
 	},
 
 	"rules" : {
 		"RuleZer" : {
-			"Id" : 				["A?p |- A?p",				""],
+			"Id" : 				["F?f |- F?f",				""],
 			"Prem" : 			["?X |- ?Y",				""],
 			"Partial" : 		["?X |- ?Y",				""]
 		},
-		"RuleU" : {
-			"I_impR" : 			["I |- ?X >> ?Y", 			"?X |- ?Y"],
-			"I_impR2" : 		["?X |- ?Y",				"I |- ?X >> ?Y"],
-			"ImpR_I" : 			["?Y >> ?X |- I",			"?X |- ?Y"],
-			"ImpR_I2" : 		["?X |- ?Y", 				"?Y >> ?X |- I"],
-			"IW_L" : 			["?X |- ?Y", 				"I |- ?Y"],
-			"IW_R" : 			["?X |- ?Y", 				"?X |- I"],
-			"W_impR_L" :		["?Z >> ?X |- ?Y", 			"?X |- ?Z"],
-			"W_impR_R" :		["?Y |- ?X >> ?Z", 			"?X |- ?Z"],
-			"C_L" : 			["?X |- ?Y", 				"?X ; ?X |- ?Y"],
-			"C_R" : 			["?X |- ?Y", 				"?X |- ?Y ; ?Y"],
-			"E_L" : 			["?X2 ; ?X1 |- ?Y", 		"?X1 ; ?X2 |- ?Y"],
-			"E_R" : 			["?X |- ?Y2 ; ?Y1", 		"?X |- ?Y1 ; ?Y2"],
-			"A_R" : 			["?W |- ?X ; (?Y ; ?Z)",	"?W |- (?X ; ?Y) ; ?Z"],
-			"A_R2" : 			["?W |- (?X ; ?Y) ; ?Z",	"?W |- ?X ; (?Y ; ?Z)"],
-			"A_L" : 			["?X ; (?Y ; ?Z) |- ?W",	"(?X ; ?Y) ; ?Z |- ?W"],
-			"A_L2" : 			["(?X ; ?Y) ; ?Z |- ?W",	"?X ; (?Y ; ?Z) |- ?W"]
+		"RuleL" : {
+			"And_L_1" :			["?X, F?A /\\ F?B |- ?Z", 	"?X, F?A |- ?Z"],
+			"And_L_2" :			["?X, F?A /\\ F?B |- ?Z", 	"?X, F?B |- ?Z"],
+			"And_R" :			["?X, ?Z |- F?A /\\ F?B, (?Y, ?W)", 	"?X |- F?A, ?Y", "?Z |- F?B, ?W"],
+			"Or_R_1" :			["?Z |- F?A \\/ F?B, ?X", 	"?Z |- F?A , ?X"],
+			"Or_R_2" :			["?Z |- F?A \\/ F?B, ?X", 	"?Z |- F?B , ?X"],
+			"Or_L" :			["(?X, ?Z), F?A \\/ F?B |- ?Y, ?W", 	"?X, F?A |- ?Y", "?Z, F?B |- ?W"],
+			"ImpR_L" :			["(?X, ?Z), F?A > F?B |- ?Y, ?W", 	"?X |- F?A, ?Y", "?Z, F?B |- ?W"],
+			"ImpR_R" :			["?Z |- F?A > F?B, ?X", 		"?Z, F?A |- F?B, ?X"],
+			"Not_L" :			["?X, -F?A |- ?Y", 		"?X |- F?A, ?Y"],
+			"Not_R" :			["?X |- -F?A, ?Y", 		"?X, F?A |- ?Y"]
 		},
-		"RuleDisp" : {
-			"Comma_impR_disp" :	["?Y |- ?X >> ?Z", 			"?X ; ?Y |- ?Z"],
-			"Comma_impR_disp2" :["?X ; ?Y |- ?Z", 			"?Y |- ?X >> ?Z"],
-			"ImpR_comma_disp" :	["?X >> ?Z |- ?Y", 			"?Z |- ?X ; ?Y"],
-			"ImpR_comma_disp2" :["?Z |- ?X ; ?Y", 			"?X >> ?Z |- ?Y"]
-		},
-		"RuleOp" : {
-			"And_L" :			["F?A ^ F?B |- ?Z", 		"F?A ; F?B |- ?Z"],
-			"Or_R" :			["?Z |- F?A \\/ F?B", 		"?Z |- F?A ; F?B"],
-			"ImpR_R" :			["?Z |- F?A > F?B", 		"?Z |- F?A >> F?B"]
-		},
-		"RuleBin" : {
-			"And_R" :			["?X ; ?Y |- F?A ^ F?B",	"?X |- F?A", "?Y |- F?B"],
-			"Or_L" :			["F?A \\/ F?B |- ?X ; ?Y",	"F?A |- ?X", "F?B |- ?Y"],
-			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", 	"F?B |- ?Y"]
+		"RuleStruct" : {
+			"W_L" : 			["?X, F?A |- ?Y", 				"?X |- ?Y"],
+			"W_R" : 			["?X |- F?A, ?Y", 				"?X |- ?Y"],
+			"C_L" : 			["?X, F?A |- ?Y", 				"?X , (F?A, F?A) |- ?Y"],
+			"C_R" : 			["?X |- F?A, ?Y", 				"?X |- (F?A, F?A) , ?Y"],
+			"P_L" : 			["(?X1, ?B), (?A, ?X2) |- ?Y", 	"(?X1, ?A), (?B, ?X2) |- ?Y"],
+			"P_R" : 			["?X |- (?Y1, ?B), (?A, ?Y2)", 	"?X |- (?Y1, ?A), (?B, ?Y2)"],
+			"A_R" : 			["?W |- ?X , (?Y , ?Z)",		"?W |- (?X , ?Y) , ?Z"],
+			"A_R2" : 			["?W |- (?X , ?Y) , ?Z",		"?W |- ?X , (?Y , ?Z)"],
+			"A_L" : 			["?X , (?Y , ?Z) |- ?W",		"(?X , ?Y) , ?Z |- ?W"],
+			"A_L2" : 			["(?X , ?Y) , ?Z |- ?W",		"?X , (?Y , ?Z) |- ?W"],
+			"I_L_L" :			["?X |- ?Y", 					"I, ?X |- ?Y"],
+			"I_L_L2" :			["I, ?X |- ?Y", 				"?X |- ?Y"],
+			"I_L_R" :			["?X |- ?Y", 					"?X, I |- ?Y"],
+			"I_L_R2" :			["?X, I |- ?Y", 				"?X |- ?Y"],
+			"I_R_L" :			["?X |- ?Y", 					"?X |- I, ?Y"],
+			"I_R_L2" :			["?X |- I, ?Y", 				"?X |- ?Y"],
+			"I_R_R" :			["?X |- ?Y", 					"?X |- ?Y, I"],
+			"I_R_R2" :			["?X |- ?Y, I", 				"?X |- ?Y"]
 		},
 		"RuleCut" : {
-			"SingleCut" :		["?X |- ?Y",	""]
+			"SingleCut" :		["?X, ?W |- ?Z, ?Y",	""]
 		}
 	}
 }
