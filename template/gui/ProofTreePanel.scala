@@ -266,6 +266,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 						pressed.parent.contents -= pressed.parent.seqButton
 						pressed.parent.preferredSize = pressed.parent.macroPtPanel.get.preferredSize
 						pressed.parent.contents += pressed.parent.macroPtPanel.get
+						// print("root: ")
+						// println(pressed.parent.macroPtPanel.get.tree.getRoot)
 						// println("new bounds: " + boundsOfNode(pressed.parent))
 						// println("new height: " + pressed.parent.height)
 
@@ -280,8 +282,8 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 					}
 					pressed.parent.seqButton.visible = !pressed.parent.seqButton.visible
 
-					repaint()
-					//update()
+					//repaint()
+					repaintWMacro()
 
 
 				case "sequent" if editable =>
@@ -641,7 +643,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 	})
 	//popup.contents += cutt
 
-
+	/*/*uncommentL?Agent*/
 	val refl_forwK = new MenuItem(new Action("Apply Refl_forwK") {
 		def apply = {
 			selectedSequentInPt match {
@@ -697,7 +699,7 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 			requestFocus
 		}
 	})
-	//popup.contents += refl_forwK
+	/*uncommentR?Agent*/*/
 
 	val displaySeqTree = new MenuItem(new Action("Display Sequent tree") {
 		accelerator = Some(getKeyStroke('t'))
@@ -779,7 +781,9 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 
 	popup.contents += new swing.Menu("Apply Rule") {
 		contents += cutt
+		/*/*uncommentL?Agent*/
 		contents += refl_forwK
+		/*uncommentR?Agent*/*/
 		contents += displayX
 		contents += idTac
 	}
@@ -868,7 +872,17 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		comp.ruleButton.peer.setLocation(xmax+5+OFFSET_X, yy-(comp.ruleIcon.getIconHeight/2)+OFFSET_Y)
 	}
 
-	
+	def repaintWMacro() = {
+		peer.removeAll()
+		val old = treeLayout.getTree()
+		treeLayout = new TreeLayout[SequentInPt](old, nodeExtentProvider, configuration)
+		build()
+		peer.revalidate()
+		peer.repaint()
+		//val s = treeLayout.getBounds().getBounds().getSize()
+		//preferredSize = new java.awt.Dimension(s.width + OFFSET_X*8, s.height + OFFSET_Y*2)
+	}
+
 	override def repaint() = {
 		println("repaint!!!")
 		for (sequentInPt <- treeLayout.getNodeBounds().keySet()) {

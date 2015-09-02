@@ -240,11 +240,15 @@ object GUI2 extends SimpleSwingApplication {
 			GUIHelper.fileOpenDialog("Open a session file") match {
 				case Some(file) =>
 					// shoudl these be called here???
+					/*/*uncommentL?Action?Agent*/
 					session.clearRelAKA
 					session.clearPreForm
+					/*uncommentR?Action?Agent*/*/
 					GUIHelper.openCSFile(file, session)
+					/*/*uncommentL?Action?Agent*/
 					relAKAtable.reload
 					preFormTable.reload
+					/*uncommentR?Action?Agent*/*/
 					abbrevTable.reload
 				case None => ;
 			}
@@ -252,14 +256,13 @@ object GUI2 extends SimpleSwingApplication {
 		case ButtonClicked(`newButton`) => 
 			session.clearAssms
 			session.clearPT
+			/*/*uncommentL?Action?Agent*/
 			session.clearRelAKA
 			session.clearPreForm
 			relAKAtable.reload
 			preFormTable.reload
-
+			/*uncommentR?Action?Agent*/*/
 		case ButtonClicked(`saveButton`) => 
-			//if(saveFile == None){
-
 			GUIHelper.fileSaveDialog() match {
 				case Some(file) => GUIHelper.saveCSFile(file, session)
 				case None => ;
@@ -568,7 +571,7 @@ object GUI2 extends SimpleSwingApplication {
 
 	/*/*uncommentL?Action?Agent*/
 
-	val relAKAreflexive = new CheckBox("relAKA is reflexive"){
+	val relAKAreflexive = new CheckBox("Action structure is reflexive"){
 		border = Swing.EmptyBorder(10,10,10,10)
 		font = new Font("Roboto-Light", Font.PLAIN, 12)
 		foreground = textColor2
@@ -603,7 +606,7 @@ object GUI2 extends SimpleSwingApplication {
 
 	val relAKAbar = new BorderPanel {
 		layout(new BoxPanel(Orientation.Horizontal) {
-			contents+= new Label("RelAKA"){
+			contents+= new Label("Action structure"){
 				font = new Font("Roboto-Light", Font.PLAIN, 16)
 				foreground = textColor2
 				border = Swing.EmptyBorder(15, 10, 15, 20)
@@ -644,7 +647,7 @@ object GUI2 extends SimpleSwingApplication {
 
 	val preFormBar = new BorderPanel {
 		layout(new BoxPanel(Orientation.Horizontal) {
-			contents+= new Label("Pre Formulas"){
+			contents+= new Label("Preconditions"){
 				font = new Font("Roboto-Light", Font.PLAIN, 16)
 				foreground = textColor2
 				border = Swing.EmptyBorder(15, 10, 15, 20)
@@ -714,10 +717,6 @@ object GUI2 extends SimpleSwingApplication {
 
 
 	tabPane.addTab(null, tab1.peer)
-	tabPane.addTab(null, tab2.peer)
-	tabPane.addTab(null, tab3.peer)
-
-
 	// Create vertical labels to render tab titles
 	val labTab1 = new JLabel("Assms & P'Trees")
 	labTab1.setUI(new VerticalLabelUI(true))
@@ -725,17 +724,25 @@ object GUI2 extends SimpleSwingApplication {
 	labTab1.setForeground(textColor)
 	tabPane.setTabComponentAt(0, labTab1) // For component1
 
+
+	tabPane.addTab(null, tab2.peer)
+
 	val labTab2 = new JLabel("Abbreviations & Macros")
 	labTab2.setUI(new VerticalLabelUI(true))
 	labTab2.setFont(new Font("Roboto-Bold", Font.BOLD, 12))
 	labTab2.setForeground(textColor)
 	tabPane.setTabComponentAt(1, labTab2) // For component2
 
+
+	/*/*uncommentL?Action?Agent*/
+	tabPane.addTab(null, tab3.peer)
+
 	val labTab3 = new JLabel("Locales")
 	labTab3.setUI(new VerticalLabelUI(true))
 	labTab3.setFont(new Font("Roboto-Bold", Font.BOLD, 12))
 	labTab3.setForeground(textColor)
 	tabPane.setTabComponentAt(2, labTab3) // For component3
+	/*uncommentR?Action?Agent*/*/
 
 
 	lazy val sideBar = new BorderPanel {

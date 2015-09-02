@@ -31,7 +31,7 @@ class SequentInPt(val seq:Sequent, val rule:Rule, val id:Int, size:Int = 15, val
       macroSession.abbrevsOn = session.abbrevsOn
       macroSession.abbrevMap ++= session.abbrevMap.toMap
       val ptPanel = new ProofTreePanel(session=macroSession, editable=false)
-      ptPanel.build()
+      ptPanel.build
       //contents+= ptPanel
       //preferredSize = ptPanel.preferredSize
       Some(ptPanel)
@@ -90,6 +90,5 @@ class RuleInPtButton(val pt:Option[Prooftree] = None, enabled: Boolean = true, p
   val parent = p
   text = "rule"
   peer.setHorizontalAlignment(SwingConstants.LEFT)
-  val str = "aaaa"
   peer.setEnabled(enabled)
 }

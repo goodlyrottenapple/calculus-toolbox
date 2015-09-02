@@ -96,6 +96,7 @@ object Proofsearch{
 		case Sequenta(lhs, rhs) => 
 			if(lhs == rhs) lhs match {
 				case Structure_Formula(f) => f match {
+					/*/*uncommentL?Action*/
 					case Formula_Action_Formula(op, a, form) =>
 						val newGoal = Sequenta(Structure_Formula(form), Structure_Formula(form))
 						var tree = derTree(3, Premise(newGoal) :: Nil, seq, 0)
@@ -104,6 +105,8 @@ object Proofsearch{
 								return Some(mergePTs(tree.get, res))
 							case None => return None
 						}
+					/*uncommentR?Action*/*/
+					/*/*uncommentL?Agent*/
 					case Formula_Agent_Formula(op, a, form) =>
 						val newGoal = Sequenta(Structure_Formula(form), Structure_Formula(form))
 						var tree = derTree(3, Premise(newGoal) :: Nil, seq, 0)
@@ -112,6 +115,7 @@ object Proofsearch{
 								return Some(mergePTs(tree.get, res))
 							case None => return None
 						}
+					/*uncommentR?Agent*/*/
 					case Formula_Atprop(a) =>
 						var tree = derTree(3, Empty()::Nil, seq, 0)
 						println(tree)
@@ -127,12 +131,16 @@ object Proofsearch{
 							}
 							case None => return None
 						}
+					/*/*uncommentL?Action*/
 					case Formula_Precondition(p) =>
 						var tree = derTree(3, Empty()::Nil, seq, 0)
 						return tree
+					/*uncommentR?Action*/*/
+					/*/*uncommentL?Formula_Zer*/
 					case Formula_Zer(z) =>
 						var tree = derTree(3, Empty()::Nil, seq, 0)
 						return tree
+					/*uncommentR?Formula_Zer*/*/
 				}
 				case _ => return None
 			}

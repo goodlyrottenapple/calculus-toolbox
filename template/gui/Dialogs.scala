@@ -96,7 +96,7 @@ class FormulaInputDialog(owner: Window = null) extends Dialog(owner) {
 }
 
 
-
+/*/*uncommentL?Agent*/
 class AgentInputDialog(owner: Window = null) extends Dialog(owner) {
   var agent:Option[Agent] = None
   modal = true
@@ -135,6 +135,7 @@ class AgentInputDialog(owner: Window = null) extends Dialog(owner) {
   centerOnScreen()
   open()
 }
+/*uncommentR?Agent*/*/
 
 class SequentInputDialog(owner: Window = null) extends Dialog(owner) {
   var sequent:Option[Sequent] = None
