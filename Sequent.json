@@ -5,7 +5,8 @@
 		"Atprop" : {
 			"Atprop" : {
 				"type":"string",
-				"ascii" : "_"
+				"ascii" : "_",
+				"isabelle_se" : "_"
 			},
 			"Atprop_Freevar" : {
 				"type" : "string",
@@ -22,25 +23,30 @@
 			"Formula_Atprop" : {
 				"type": "Atprop",
 				"isabelle" : "_ \\<^sub>A",
+				"isabelle_se" : "_",
 				"precedence": [320, 330]
 			},
 			"Formula_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>F _",
+				"isabelle_se" : "_",
 				"ascii" : "F? _",
 				"latex" : "?_F _",
-				"precedence": [340, 330]
+				"precedence": [340, 330],
+				"shallow" : false
 			},
 
 			"Formula_Un" : {
 				"type" : ["Formula_Un_Op", "Formula"],
 				"isabelle" : "U\\<^sub>F _",
+				"isabelle_se" : "_",
 				"precedence": [330, 331]
 			},
 
 			"Formula_Bin" : {
 				"type" : ["Formula", "Formula_Bin_Op", "Formula"],
 				"isabelle" : "B\\<^sub>F _",
+				"isabelle_se" : "_",
 				"precedence": [330,330,330, 331]
 			}
 		},
@@ -78,26 +84,31 @@
 			"Structure_Formula" : {
 				"type": "Formula",
 				"isabelle" : "_ \\<^sub>S",
+				"isabelle_se" : "_ \\<^sub>S",
 				"precedence": [330, 340]
 			},
 
 			"Structure_Freevar" : {
 				"type" : "string",
 				"isabelle" : "?\\<^sub>S _",
+				"isabelle_se" : "_",
 				"ascii" : "? _",
 				"latex" : "? _",
-				"precedence": [340, 340]
+				"precedence": [340, 340],
+				"shallow" : false
 			},
 
 			"Structure_Zer" : {
 				"type" : "Structure_Zer_Op",
 				"isabelle" : "Z\\<^sub>S",
+				"isabelle_se" : "_",
 				"precedence": [340, 340]
 			},
 
 			"Structure_Bin" : {
 				"type" : ["Structure", "Structure_Bin_Op", "Structure"],
 				"isabelle" : "B\\<^sub>S _",
+				"isabelle_se" : "_",
 				"precedence": [340,340,340, 341]
 			}
 		},
