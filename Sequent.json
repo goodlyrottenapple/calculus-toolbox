@@ -333,7 +333,7 @@
 			"I_R_R2" :			["?X |- ?Y, I", 				"?X |- ?Y"]
 		},
 		"RuleCut" : {
-			"SingleCut" :		["?X, ?W |- ?Z, ?Y",	""]
+			"SingleCut" :		["?X, ?W |- ?Z, ?Y",	"?X |- ?Z , F?f", "F?f, ?W |- ?Y"]
 		}
 	}
 }
