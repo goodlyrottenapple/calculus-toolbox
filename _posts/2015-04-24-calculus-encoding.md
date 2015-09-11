@@ -65,13 +65,17 @@ The generic `datatype` definition above is 'disassembled' into the JSON file bel
 Note that none of the nested parameters (`type`, `isabelle`, `ascii`, etc.) are not compulsory and can be omitted. Further details on the parameters used by the calculus toolbox generator tools are detailed here:
 
 {: .table}
-| Field      | JSON&nbsp;Data&nbsp;Type | Description |
-| ---------- | -------------- | ----------- |
-| type       | String         | Defines the values the constructor will hold (e.g. `string`, `int list`, ...) |
-| isabelle   | String         | Defines the sugar syntax for the constructor |
-| ascii      | String         | Defines the ASCII encoding, used to build the ASCII parser in Scala. If left undefined, will use the basic constructor syntax. |
-| latex      | String         | Defines the LaTeX encoding, used to build the UI LaTeX typesetting and export functionality. If left undefined uses the basic constructor syntax. |
-| precedence | Integer Array  | Defines the term biding for the syntactic sugar. __(Only implemented for Isabelle syntactic sugar at the moment)__ |
+| Field       | JSON&nbsp;Data&nbsp;Type | Description |
+| ----------- | ------------- | ----------- |
+| type        | String        | Defines the values the constructor will hold (e.g. `string`, `int list`, ...) |
+| isabelle    | String        | Defines the sugar syntax for the constructor in Isabelle (deep embedding) |
+| isabelle_se | String        | Defines the sugar syntax for the constructor in Isabelle (shallow embedding) |
+| ascii       | String        | Defines the ASCII encoding, used to build the ASCII parser in Scala. If left undefined, will use the basic constructor syntax. |
+| latex       | String        | Defines the LaTeX encoding, used to build the UI LaTeX typesetting and export functionality. If left undefined uses the basic constructor syntax. |
+| precedence  | Integer Array | Defines the term biding for the syntactic sugar. |
+| shallow     | Boolean       | If defined and set to _false_, this attribute tells the build script that the particular constructor should not be added in the shallow embedding. For example, the free variable constructors which are needed in the deep embedding should not be added in the definition of the shallow embedding. |
+| parsable    | Boolean       | Similar to ```shallow```, if the value of ```parsable``` is set to _false_, the build script will not generate an ASCII parser for this constructor. This is useful in the definition of ```Sequent_Structure```, for example, as this constructor is only used internally and does not constitute a valid term of the actual calculus (see [here]({{ site.baseurl }}/doc/calculi.html#seq-struct-reason) for details why it is needed). |
+
 
 #### calc_structure_rules
 
@@ -108,6 +112,9 @@ The rules themselves are encoded in the following format:
 | condition  | String         | This field defines any additional conditions that a rule might have. This field is directly copied into Isabelle and should contain valid Isabelle code (can either contain a lambda function with the type signature `Sequent ⇒ bool` or a reference to a function with such type signature. This function needs to be defined in the Isabelle theory file template before the `rules_rule_fun` macro) |
 | locale     | String         | If left undefined defaults to the `Empty` locale. The other [predefined locales](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy) include `CutFormula`, `Premise` and `RelAKA`. |
 | premise    | String         | Defines a custom derivation function for the premises. Must contain valid Isabelle function/reference to a defined function with the type signature `Sequent ⇒ Sequent list option`. For more information, have a look at the [swapout](#swapout) rule case below. |
+| se         | Boolean        | If set to _false_, the rule will not be added to the shallow embedding of the calculus. |
+| se\_rule   | String         | Overrides any definition of a rule defined in the ```rule``` section of the JSON file with the supplied string. Note, this string has to be a valid Isabelle term. |
+
 
 #### rules
 
@@ -227,7 +234,7 @@ The rule $swap\text{-}out'_R$ given above has been formalized in Isabelle in the
 {:.table}
 <span class="glyphicon glyphicon-info-sign"></span> | The encoding of this rule is slightly different in the Isabelle theory files. It has been adapted for better readability here.
 
-The first part of this rule (the conclusion) looks like any other rule, but its the part after `⟹RD` that differs form the standard encoding, which has the usual form `(λx. Some [ ... ])`. To understand what goes on in <code>swapout_R rel (?<sub>S</sub>''Y'' ⊢ AgS<sub>S</sub> forwK<sub>S</sub> ?<sub>Ag</sub>''a'' (ActS<sub>S</sub> forwA<sub>S</sub> ?<sub>Act</sub>''beta'' ?<sub>S</sub>''X''))</code>, let's take a look at the signature of the function `swapout_R`:
+The first part of this rule (the conclusion) looks like any other rule, but its the part after `⟹RD` that differs from the standard encoding, which has the usual form `(λx. Some [ ... ])`. To understand what goes on in <code>swapout_R rel (?<sub>S</sub>''Y'' ⊢ AgS<sub>S</sub> forwK<sub>S</sub> ?<sub>Ag</sub>''a'' (ActS<sub>S</sub> forwA<sub>S</sub> ?<sub>Act</sub>''beta'' ?<sub>S</sub>''X''))</code>, let's take a look at the signature of the function `swapout_R`:
 
 {% highlight coq %}
 fun swapout_R :: "(Action ⇒ Agent => Action list) ⇒ Sequent ⇒ Sequent ⇒ Sequent list option" where ...
@@ -239,7 +246,7 @@ One can see that this function takes a sequent and either succeeds in deriving t
 
 ### Rule Macro
 
-The macro 'rule' is a special rule that gets added to any generated calculus by default. The motivation for the macro rule arises form the notion of derived rules in a calculus. Since derived rules can be used quite frequently, the Scala UI provides an easy way to create macros that can be applied in a similar fashion to the defined rules of the calculus. These macros represent snippets of proof tree skeletons where the sequents contain free variables to be substituted for by concrete terms, when applied.
+The macro 'rule' is a special rule that gets added to any generated calculus by default. The motivation for the macro rule arises from the notion of derived rules in a calculus. Since derived rules can be used quite frequently, the Scala UI provides an easy way to create macros that can be applied in a similar fashion to the defined rules of the calculus. These macros represent snippets of proof tree skeletons where the sequents contain free variables to be substituted for by concrete terms, when applied.
 
 - - -
 
@@ -257,7 +264,7 @@ datatype Rule = RuleZer RuleZer
 
 - - -
 
-Due to the nature of the UI tools (namely that the proof tree generated by the tools must always be valid), these derived proof tree snippets have concrete terms substituted in, are checked for validity and added directly to the main proof tree. To remove clutter, the snippet of the proof tree is stored separate form the main proof tree structure. To demonstrate, let's take a look at a derived rule in the D.EAK calculus, $W_R$:
+Due to the nature of the UI tools (namely that the proof tree generated by the tools must always be valid), these derived proof tree snippets have concrete terms substituted in, are checked for validity and added directly to the main proof tree. To remove clutter, the snippet of the proof tree is stored separate from the main proof tree structure. To demonstrate, let's take a look at a derived rule in the D.EAK calculus, $W_R$:
 
 $$\frac{\displaystyle \frac
 {X \vdash Y}

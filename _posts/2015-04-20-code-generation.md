@@ -13,7 +13,7 @@ The full build process (invoked by `build.py`) goes through several stages of ge
 
 <br>
 
-<img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://cdn.rawgit.com/goodlyrottenapple/calculus-toolbox/c3a314ca9eaf22fbcbc110118a9f3f8191550ff6/_files/gen_dia.svg">
+<img style="margin:0 auto;" class="img-responsive" alt="code generation diagram" src="https://cdn.rawgit.com/goodlyrottenapple/calculus-toolbox/377cf93d6f4836df6fc800259a0a9485500e0519/_files/gen_dia.svg">
 
 <br>
 
