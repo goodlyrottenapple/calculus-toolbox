@@ -2,6 +2,5 @@
 *.py[cod]
 
 # Isabelle temp files
-*.thy~
-
+*.thy
 .DS_Store
