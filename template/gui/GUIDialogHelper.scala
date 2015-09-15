@@ -602,7 +602,7 @@ class AbbrevParsePopup extends BorderPanel with Popup  {
 			}
 	}
 		
-	layout(new FlowPanel(FlowPanel.Alignment.Left)(new Label("INPUT A PREFORM") {
+	layout(new FlowPanel(FlowPanel.Alignment.Left)(new Label("INPUT AN ABBREVIATION") {
 		font = new Font("Roboto-Bold", Font.BOLD, 16)
 		foreground = Color.white
 	}){opaque = false}) = North
