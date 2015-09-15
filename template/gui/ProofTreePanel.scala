@@ -706,7 +706,6 @@ class ProofTreePanel(session : CalcSession, gapBetweenLevels:Int = 10, gapBetwee
 		def apply = {
 			seqTreeViewDialog match {
 				case None =>
-					displayTactic( selectedSequentInPt.get.seq )
 					val dialog = new SequentTreeViewDialog(null, selectedSequentInPt.get.seq)
 					seqTreeViewDialog = Some(dialog)
 				case Some(dialog) => 
