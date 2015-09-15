@@ -250,5 +250,5 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
    You should see the following screen:
 
-   ![scala gui screenshot](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/scala_gui_screen1.png)
+   <img style="margin:0 auto; max-width:100%; height: auto;" alt="scala gui screenshot" src="https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/scala_gui_screen1.png">
 

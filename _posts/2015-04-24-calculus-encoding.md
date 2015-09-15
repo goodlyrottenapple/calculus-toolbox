@@ -278,6 +278,6 @@ Here _X_, _Y_ and _Z_ are variables that can be substituted by concrete terms. O
 
 The use of rule macro simulates this in the Scala UI, keeping the proof trees shorter and more readable:
 
-![scala ui proof tree macro](https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/scala_gui_pt_macro.png)
+<img style="margin:0 auto; max-width:100%; height: auto;" alt="scala ui proof tree macro" src="https://raw.githubusercontent.com/goodlyrottenapple/calculus-toolbox/gh-pages/_files/scala_gui_pt_macro.png">
 
 At the same time, the underlying encoding (ASCII and Isabelle) carries the macro proof tree within the the main proof tree, and this means that the main proof tree can be checked for validity without relying on any external definitions of derived rules. To learn how to define and use rule macros, have a look at the [Scala UI]({{ site.baseurl }}/doc/scala-ui.html) documentation.
