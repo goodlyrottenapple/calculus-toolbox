@@ -176,7 +176,7 @@ object Proofsearch{
 
 	// used for macro rules - manual only, not used for PS!!
 	def derAllM(loc:List[Locale], s:Sequent, macros : List[(String, Prooftree)] = List()) : List[(Rule, List[Sequent])] = 
-		macros.map{ case (n, pt) => (RuleMacro(n.toList, replaceIntoPT(s, pt)), replaceIntoPT(s, pt)) }
+		macros.map{ case (n, pt) => (RuleMacro(n.toList, replaceSequentIntoPT(s, pt)), replaceSequentIntoPT(s, pt)) }
 			.filter{ case (r, pt) => isProofTreeWithCut(loc++collectPremisesToLocale(pt), pt) }
 				.map{ case (r, pt) => (r, collectPremises(pt)) }
 

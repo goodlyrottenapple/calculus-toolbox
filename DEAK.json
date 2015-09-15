@@ -889,14 +889,14 @@
 				"ascii" : "swapout'L",
 				"latex" : "swapout'L",
 				"locale" : "RelAKA rel",
-				"premise" : "swapout_L rel (AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))",
+				"premise" : "swapout_L rel",
 				"se_rule" : "(\\<forall> Y \\<in> (set Ys). \\<exists>beta \\<in> set (rel alpha a). (l \\<turnstile>d forwK\\<^sub>S a (forwA\\<^sub>S beta X) \\<turnstile>\\<^sub>S Y) ) \\<Longrightarrow> l \\<turnstile>d forwA\\<^sub>S alpha (forwK\\<^sub>S a X) \\<turnstile>\\<^sub>S ;;\\<^sub>S Ys"
 			},
 			"Swapout_R" : {
 				"ascii" : "Swapout'R",
 				"latex" : "Swapout'R",
 				"locale" : "RelAKA rel",
-				"premise" : "swapout_R rel ((?\\<^sub>S ''Y'') \\<turnstile>\\<^sub>S AgS\\<^sub>S forwK\\<^sub>S (?\\<^sub>Ag ''a'') ActS\\<^sub>S forwA\\<^sub>S (?\\<^sub>Act ''beta'') (?\\<^sub>S ''X''))",
+				"premise" : "swapout_R rel",
 				"se_rule" : "(\\<forall> Y \\<in> (set Ys). \\<exists>beta \\<in> set (rel alpha a). (l \\<turnstile>d Y \\<turnstile>\\<^sub>S forwK\\<^sub>S a (forwA\\<^sub>S beta X)) ) \\<Longrightarrow> l \\<turnstile>d  ;;\\<^sub>S Ys \\<turnstile>\\<^sub>S forwA\\<^sub>S alpha (forwK\\<^sub>S a X)"
 			}
 		},
