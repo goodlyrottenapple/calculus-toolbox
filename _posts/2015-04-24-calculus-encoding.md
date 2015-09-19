@@ -109,11 +109,11 @@ The rules themselves are encoded in the following format:
 | ---------- | -------------- | ----------- |
 | ascii      | String         | Defines the ASCII sugar notation, used to build the ASCII parser in Scala. If left undefined, will use `Rule_name` |
 | latex      | String         | Defines the LaTeX sugar notation, used for the proof tree labels in LaTeX typesetting. If left undefined default to `Rule_name` |
-| condition  | String         | This field defines any additional conditions that a rule might have. This field is directly copied into Isabelle and should contain valid Isabelle code (can either contain a lambda function with the type signature `Sequent ⇒ bool` or a reference to a function with such type signature. This function needs to be defined in the Isabelle theory file template before the `rules_rule_fun` macro) |
+| condition  | String         | This field defines any additional conditions that a rule might have. This field is directly copied into Isabelle and should be defined by valid Isabelle code (either a lambda function with the type signature `Sequent ⇒ bool` or a reference to a function with such type signature. This function needs to be defined in the Isabelle theory file template before the `rules_rule_fun` macro) |
 | locale     | String         | If left undefined defaults to the `Empty` locale. The other [predefined locales](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Rules.thy) include `CutFormula`, `Premise` and `RelAKA`. |
 | premise    | String         | Defines a custom derivation function for the premises. Must contain valid Isabelle function/reference to a defined function with the type signature `Sequent ⇒ Sequent list option`. For more information, have a look at the [swapout](#swapout) rule case below. |
 | se         | Boolean        | If set to _false_, the rule will not be added to the shallow embedding of the calculus. |
-| se\_rule   | String         | Overrides any definition of a rule defined in the ```rule``` section of the JSON file with the supplied string. Note, this string has to be a valid Isabelle term. |
+| se\_rule   | String         | Overrides any definition of a rule defined in the ```rule``` section of the JSON file with the supplied string in the shallow embedding version of the calculus. Note, this string has to be a valid Isabelle term. |
 
 
 #### rules

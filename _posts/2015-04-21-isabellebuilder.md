@@ -7,7 +7,7 @@ date: 2015-04-21 11:19:29
 
 This class ([`tools/isabuilder.py`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/isabuilder.py)) contains all the macro functions, which take the JSON encoded calculus and generate Isabelle code that is replaced into the `.thy` theory files.
 
-Add any macro functions for code generation in Isabelle theories to this [file (`tools/isabuilder.py`)](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/isabuilder.py). They will automatically be called if referenced in the processed file (i.e if a method `foo` is defined, it will be called if `(*foo*)` appears in the processed file).  
+Add any macro functions for code generation in Isabelle theories to this [file (`tools/isabuilder.py`)](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/isabuilder.py). They will automatically be called if referenced in the processed theory file (i.e if a method `foo` is defined in [`tools/isabuilder.py`](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/tools/isabuilder.py), it will be called if `(*foo*)` appears in the processed theory file).  
 For passing arguments to `foo`, use `(*foo?arg1?arg2?...*)` in the processed file.  
 The return type for any function that can be referenced in the processed files must be string. For any functions that do not return a string, add two underscores before a function name. Also add two underscores if the function is going to be static or purposefully hidden from use in the processed file.
 
@@ -82,13 +82,55 @@ These functions in pair uncomment a section enclosed in:
 (*(*uncommentL?ident1?ident2?ident3?...*) ... (*uncommentR?ident1?ident2?ident3?...*)*)
 ~~~
 
-if `ident1,ident2,ident3,...` is defined in `calc_structure` (that is $\\{ ident1,ident2,ident3,... \\} \subseteq set( \text{__keywords(self.calc)})$), by turning into:
+if `ident1,ident2,ident3,...` is defined in `calc_structure` (that is, {ident1,ident2,ident3,…} ⊆ set (__keywords(self.calc)) ), by turning into:
 
 ~~~
 (*(*uncommentL?ident1?ident2?ident3?...-BEGIN*)*)(*uncommentL?ident1?ident2?ident3?...-END*) ... (*uncommentR?ident1?ident2?ident3?...-BEGIN*)(*(*uncommentR?ident1?ident2?ident3?...-END*)*)
 ~~~
 
 Otherwise they remain unchanged.
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #terminal}
+| def __is_terminal(name, structure) |
+
+Checks that the given structure is not recursive or encapsulates another type.
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #prefix_candidtate}
+| def  __prefix_candidtate(name, constructor, structure) |
+
+Checks that the given structure is a prefix constructor, by checking that the first argument is a terminal type (i.e. a type that encodes the operators) and the last argument is recursive.   
+Used in [calc_structure_datatype](#calc_structure_datatype)
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #infix_candidtate}
+| def  __infix_candidtate(name, constructor, structure) |
+
+Checks that the given structure is a infix constructor, by checking that the constructor only takes 3 arguments, with the middle one being a terminal type (the infix operator).   
+Used in [calc_structure_datatype](#calc_structure_datatype)
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #is_recursive}
+| def  __is_recursive(name, structure) |
+
+{: .code .python #is_recursive}
+| def  __is_recursive_aux(name, current, structure) |
+
+Checks that the given datatype is recursive. __Unused__
+
 
 <br>
 
@@ -105,7 +147,7 @@ Used in [calc_structure](#calc_structure) and [calc_structure_rules](#calc_struc
 <div class="code">@staticmethod</div>
 
 {: .code .python #calc_structure_datatype}
-| def __calc_structure_datatype(name, datatype) |
+| def __calc_structure_datatype(name, datatype, structure, shallow = False) |
 
 Returns a definition of a `datatype` in Isabelle with syntactic sugar (if defined).
 For example, the following entry in the JSON file:
@@ -132,7 +174,6 @@ datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
                         | Formula_ImpR ("\<rightarrow>\<^sub>F")
 ~~~
 
-
 <br>
 
 {: .code .python #calc_structure}
@@ -140,6 +181,44 @@ datatype Formula_Bin_Op = Formula_And ("\<and>\<^sub>F")
 
 Called from the [core calculus template](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core.thy). Generates Isabelle `datatype` definitions declared under `calc_structure` in the JSON calculus file.  
 Uses [__calc_structure_datatype](#calc_structure_datatype) and [__calc_structure_dependencies](#calc_structure_dependencies)
+
+<br>
+
+{: .code .python #calc_structure_se}
+| def calc_structure_se(self) |
+
+Called from the [core calculus SE template](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/template/Calc_Core_SE.thy). Generates Isabelle `datatype` definitions declared under `calc_structure` in the JSON calculus file for the shallow embedding.  
+Uses [__calc_structure_datatype](#calc_structure_datatype) and [__calc_structure_dependencies](#calc_structure_dependencies)
+
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #calc_structure_se_to_de}
+| def __calc_structure_se_to_de(name, datatype, structure, calc_name) |
+
+Produces the definition for the SE_to_DE_ function for a given type, that translate terms of the shallow embedding into the terms of the deep embedding.   
+Uses [__prefix_candidate](#prefix_candidate), [__infix_candidate](#infix_candidate) and [__is_terminal](#terminal)
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #calc_structure_de_to_se}
+| def __calc_structure_de_to_se(name, datatype, structure, calc_name) |
+
+This function generates definitions, converse to [__calc_structure_se_to_de](#calc_structure_se_to_de), taking deep embedding terms into shallow embedding.
+Uses [__prefix_candidate](#prefix_candidate), [__infix_candidate](#infix_candidate) and [__is_terminal](#terminal)
+
+<br>
+
+<div class="code">@staticmethod</div>
+
+{: .code .python #calc_structure_de_to_se}
+| def __calc_structure_translate(self, se_to_de = True) |
+
+This function uses [__calc_structure_se_to_de](#calc_structure_se_to_de) or [__calc_structure_de_to_se](#calc_structure_de_to_se) (depending on the `se_to_de` flag passed in as an argument) to generate the translation functions for all the terms of the calculus.
 
 <br>
 
@@ -200,9 +279,14 @@ Since the rule encoding in the JSON file is split into two parts, the declaratio
 {: .code .python #rules_rule_fun}
 | def rules_rule_fun(self) |
 
+Generates a universal rule function that brings all the separate ruleBin/Op/etc functions under one call.
+
 <br>
 
 {: .code .python #rules_rule_list}
 | def rules_rule_list(self) |
+
+Generates the ruleList definition, used for proof search in Scala, as any rules not in this list will be omitted from the search.
+
 
 <br>
