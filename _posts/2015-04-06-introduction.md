@@ -38,7 +38,7 @@ git clone https://github.com/goodlyrottenapple/calculus-toolbox
 
 1. First open the default calculus template `default.json` and edit the calculus name: 
    
-   <div>{% highlight json %}"calc_name" : "EAKMin"{% endhighlight %}
+   <div>{% highlight json %}"calc_name" : "DCPL"{% endhighlight %}
 
    This name is used in all the Isabelle theory files and Scala classes.
    

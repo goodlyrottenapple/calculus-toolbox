@@ -119,7 +119,7 @@ The `-r` flag introduces some path rewrite rules, specific to the structure of t
     When run with the [default calculus description file](https://github.com/goodlyrottenapple/calculus-toolbox/blob/master/default.json), the code snippet above will be turned into:
 
     <div markdown="1">{% highlight coq %}
-    theory (*calc_name_core-BEGIN*)EAKMin(*calc_name_core-END*)
+    theory (*calc_name_core-BEGIN*)DCPL(*calc_name_core-END*)
     imports Main "~~/src/HOL/Library/Code_Char" "~~/src/HOL/Code_Numeral"
 
     begin
