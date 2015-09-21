@@ -175,10 +175,10 @@ class ScalaBuilder:
 
 		for c in datatype:
 			if name in datatype[c].get("type", []) and datatype[c].get("parsable", True):
-				print c,"\n"
+				# print c,"\n"
 				if ScalaBuilder.__infix_candidtate(name, c, structure):
 					list_of_generated_parsers.append(c)
-					print "infix candidate found!!!\n"
+					# print "infix candidate found!!!\n"
 					op = datatype[c]["type"][1]
 					for cc in structure[op]:
 						#print cc, structure[op][cc].get("ascii", c)
@@ -194,7 +194,7 @@ class ScalaBuilder:
 
 				elif ScalaBuilder.__prefix_candidtate(name, c, structure):
 					list_of_generated_parsers.append(c)
-					print "prefix candidate found!!!\n"
+					# print "prefix candidate found!!!\n"
 					op = datatype[c]["type"][0]
 
 					inbetween = [datatype[c]["type"][i] for i in range(1, len(datatype[c]["type"])-1)]

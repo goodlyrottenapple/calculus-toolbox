@@ -184,7 +184,7 @@ class IsabelleBuilder:
 				else:
 					precedence = " {0}".format( precedence[0] )
 			else: precedence = ""
-			print precedence
+			# print precedence
 
 			sugar = con.get("isabelle","")
 			if sugar:
@@ -735,7 +735,7 @@ class IsabelleBuilder:
 					count = len(rules[r])
 					search_str = ""
 					for i in reversed(rules[r]):
-						print i
+						# print i
 						if count > 1: search_str+=i
 						count -= 1
 					import re
