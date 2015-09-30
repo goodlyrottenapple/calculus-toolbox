@@ -242,7 +242,7 @@ def add_gui(flags):
         print "Copying gui/img folder..."
         imgs = glob(TEMPLATE_FILES_PATH+"gui/img/*")
         list = [p.split('/')[-1] for p in imgs]
-        print list, imgs
+        # print list, imgs
         for l in list:
             shutil.copyfile(imgs[list.index(l)], OUTPUT_PATH+SCALA_SRC_PATH+"gui/img/"+l)
 
