@@ -366,7 +366,6 @@
 				"latex" : "Cut",
 				"locale" : "CutFormula f",
 				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
-				"se_rule" : "l \\<turnstile>d (X \\<turnstile>\\<^sub>S f \\<^sub>S) \\<Longrightarrow> l \\<turnstile>d (f \\<^sub>S \\<turnstile>\\<^sub>S Y) \\<Longrightarrow> l \\<turnstile>d (X \\<turnstile>\\<^sub>S Y)"
 			}
 		},
 
