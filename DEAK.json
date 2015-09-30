@@ -1140,7 +1140,7 @@
 			"Swapout_R" :		["?Ylist |- forwA Act?alpha (forwK Ag?a ?X)",	""]
 		},
 		"RuleCut" : {
-			"SingleCut" :		["?X |- ?Y",	""]
+			"SingleCut" :		["?X |- ?Y",	"?X |- F?f",  "F?f |- ?Y"]
 		},
 		"RuleKnowledge" : {
 			"Refl_ForwK" : 		["?X |- ?Y",	"?X |- forwK Ag?a ?Y"]

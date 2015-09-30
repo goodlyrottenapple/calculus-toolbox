@@ -296,9 +296,9 @@
 
 	"rules" : {
 		"RuleZer" : {
-			"Id" : 				["F?f |- F?f",				""],
-			"Prem" : 			["?X |- ?Y",				""],
-			"Partial" : 			["?X |- ?Y",				""]
+			"Id" :				["F?f |- F?f",				""],
+			"Prem" :			["?X |- ?Y",				""],
+			"Partial" :			["?X |- ?Y",				""]
 		},
 		"RuleL" : {
 			"And_L_1" :			["?X, F?A /\\ F?B |- ?Z", 	"?X, F?A |- ?Z"],

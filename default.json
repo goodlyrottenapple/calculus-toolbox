@@ -274,7 +274,7 @@
 		"RuleZer" : {
 			"Id" : 				["A?p |- A?p",				""],
 			"Prem" : 			["?X |- ?Y",				""],
-			"Partial" : 		["?X |- ?Y",				""]
+			"Partial" :			["?X |- ?Y",				""]
 		},
 		"RuleU" : {
 			"I_impR" : 			["I |- ?X >> ?Y", 			"?X |- ?Y"],
@@ -311,7 +311,7 @@
 			"ImpR_L" :			["F?A > F?B |- ?X >> ?Y",	"?X |- F?A", 	"F?B |- ?Y"]
 		},
 		"RuleCut" : {
-			"SingleCut" :		["?X |- ?Y",	""]
+			"SingleCut" :		["?X |- ?Y",	"?X |- F?f",  "F?f |- ?Y"]
 		}
 	}
 }
