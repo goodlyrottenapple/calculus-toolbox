@@ -365,7 +365,7 @@
 				"ascii" : "Cut",
 				"latex" : "Cut",
 				"locale" : "CutFormula f",
-				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])",
+				"premise" : "(\\<lambda>x. Some [((?\\<^sub>S ''X'') \\<turnstile>\\<^sub>S f \\<^sub>S),(f \\<^sub>S \\<turnstile>\\<^sub>S (?\\<^sub>S ''Y''))])"
 			}
 		},
 
