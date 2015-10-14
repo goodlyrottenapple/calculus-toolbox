@@ -14,4 +14,10 @@ To run the tools in the Calculus Toolbox, you need the following:
 - Python (2.7 or higher)
 - (optional) `npyscreen` and `watchdog` python modules
 
+### Compiled toolboxes
+Compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as separate repositories here:
+
+- [DEAK-calculus-tool](https://github.com/goodlyrottenapple/DEAK-calculus-tool)
+- [Sequent-calculus-tool](https://github.com/goodlyrottenapple/Sequent-calculus-tool)
+
 
