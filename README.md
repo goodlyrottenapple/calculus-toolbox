@@ -1,3 +1,5 @@
+## This is the 2015 branch, to be used with Isabelle 2015. Switch to the master branch for the latest version.
+
 # calculus-toolbox
 A set of tools for generating calculi in Isabelle and supporting tools through a JSON description file
 
