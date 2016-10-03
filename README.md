@@ -5,11 +5,13 @@ A set of tools for generating calculi in Isabelle and supporting tools through a
 
 To get started, fork the [github repository](https://github.com/goodlyrottenapple/calculus-toolbox) or download the project as a [zip file](https://github.com/goodlyrottenapple/calculus-toolbox/archive/master.zip) and then head over to the [Introduction](https://goodlyrottenapple.github.io/calculus-toolbox/doc/introduction.html) page.
 
+**If you are using an older version of Isabelle (2014/2015), switch to the `isabelle2015` branch  via `git checkout isabelle2015`.**
+
 ### System requirements
 
 To run the tools in the Calculus Toolbox, you need the following:
 
-- Isabelle2015 (`isabelle` needs to be added to bash PATH) (if running Isabelle2014, please use the `--isa2014` flag when compiling the calculus)
+- Isabelle2016 (`isabelle` needs to be added to bash PATH) (if running Isabelle2014, please use the `--isa2014` flag when compiling the calculus)
 - Scala (preferred 2.10 or higher)
 - Python (2.7 or higher)
 - (optional) `npyscreen` and `watchdog` python modules
