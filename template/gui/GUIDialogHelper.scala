@@ -31,7 +31,7 @@ class ProofSearchPopup(locale : List[Locale] = List(Empty()), seq : Sequent, dep
 	
 	// the following code (interruptableFuture) is from http://stackoverflow.com/questions/16020964/cancellation-with-future-and-promise-in-scala
 
-	def interruptableFuture[T](fun: () => T)(implicit ex: ExecutionContext): (Future[T], () => Boolean) = {
+	def interruptableFuture[T](fun: () => T): (Future[T], () => Boolean) = {
 		val p = Promise[T]()
 		val f = p.future
 		val aref = new AtomicReference[Thread](null)
