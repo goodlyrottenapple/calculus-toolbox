@@ -73,6 +73,7 @@ object GUI2 extends SimpleSwingApplication {
 		// icon = new ImageIcon(new ImageIcon("src/scala/gui/img/add_button.png").getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH))
 		// selectedIcon = new ImageIcon(new ImageIcon("src/scala/gui/img/add_button_toggled.png").getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH))
 		border = Swing.EmptyBorder(0, 0, 0, 0)
+		contentAreaFilled = false
 	}
 
 
@@ -177,6 +178,7 @@ object GUI2 extends SimpleSwingApplication {
 			override def getIconHeight() = 25
 		}
 		border = Swing.EmptyBorder(10, 0, 0, 10)
+		contentAreaFilled = false
 	}
 
 	val newButton = new Button("NEW") {
@@ -194,6 +196,7 @@ object GUI2 extends SimpleSwingApplication {
 		}
 
 		border = Swing.EmptyBorder(0, 0, 0, 0)
+		contentAreaFilled = false
 	}
 
 	val openButton = new Button("OPEN") {
@@ -210,6 +213,7 @@ object GUI2 extends SimpleSwingApplication {
 			override def getIconHeight() = 25
 		}
 		border = Swing.EmptyBorder(0, 0, 0, 0)
+		contentAreaFilled = false
 	}
 
 	val saveButton = new Button("SAVE") {
@@ -226,6 +230,7 @@ object GUI2 extends SimpleSwingApplication {
 			override def getIconHeight() = 25
 		}
 		border = Swing.EmptyBorder(0, 0, 0, 0)
+		contentAreaFilled = false
 	}
 
 
@@ -832,7 +837,7 @@ object GUI2 extends SimpleSwingApplication {
 		val osName = System.getProperty("os.name").toLowerCase()
 		if (osName.startsWith("mac os x")) {
 			System.setProperty("apple.laf.useScreenMenuBar", "true")
-			com.apple.eawt.FullScreenUtilities.setWindowCanFullScreen(peer,true)
+			// com.apple.eawt.FullScreenUtilities.setWindowCanFullScreen(peer,true)
 		}
 
 		ptPanel.requestFocus
