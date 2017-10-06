@@ -28,8 +28,8 @@ object GUI2 extends SimpleSwingApplication {
 	// misc stuff -------------------------
 
 	val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-	ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("src/scala/gui/img/Roboto-Bold.ttf")))
-	ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("src/scala/gui/img/Roboto-Light.ttf")))
+	ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream("img/Roboto-Bold.ttf")))
+	ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream("img/Roboto-Light.ttf")))
 
 	val tabHighlightColor = new Color(255,82,82)
 	val parsedBottomBarColor = new Color(51,172,113)
@@ -48,7 +48,7 @@ object GUI2 extends SimpleSwingApplication {
 
 	val addButton = new ToggleButton {
 
-		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(new java.io.File("src/scala/gui/img/add_button.png"))
+		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(this.getClass().getResourceAsStream("img/add_button.png"))
 		icon = new Icon() {
 			override def paintIcon(c:java.awt.Component, g:java.awt.Graphics, x:Int, y:Int) = {
 				val graphics = g.create().asInstanceOf[Graphics2D]
@@ -60,7 +60,7 @@ object GUI2 extends SimpleSwingApplication {
 		}
 
 
-		val image2 : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(new java.io.File("src/scala/gui/img/add_button_toggled.png"))
+		val image2 : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(this.getClass().getResourceAsStream("img/add_button_toggled.png"))
 		selectedIcon = new Icon() {
 			override def paintIcon(c:java.awt.Component, g:java.awt.Graphics, x:Int, y:Int) = {
 				val graphics = g.create().asInstanceOf[Graphics2D]
@@ -167,7 +167,7 @@ object GUI2 extends SimpleSwingApplication {
 	// sidebar ---------------------------------
 
 	val menuButton = new ToggleButton {
-		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(new java.io.File("src/scala/gui/img/menu_button.png"))
+		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(this.getClass().getResourceAsStream("img/menu_button.png"))
 		icon = new Icon() {
 			override def paintIcon(c:java.awt.Component, g:java.awt.Graphics, x:Int, y:Int) = {
 				val graphics = g.create().asInstanceOf[Graphics2D]
@@ -184,7 +184,7 @@ object GUI2 extends SimpleSwingApplication {
 	val newButton = new Button("NEW") {
 		font = new Font("Roboto-BOLD", Font.BOLD, 12)
 		foreground = textColor
-		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(new java.io.File("src/scala/gui/img/new_button.png"))
+		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(this.getClass().getResourceAsStream("img/new_button.png"))
 		icon = new Icon() {
 			override def paintIcon(c:java.awt.Component, g:java.awt.Graphics, x:Int, y:Int) = {
 				val graphics = g.create().asInstanceOf[Graphics2D]
@@ -202,7 +202,7 @@ object GUI2 extends SimpleSwingApplication {
 	val openButton = new Button("OPEN") {
 		font = new Font("Roboto-BOLD", Font.BOLD, 12)
 		foreground = textColor
-		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(new java.io.File("src/scala/gui/img/open_button.png"))
+		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(this.getClass().getResourceAsStream("img/open_button.png"))
 		icon = new Icon() {
 			override def paintIcon(c:java.awt.Component, g:java.awt.Graphics, x:Int, y:Int) = {
 				val graphics = g.create().asInstanceOf[Graphics2D]
@@ -219,7 +219,7 @@ object GUI2 extends SimpleSwingApplication {
 	val saveButton = new Button("SAVE") {
 		font = new Font("Roboto-BOLD", Font.BOLD, 12)
 		foreground = textColor
-		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(new java.io.File("src/scala/gui/img/save_button.png"))
+		val image : java.awt.image.BufferedImage = javax.imageio.ImageIO.read(this.getClass().getResourceAsStream("img/save_button.png"))
 		icon = new Icon() {
 			override def paintIcon(c:java.awt.Component, g:java.awt.Graphics, x:Int, y:Int) = {
 				val graphics = g.create().asInstanceOf[Graphics2D]
@@ -292,6 +292,7 @@ object GUI2 extends SimpleSwingApplication {
 		border = Swing.EmptyBorder(0,0,0,0)
 		font = new Font("Roboto-BOLD", Font.BOLD, 12)
 		foreground = sideBarColor
+		contentAreaFilled = false
 	}
 
 	val assmsBar = new BorderPanel {

@@ -1,0 +1,20 @@
+#!/bin/sh
+mkdir -p bin
+
+javac -d bin -classpath bin:lib:lib/jlatexmath.jar:lib/treelayout.jar:. `find src -maxdepth 3 -name "*.java"`
+scalac -d bin -classpath bin:lib:lib/jlatexmath.jar:lib/treelayout.jar:. `find src -maxdepth 3 -name "*.scala"`
+
+cp -r src/scala/gui/img bin/img/
+
+cd bin
+7z x ../lib/jlatexmath.jar
+rm -rf META-INF
+7z x ../lib/treelayout.jar
+rm -rf META-INF
+
+echo "Main-Class: GUI2" >> MANIFEST.MF
+
+jar -cfm calc.jar MANIFEST.MF .
+cd ..
+mv bin/calc.jar calc.jar
+rm -rf bin

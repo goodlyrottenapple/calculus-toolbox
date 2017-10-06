@@ -5,7 +5,7 @@ from glob import glob
 from tools import utils, isabuilder, scalabuilder
 
 CALC_NAME = ""
-CALC_TEMPLATE = "default.json"
+CALC_TEMPLATE = "calculi/default.json"
 OUTPUT_PATH = "gen_calc/"
 TEMPLATE_FILES_PATH = "template/"
 LIB_FILES_PATH ="libs/"
@@ -247,16 +247,16 @@ def add_gui(flags):
             shutil.copyfile(imgs[list.index(l)], OUTPUT_PATH+SCALA_SRC_PATH+"gui/img/"+l)
 
     if os.path.exists(TEMPLATE_FILES_PATH+"build.py"):
-        print "Copying build.py script ..."
-        shutil.copyfile(TEMPLATE_FILES_PATH+"build.py", OUTPUT_PATH+"build.py")
-        cmd = "chmod +x " + OUTPUT_PATH+"build.py"
+        print "Copying build script ..."
+        shutil.copyfile(TEMPLATE_FILES_PATH+"build", OUTPUT_PATH+"build")
+        cmd = "chmod +x " + OUTPUT_PATH+"build"
         response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
 
-    if os.path.exists(TEMPLATE_FILES_PATH+"Makefile"):
-        print "Copying Makefile ..."
-        shutil.copyfile(TEMPLATE_FILES_PATH+"Makefile", OUTPUT_PATH+"Makefile")
-        cmd = "chmod +x " + OUTPUT_PATH+"Makefile"
-        response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
+    # if os.path.exists(TEMPLATE_FILES_PATH+"Makefile"):
+    #     print "Copying Makefile ..."
+    #     shutil.copyfile(TEMPLATE_FILES_PATH+"Makefile", OUTPUT_PATH+"Makefile")
+    #     cmd = "chmod +x " + OUTPUT_PATH+"Makefile"
+    #     response,err = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE).communicate()
 
     print "Copying libs ..."
 
