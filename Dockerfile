@@ -1,5 +1,6 @@
 FROM openjdk:8u121-jdk-alpine
 
+# needed for the calculus gui...otherwise we get a runtime error
 RUN apk add --update ttf-dejavu && rm -rf /var/cache/apk/*
 
 # The bash shell is required by Scala utilities
@@ -47,6 +48,7 @@ RUN nix-env --option verify-https-binary-caches false --install isabelle-2016-1 
 
 RUN apk del --no-cache .dependencies
 
+# Compile Isabelle's HOL theory files.
 RUN isabelle build -s -b HOL
 
 RUN apk add --no-cache --update python p7zip
