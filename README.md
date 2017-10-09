@@ -3,7 +3,7 @@ A set of tools for generating calculi in Isabelle and supporting tools through a
 
 ### Setup
 
-To try to make setting up the calculus toolbox as simple as possible, we now recommend installing the toolbox using [Docker](https://www.docker.com). PLease install Docker for your platform and run the following commands:
+To try to make setting up the calculus toolbox as simple as possible, we now recommend installing the toolbox using [Docker](https://www.docker.com). Please install Docker for your platform and run the following commands:
 
 First, download or fork this repository, then, inside the repo, run:
 
