@@ -31,6 +31,8 @@ To exit the Docker sandox shell, press Control (Command on Mac) + D. In order to
 scala calculi/calc.jar
 ```
 
+(This is assuming that you have Java 8.0 or older and Scala 2.12.0 or older installed on your system)
+
 ### Compiled toolboxes
 Compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as scala jar files:
 
