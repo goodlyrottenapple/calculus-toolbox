@@ -33,6 +33,8 @@ scala calculi/calc.jar
 
 (This is assuming that you have Java 8.0 or older and Scala 2.12.0 or older installed on your system)
 
+For more information on how the toolbox works, head to the [Introduction](https://goodlyrottenapple.github.io/calculus-toolbox/doc/introduction.html) page.
+
 ### Compiled toolboxes
 Compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as Scala JAR files:
 
