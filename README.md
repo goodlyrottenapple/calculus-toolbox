@@ -18,7 +18,7 @@ First, download or fork this repository, then, inside the repo, run:
 ./run.sh
 ```
 
-This script will download and compile all the dependencies and launch a sandboxed environment shell for buiding cutom calculi toolboxes. 
+This script will download and compile all the dependencies and launch a sandboxed environment shell for building custom calculi toolboxes. 
 
 --------
 
