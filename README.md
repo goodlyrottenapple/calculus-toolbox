@@ -7,7 +7,7 @@ To try to make setting up the calculus toolbox as simple as possible, we now rec
 
 - macOS: For macOS, simply download the [Docker CE desktop app](https://download.docker.com/mac/stable/Docker.dmg) and install it on your system.
 - Ubuntu: Follow this [guide](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) to install Docker on Ubuntu
-- Other linux: Check the [Docker documentation](https://docs.docker.com/engine/installation/) for install instructions for other linux distributions.
+- Other Linux: Check the [Docker documentation](https://docs.docker.com/engine/installation/) for install instructions for other Linux distributions.
 - Windows 10: Download [Docker CE for Windows](https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe) and install it on your system. Please see the [docs](https://docs.docker.com/docker-for-windows/install/#what-to-know-before-you-install) for further information on installing and using Docker on Windows.
 
 ## Setup
@@ -24,7 +24,7 @@ This script will download and compile all the dependencies and launch a sandboxe
 
 ### Windows
 
-If on Windows, you will have to run the commands inside the bash script `run.sh` manually. First open PowerShell, navigate to the repo folder and run:
+If on Windows, you will have to run the commands inside the bash script `run.sh` manually. First open PowerShell, navigate to the calculus-toolbox folder and run:
 
 ```bash
 docker build -t calculus-toolbox .
@@ -52,7 +52,7 @@ cd gen_calc
 mv calc.jar ../calculi/calc.jar
 ```
 
-To exit the Docker sandox shell, press Control (Command on Mac) + D. In order to run the compiled JAR file, run:
+To exit the Docker sandbox shell, press Control (Command on Mac) + D. In order to run the compiled JAR file, run:
 
 ```bash
 scala calculi/calc.jar
