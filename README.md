@@ -3,6 +3,24 @@ A set of tools for generating calculi in Isabelle and supporting tools through a
 
 To try to make setting up the calculus toolbox as simple as possible, we now recommend installing the toolbox using [Docker](https://www.docker.com). Please install Docker for your platform and then follow the setup guide below.
 
+## Compiled toolboxes
+If you just want to test out a toolbox GUI generated from a JSON description file, compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as Scala JAR files:
+
+- [DEAK-calculus-tool](https://github.com/goodlyrottenapple/calculus-toolbox/raw/master/calculi/DEAK.jar)
+- [Sequent-calculus-tool](https://github.com/goodlyrottenapple/calculus-toolbox/raw/master/calculi/Sequent.jar)
+
+Please ensure you have Java 8.0 or older and Scala 2.12.0 or older on your system. In order to launch the toolbox, run
+
+```bash
+scala DEAK.jar
+```
+
+or
+
+```bash
+scala Sequent.jar
+```
+
 ## Installing Docker
 
 - macOS: For macOS, simply download the [Docker CE desktop app](https://download.docker.com/mac/stable/Docker.dmg) and install it on your system.
@@ -61,24 +79,6 @@ scala calculi/calc.jar
 (This is assuming that you have Java 8.0 or older and Scala 2.12.0 or older installed on your system)
 
 For more information on how the toolbox works, head to the [Introduction](https://goodlyrottenapple.github.io/calculus-toolbox/doc/introduction.html) page.
-
-## Compiled toolboxes
-Compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as Scala JAR files:
-
-- [DEAK-calculus-tool](https://github.com/goodlyrottenapple/calculus-toolbox/raw/master/calculi/DEAK.jar)
-- [Sequent-calculus-tool](https://github.com/goodlyrottenapple/calculus-toolbox/raw/master/calculi/Sequent.jar)
-
-Please ensure you have Java 8.0 or older and Scala 2.12.0 or older on your system. In order to launch the toolbox, run
-
-```bash
-scala DEAK.jar
-```
-
-or
-
-```bash
-scala Sequent.jar
-```
 
 
 ## OLD SETUP:
