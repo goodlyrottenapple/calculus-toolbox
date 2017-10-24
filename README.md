@@ -4,7 +4,7 @@ A set of tools for generating calculi in Isabelle and supporting tools through a
 To try to make setting up the calculus toolbox as simple as possible, we now recommend installing the toolbox using [Docker](https://www.docker.com). Please install Docker for your platform and then follow the setup guide below.
 
 ## Compiled toolboxes
-If you just want to test out a toolbox GUI generated from a JSON description file, compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as Scala JAR files:
+If you just want to test out a toolbox GUI generated from a JSON description file, compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as Scala JAR files (these have been tested on Linux and macOS):
 
 - [DEAK-calculus-tool](https://github.com/goodlyrottenapple/calculus-toolbox/raw/master/calculi/DEAK.jar)
 - [Sequent-calculus-tool](https://github.com/goodlyrottenapple/calculus-toolbox/raw/master/calculi/Sequent.jar)
