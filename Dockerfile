@@ -43,7 +43,7 @@ ENV \
 # A massive hack to stop curl complaining about ssl certificates...no idea what's going on...
 RUN echo insecure >> ~/.curlrc
 
-RUN nix-env --option verify-https-binary-caches false --install isabelle-2017 && nix-env --option verify-https-binary-caches false --install perl-5.24.2
+RUN nix-env --option verify-https-binary-caches false --install isabelle-2017 && nix-env --option verify-https-binary-caches false --install perl
 
 
 RUN apk del --no-cache .dependencies
