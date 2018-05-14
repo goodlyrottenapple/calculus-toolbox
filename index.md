@@ -3,9 +3,11 @@ layout: default
 title: "Calculus Toolbox Docs Home"
 ---
 
-### Get started
+# Get started
 
 To try to make setting up the calculus toolbox as simple as possible, we now recommend installing the toolbox using [Docker](https://www.docker.com). Please install Docker for your platform and then follow the setup guide below.
+
+
 
 ## Compiled toolboxes
 If you just want to test out a toolbox GUI generated from a JSON description file, compiled toolboxes for the D.EAK calculus and a version of an LK Sequent calculus fragment are available as Scala JAR files (these have been tested on Linux and macOS):
@@ -83,4 +85,9 @@ scala calculi/calc.jar
 (This is assuming that you have Java 8.0 or older and Scala 2.12.0 or older installed on your system)
 
 For more information on how the toolbox works, head to the [Introduction](https://goodlyrottenapple.github.io/calculus-toolbox/doc/introduction.html) page.
+
+## Tutorial
+
+There is a tutorial on how to build a logic and compile it into a toolbox, which can be found [here](https://goodlyrottenapple.github.io/2015/09/02/sequent-tutorial/)
+
 
