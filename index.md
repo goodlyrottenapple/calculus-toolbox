@@ -88,6 +88,6 @@ For more information on how the toolbox works, head to the [Introduction](https:
 
 ## Tutorial
 
-There is a tutorial on how to build a logic and compile it into a toolbox, which can be found [here](https://goodlyrottenapple.github.io/2015/09/02/sequent-tutorial/)
+There is also a tutorial on how to build a logic and compile it into a toolbox, which can be found [here](https://goodlyrottenapple.github.io/2015/09/02/sequent-tutorial/)
 
 
