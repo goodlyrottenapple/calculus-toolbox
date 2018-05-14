@@ -36,7 +36,7 @@ scala Sequent.jar
 
 ## Setup
 
-First, download or fork this repository, then, inside the repo, run:
+First, download or fork [this repository](https://github.com/goodlyrottenapple/calculus-toolbox), then, inside the repo, run:
 
 ```bash
 ./run.sh
